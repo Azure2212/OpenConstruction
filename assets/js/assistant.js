@@ -416,9 +416,28 @@
     panel.innerHTML = html;
   }
 
-  // Expose pure retrieval internals for testing (no-op in the browser).
+  // Shared, cached catalog index — loaded once, reused by the search-bar "Ask"
+  // mode AND the floating chatbox so retrieval logic lives in one place.
+  let sharedIndexPromise = null;
+  function getIndex() {
+    if (!sharedIndexPromise) {
+      sharedIndexPromise = (async () => {
+        const [datasets, models, usecases, oers, skills] = await Promise.all([
+          loadJson('datasets.json'), loadJson('models.json'),
+          loadJson('use-cases.json'), loadJson('oer.json'), loadJson('skills.json')
+        ]);
+        return buildIndex({ datasets, models, usecases, oers, skills });
+      })();
+    }
+    return sharedIndexPromise;
+  }
+
+  // Expose the engine: for node tests, and on window for the chatbox to reuse.
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = { norm, expand, buildIndex, retrieve, citation };
+  }
+  if (typeof window !== 'undefined') {
+    window.OCAssistant = { getIndex, retrieve, citation, buildIndex, TYPE_LABEL, GROUP_ORDER };
   }
 
   // ----------------------------------------------------------------- bootstrap
@@ -460,21 +479,9 @@
     hero.appendChild(examples);
     hero.parentNode.insertBefore(panel, hero.nextSibling);
 
-    // --- state + data (lazy) ---
+    // --- state + data (lazy, shared with the chatbox) ---
     let askMode = false;
-    let indexPromise = null;
-    function ensureIndex() {
-      if (!indexPromise) {
-        indexPromise = (async () => {
-          const [datasets, models, usecases, oers, skills] = await Promise.all([
-            loadJson('datasets.json'), loadJson('models.json'),
-            loadJson('use-cases.json'), loadJson('oer.json'), loadJson('skills.json')
-          ]);
-          return buildIndex({ datasets, models, usecases, oers, skills });
-        })();
-      }
-      return indexPromise;
-    }
+    const ensureIndex = getIndex;
 
     async function runAsk() {
       const q = input.value.trim();
