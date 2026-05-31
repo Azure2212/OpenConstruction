@@ -1,0 +1,2000 @@
+{
+  "schema_version": "1.0.0",
+  "benchmarks": [
+    {
+      "id": "semanticbridge-benchmark-results",
+      "name": "SemanticBridge: 3D Bridge Component Semantic Segmentation",
+      "task": "3D semantic segmentation",
+      "dataset_id": "3d_bridge_segmentation",
+      "dataset_name": "SemanticBridge: 3D semantic segmentation of bridge dataset",
+      "page_title": "SemanticBridge: 3D Bridge Component Semantic Segmentation",
+      "summary": "Reported benchmark results for the SemanticBridge dataset and the tested 3D segmentation models released in the source repository.",
+      "task_description": "",
+      "source_label": "SemanticBridge paper",
+      "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+      "dataset_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+      "primary_metric_key": "miou",
+      "metric_columns": [
+        { "key": "unlabeled", "label": "Unlabeled", "direction": "higher", "precision": 3 },
+        { "key": "underground", "label": "Underground", "direction": "higher", "precision": 3 },
+        { "key": "high_vegetation", "label": "High Vegetation", "direction": "higher", "precision": 3 },
+        { "key": "abutment", "label": "Abutment", "direction": "higher", "precision": 3 },
+        { "key": "superstructure", "label": "Superstructure", "direction": "higher", "precision": 3 },
+        { "key": "deck", "label": "Deck", "direction": "higher", "precision": 3 },
+        { "key": "railing", "label": "Railing", "direction": "higher", "precision": 3 },
+        { "key": "traffic_sign", "label": "Traffic Sign", "direction": "higher", "precision": 3 },
+        { "key": "pillar", "label": "Pillar", "direction": "higher", "precision": 3 },
+        { "key": "miou", "label": "mIoU", "direction": "higher", "precision": 3 }
+      ],
+      "results": [
+        {
+          "data_source": "TLS",
+          "method": "UNet3D",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.888,
+            "underground": 0.786,
+            "high_vegetation": 0.877,
+            "abutment": 0.508,
+            "superstructure": 0.894,
+            "deck": 0.880,
+            "railing": 0.759,
+            "traffic_sign": 0.186,
+            "pillar": 0.583,
+            "miou": 0.707
+          },
+          "notes": "Reported TLS benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "TLS",
+          "method": "KPConv",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.895,
+            "underground": 0.784,
+            "high_vegetation": 0.872,
+            "abutment": 0.599,
+            "superstructure": 0.898,
+            "deck": 0.890,
+            "railing": 0.796,
+            "traffic_sign": 0.064,
+            "pillar": 0.544,
+            "miou": 0.705
+          },
+          "notes": "Reported TLS benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "TLS",
+          "method": "PTv2",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.812,
+            "underground": 0.758,
+            "high_vegetation": 0.884,
+            "abutment": 0.502,
+            "superstructure": 0.705,
+            "deck": 0.756,
+            "railing": 0.752,
+            "traffic_sign": 0.158,
+            "pillar": 0.389,
+            "miou": 0.635
+          },
+          "notes": "Reported TLS benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "TLS 13, 17, 19",
+          "method": "UNet3D",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.691,
+            "underground": 0.722,
+            "high_vegetation": 0.853,
+            "abutment": 0.687,
+            "superstructure": 0.894,
+            "deck": 0.882,
+            "railing": 0.700,
+            "traffic_sign": 0.196,
+            "pillar": 0.514,
+            "miou": 0.682
+          },
+          "notes": "Reported TLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "TLS 13, 17, 19",
+          "method": "KPConv",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.763,
+            "underground": 0.714,
+            "high_vegetation": 0.850,
+            "abutment": 0.796,
+            "superstructure": 0.892,
+            "deck": 0.853,
+            "railing": 0.711,
+            "traffic_sign": 0.105,
+            "pillar": 0.697,
+            "miou": 0.709
+          },
+          "notes": "Reported TLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "TLS 13, 17, 19",
+          "method": "PTv2",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.661,
+            "underground": 0.727,
+            "high_vegetation": 0.857,
+            "abutment": 0.663,
+            "superstructure": 0.884,
+            "deck": 0.869,
+            "railing": 0.672,
+            "traffic_sign": 0.083,
+            "pillar": 0.382,
+            "miou": 0.644
+          },
+          "notes": "Reported TLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "MLS 13, 17, 19",
+          "method": "UNet3D",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.505,
+            "underground": 0.733,
+            "high_vegetation": 0.856,
+            "abutment": 0.578,
+            "superstructure": 0.730,
+            "deck": 0.618,
+            "railing": 0.625,
+            "traffic_sign": 0.130,
+            "pillar": 0.387,
+            "miou": 0.574
+          },
+          "notes": "Reported MLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "MLS 13, 17, 19",
+          "method": "KPConv",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.613,
+            "underground": 0.731,
+            "high_vegetation": 0.864,
+            "abutment": 0.642,
+            "superstructure": 0.737,
+            "deck": 0.631,
+            "railing": 0.636,
+            "traffic_sign": 0.069,
+            "pillar": 0.431,
+            "miou": 0.595
+          },
+          "notes": "Reported MLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        },
+        {
+          "data_source": "MLS 13, 17, 19",
+          "method": "PTv2",
+          "model_id": "3d_bridge_segmentation_model",
+          "year": 2026,
+          "paper_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "code_url": "https://github.com/mvg-inatech/3d_bridge_segmentation",
+          "source_label": "SemanticBridge paper",
+          "source_url": "https://doi.org/10.1016/j.dibe.2026.100912",
+          "metrics": {
+            "unlabeled": 0.526,
+            "underground": 0.732,
+            "high_vegetation": 0.852,
+            "abutment": 0.547,
+            "superstructure": 0.737,
+            "deck": 0.631,
+            "railing": 0.607,
+            "traffic_sign": 0.161,
+            "pillar": 0.377,
+            "miou": 0.575
+          },
+          "notes": "Reported MLS 13, 17, 19 benchmark row transcribed from the provided SemanticBridge results table."
+        }
+      ]
+    },
+    {
+      "id": "HBD",
+      "name": "HBD: Hong Kong University Building Image Dataset",
+      "task": "Instance segmentation",
+      "dataset_id": "HBD",
+      "dataset_name": "HBD: Hong Kong University Building Image Dataset",
+      "page_title": "HBD: Hong Kong University Building Image Dataset",
+      "summary": "Reported HBD benchmark results for different instance segmentation models.",
+      "source_url": "https://doi.org/10.1016/j.autcon.2024.105558",
+      "primary_metric_key": "ap",
+      "comparison_chart": {
+        "orientation": "horizontal-grouped",
+        "metric_label": "Average Precision",
+        "x_axis_label": "Average Precision",
+        "min_value": 0,
+        "max_value": 0.75,
+        "metric_keys": ["ap", "ap50", "ap75"],
+        "series_colors": {
+          "AP": "#d9c4a7",
+          "AP50": "#8cc6ff",
+          "AP75": "#ee9999"
+        },
+        "caption": "HBD instance segmentation results, comparing AP, AP50, and AP75 across models."
+      },
+      "metric_columns": [
+        { "key": "ap", "label": "AP", "direction": "higher", "precision": 3 },
+        { "key": "ap50", "label": "AP50", "direction": "higher", "precision": 3 },
+        { "key": "ap75", "label": "AP75", "direction": "higher", "precision": 3 },
+        { "key": "ap_small", "label": "AP small", "direction": "higher", "precision": 3 },
+        { "key": "ap_medium", "label": "AP medium", "direction": "higher", "precision": 3 },
+        { "key": "ap_large", "label": "AP large", "direction": "higher", "precision": 3 },
+        { "key": "time_min", "label": "T (min)", "direction": "lower", "precision": 1 },
+        { "key": "fps", "label": "FPS", "direction": "higher", "precision": 1 }
+      ],
+      "results": [
+        {
+          "data_source": "HBD",
+          "method": "Mask R-CNN",
+          "year": 2024,
+          "code_url": "https://github.com/facebookresearch/detectron2",
+          "source_label": "Detectron2",
+          "source_url": "https://github.com/facebookresearch/detectron2",
+          "metrics": {
+            "ap": 0.402,
+            "ap50": 0.535,
+            "ap75": 0.429,
+            "ap_small": 0.057,
+            "ap_medium": 0.098,
+            "ap_large": 0.444,
+            "time_min": 15.0,
+            "fps": 0.9
+          }
+        },
+        {
+          "data_source": "HBD",
+          "method": "Cascade R-CNN [ResNet-50-FPN]",
+          "year": 2024,
+          "code_url": "https://github.com/open-mmlab/mmdetection",
+          "source_label": "MMDetection",
+          "source_url": "https://github.com/open-mmlab/mmdetection",
+          "metrics": {
+            "ap": 0.405,
+            "ap50": 0.559,
+            "ap75": 0.420,
+            "ap_small": 0,
+            "ap_medium": 0.044,
+            "ap_large": 0.441,
+            "time_min": 28.0,
+            "fps": 0.6
+          },
+          "notes": "T and FPS are adjusted based on GPU TFLOPS performance."
+        },
+        {
+          "data_source": "HBD",
+          "method": "YOLOv8",
+          "year": 2024,
+          "code_url": "https://github.com/ultralytics/ultralytics",
+          "source_label": "Ultralytics",
+          "source_url": "https://github.com/ultralytics/ultralytics",
+          "metrics": {
+            "ap": 0.507,
+            "ap50": 0.695,
+            "ap75": 0.533,
+            "ap_small": "N/A",
+            "ap_medium": "N/A",
+            "ap_large": "N/A",
+            "time_min": 8.5,
+            "fps": 30.3
+          }
+        },
+        {
+          "data_source": "HBD",
+          "method": "Cascade R-CNN [Swin Transformer]",
+          "year": 2024,
+          "code_url": "https://github.com/open-mmlab/mmdetection",
+          "source_label": "MMDetection",
+          "source_url": "https://github.com/open-mmlab/mmdetection",
+          "metrics": {
+            "ap": 0.496,
+            "ap50": 0.626,
+            "ap75": 0.536,
+            "ap_small": 0,
+            "ap_medium": 0.093,
+            "ap_large": 0.535,
+            "time_min": 71.8,
+            "fps": 0.6
+          }
+        },
+        {
+          "data_source": "HBD",
+          "method": "EVA-02",
+          "year": 2024,
+          "code_url": "https://github.com/baaivision/EVA",
+          "source_label": "BAAI-Vision",
+          "source_url": "https://github.com/baaivision/EVA",
+          "metrics": {
+            "ap": 0.468,
+            "ap50": 0.618,
+            "ap75": 0.505,
+            "ap_small": 0.034,
+            "ap_medium": 0.0573,
+            "ap_large": 0.506,
+            "time_min": 34.7,
+            "fps": 3.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "aec-bench-agentic-blueprint-reading-results",
+      "name": "AEC-Bench: Agentic Blueprint Reading",
+      "task": "Agentic blueprint reading",
+      "dataset_id": "aec-bench",
+      "dataset_name": "AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction",
+      "page_title": "AEC-Bench: Agentic Blueprint Reading",
+      "summary": "AEC-Bench mean reward by task, model, and setup. Rows are grouped by benchmark category and task; each model has two columns: H (base agent harness) and H+N (base agent harness augmented with Nomic tools and models).",
+      "task_description": "Mean reward by AEC-Bench category for agentic blueprint reading, comparing model performance under the base harness and the harness augmented with Nomic tools and models.",
+      "source_label": "AEC-Bench paper",
+      "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+      "dataset_url": "https://github.com/nomic-ai/aec-bench",
+      "primary_metric_key": "mean_reward",
+      "comparison_chart": {
+        "orientation": "horizontal-grouped",
+        "metric_label": "Mean Performance (Reward)",
+        "x_axis_label": "Mean Performance (Reward)",
+        "min_value": 25,
+        "max_value": 90,
+        "category_order": ["Intra-Sheet", "Intra-Drawing", "Intra-Project"],
+        "series_order": ["Codex (H+N)", "Claude (H)", "Claude (H+N)", "Nomic Agent (N)", "Codex (H)"],
+        "series_colors": {
+          "Codex (H+N)": "#dfccb1",
+          "Claude (H)": "#f5c48a",
+          "Claude (H+N)": "#abf19b",
+          "Nomic Agent (N)": "#8e8be6",
+          "Codex (H)": "#ee9898"
+        },
+        "caption": "AEC-Bench mean reward by task, model, and setup. Rows are grouped by benchmark category and task; each model has two columns: H (base agent harness) and H+N (base agent harness augmented with Nomic tools and models)."
+      },
+      "metric_columns": [
+        { "key": "mean_reward", "label": "Mean Reward", "direction": "higher", "precision": 1 }
+      ],
+      "results": [
+        {
+          "data_source": "Intra-Sheet",
+          "method": "Codex (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 50.0 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Sheet",
+          "method": "Claude (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 44.3 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Sheet",
+          "method": "Claude (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 62.5 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Sheet",
+          "method": "Nomic Agent (N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 70.6 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Sheet",
+          "method": "Codex (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 45.6 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Drawing",
+          "method": "Codex (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 77.2 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Drawing",
+          "method": "Claude (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 68.8 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Drawing",
+          "method": "Claude (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 72.3 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Drawing",
+          "method": "Nomic Agent (N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 88.3 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Drawing",
+          "method": "Codex (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 82.3 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Project",
+          "method": "Codex (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 57.2 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Project",
+          "method": "Claude (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 38.1 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Project",
+          "method": "Claude (H+N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 57.8 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Project",
+          "method": "Nomic Agent (N)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 62.0 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        },
+        {
+          "data_source": "Intra-Project",
+          "method": "Codex (H)",
+          "year": 2026,
+          "code_url": "https://github.com/nomic-ai/aec-bench",
+          "source_label": "AEC-Bench paper",
+          "source_url": "https://doi.org/10.48550/arXiv.2603.29199",
+          "metrics": { "mean_reward": 46.0 },
+          "notes": "Reported mean reward from the benchmark comparison figure."
+        }
+      ]
+    },
+    {
+      "id": "cubit-inseg-end-to-end-instance-segmentation",
+      "name": "CUBIT-InSeg: End-to-End Instance Segmentation",
+      "task": "Instance segmentation",
+      "dataset_id": "CUBIT-InSeg",
+      "dataset_name": "CUBIT-InSeg Dataset",
+      "page_title": "CUBIT-InSeg: End-to-End Instance Segmentation",
+      "summary": "Reported benchmark results for selected end-to-end instance segmentation models on the CUBIT-InSeg test set, including overall box/mask mAP and crack/spalling category AP.",
+      "task_description": "CUBIT-InSeg evaluates facade defect instance segmentation for cracks and spalling using COCO-style AP at IoU 0.5 and AP averaged over IoU 0.5:0.95 for both bounding boxes and masks.",
+      "source_label": "CUBIT-InSeg paper",
+      "source_url": "https://doi.org/10.1016/j.autcon.2026.106980",
+      "dataset_url": "https://github.com/BenyunZhao/CUBIT-InSeg",
+      "primary_metric_key": "mask_map_50_95",
+      "method_column_label": "Model",
+      "hide_year_column": true,
+      "row_columns": [
+            {
+                  "key": "model_family",
+                  "label": "Model family",
+                  "min_width": "132px",
+                  "position": "after_method"
+            }
+      ],
+      "metric_columns": [
+            {
+                  "key": "params_m",
+                  "label": "#Params (M)",
+                  "direction": "lower",
+                  "precision": 2
+            },
+            {
+                  "key": "flops_g",
+                  "label": "FLOPs (G)",
+                  "direction": "lower",
+                  "precision": 1
+            },
+            {
+                  "key": "fps",
+                  "label": "FPS",
+                  "direction": "higher",
+                  "precision": 2
+            },
+            {
+                  "key": "box_map_50",
+                  "label": "Box mAP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "box_map_50_95",
+                  "label": "Box mAP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "crack_box_ap_50",
+                  "label": "Crack Box AP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "crack_box_ap_50_95",
+                  "label": "Crack Box AP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "spalling_box_ap_50",
+                  "label": "Spalling Box AP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "spalling_box_ap_50_95",
+                  "label": "Spalling Box AP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "mask_map_50",
+                  "label": "Mask mAP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "mask_map_50_95",
+                  "label": "Mask mAP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "crack_mask_ap_50",
+                  "label": "Crack Mask AP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "crack_mask_ap_50_95",
+                  "label": "Crack Mask AP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "spalling_mask_ap_50",
+                  "label": "Spalling Mask AP@0.5",
+                  "direction": "higher",
+                  "precision": 3
+            },
+            {
+                  "key": "spalling_mask_ap_50_95",
+                  "label": "Spalling Mask AP@0.5:0.95",
+                  "direction": "higher",
+                  "precision": 3
+            }
+      ],
+      "comparison_chart": {
+            "enabled": false
+      },
+      "results": [
+            {
+                  "model_family": "Conv-based",
+                  "method": "EMO-1M (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 3.27,
+                        "flops_g": 13.1,
+                        "fps": 498.35,
+                        "box_map_50": 0.845,
+                        "box_map_50_95": 0.744,
+                        "crack_box_ap_50": 0.711,
+                        "crack_box_ap_50_95": 0.545,
+                        "spalling_box_ap_50": 0.979,
+                        "spalling_box_ap_50_95": 0.944,
+                        "mask_map_50": 0.761,
+                        "mask_map_50_95": 0.527,
+                        "crack_mask_ap_50": 0.547,
+                        "crack_mask_ap_50_95": 0.19,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.863
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "EMO-2M (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 9.06,
+                        "flops_g": 37.1,
+                        "fps": 356.96,
+                        "box_map_50": 0.88,
+                        "box_map_50_95": 0.787,
+                        "crack_box_ap_50": 0.776,
+                        "crack_box_ap_50_95": 0.619,
+                        "spalling_box_ap_50": 0.984,
+                        "spalling_box_ap_50_95": 0.955,
+                        "mask_map_50": 0.786,
+                        "mask_map_50_95": 0.553,
+                        "crack_mask_ap_50": 0.596,
+                        "crack_mask_ap_50_95": 0.224,
+                        "spalling_mask_ap_50": 0.977,
+                        "spalling_mask_ap_50_95": 0.882
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "EMO-5M (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 20.46,
+                        "flops_g": 86.1,
+                        "fps": 242.75,
+                        "box_map_50": 0.904,
+                        "box_map_50_95": 0.822,
+                        "crack_box_ap_50": 0.82,
+                        "crack_box_ap_50_95": 0.68,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.964,
+                        "mask_map_50": 0.816,
+                        "mask_map_50_95": 0.575,
+                        "crack_mask_ap_50": 0.649,
+                        "crack_mask_ap_50_95": 0.252,
+                        "spalling_mask_ap_50": 0.983,
+                        "spalling_mask_ap_50_95": 0.898
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "EMO-6M (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 32.12,
+                        "flops_g": 149.5,
+                        "fps": 203.45,
+                        "box_map_50": 0.905,
+                        "box_map_50_95": 0.824,
+                        "crack_box_ap_50": 0.821,
+                        "crack_box_ap_50_95": 0.682,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.967,
+                        "mask_map_50": 0.812,
+                        "mask_map_50_95": 0.579,
+                        "crack_mask_ap_50": 0.64,
+                        "crack_mask_ap_50_95": 0.25,
+                        "spalling_mask_ap_50": 0.983,
+                        "spalling_mask_ap_50_95": 0.907
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "MobileNetV4-S (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 10.19,
+                        "flops_g": 41.8,
+                        "fps": 592.27,
+                        "box_map_50": 0.783,
+                        "box_map_50_95": 0.664,
+                        "crack_box_ap_50": 0.589,
+                        "crack_box_ap_50_95": 0.408,
+                        "spalling_box_ap_50": 0.977,
+                        "spalling_box_ap_50_95": 0.92,
+                        "mask_map_50": 0.712,
+                        "mask_map_50_95": 0.485,
+                        "crack_mask_ap_50": 0.455,
+                        "crack_mask_ap_50_95": 0.133,
+                        "spalling_mask_ap_50": 0.969,
+                        "spalling_mask_ap_50_95": 0.837
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "MobileNetV4-M (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 23.27,
+                        "flops_g": 140.0,
+                        "fps": 340.33,
+                        "box_map_50": 0.791,
+                        "box_map_50_95": 0.676,
+                        "crack_box_ap_50": 0.604,
+                        "crack_box_ap_50_95": 0.423,
+                        "spalling_box_ap_50": 0.978,
+                        "spalling_box_ap_50_95": 0.93,
+                        "mask_map_50": 0.713,
+                        "mask_map_50_95": 0.486,
+                        "crack_mask_ap_50": 0.457,
+                        "crack_mask_ap_50_95": 0.137,
+                        "spalling_mask_ap_50": 0.97,
+                        "spalling_mask_ap_50_95": 0.834
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "MobileNetV4-L (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 34.49,
+                        "flops_g": 154.7,
+                        "fps": 285.14,
+                        "box_map_50": 0.809,
+                        "box_map_50_95": 0.7,
+                        "crack_box_ap_50": 0.641,
+                        "crack_box_ap_50_95": 0.461,
+                        "spalling_box_ap_50": 0.976,
+                        "spalling_box_ap_50_95": 0.938,
+                        "mask_map_50": 0.729,
+                        "mask_map_50_95": 0.505,
+                        "crack_mask_ap_50": 0.486,
+                        "crack_mask_ap_50_95": 0.148,
+                        "spalling_mask_ap_50": 0.971,
+                        "spalling_mask_ap_50_95": 0.861
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-t0 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 4.15,
+                        "flops_g": 13.1,
+                        "fps": 729.19,
+                        "box_map_50": 0.797,
+                        "box_map_50_95": 0.682,
+                        "crack_box_ap_50": 0.617,
+                        "crack_box_ap_50_95": 0.432,
+                        "spalling_box_ap_50": 0.978,
+                        "spalling_box_ap_50_95": 0.931,
+                        "mask_map_50": 0.722,
+                        "mask_map_50_95": 0.49,
+                        "crack_mask_ap_50": 0.471,
+                        "crack_mask_ap_50_95": 0.141,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.84
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-t1 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 7.79,
+                        "flops_g": 21.7,
+                        "fps": 640.52,
+                        "box_map_50": 0.821,
+                        "box_map_50_95": 0.706,
+                        "crack_box_ap_50": 0.66,
+                        "crack_box_ap_50_95": 0.474,
+                        "spalling_box_ap_50": 0.982,
+                        "spalling_box_ap_50_95": 0.939,
+                        "mask_map_50": 0.744,
+                        "mask_map_50_95": 0.503,
+                        "crack_mask_ap_50": 0.51,
+                        "crack_mask_ap_50_95": 0.16,
+                        "spalling_mask_ap_50": 0.978,
+                        "spalling_mask_ap_50_95": 0.847
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-t2 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 15.17,
+                        "flops_g": 39.4,
+                        "fps": 508.73,
+                        "box_map_50": 0.827,
+                        "box_map_50_95": 0.713,
+                        "crack_box_ap_50": 0.674,
+                        "crack_box_ap_50_95": 0.489,
+                        "spalling_box_ap_50": 0.981,
+                        "spalling_box_ap_50_95": 0.937,
+                        "mask_map_50": 0.742,
+                        "mask_map_50_95": 0.506,
+                        "crack_mask_ap_50": 0.507,
+                        "crack_mask_ap_50_95": 0.155,
+                        "spalling_mask_ap_50": 0.977,
+                        "spalling_mask_ap_50_95": 0.858
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-s (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 35.85,
+                        "flops_g": 100.2,
+                        "fps": 302.47,
+                        "box_map_50": 0.858,
+                        "box_map_50_95": 0.78,
+                        "crack_box_ap_50": 0.728,
+                        "crack_box_ap_50_95": 0.542,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.953,
+                        "mask_map_50": 0.76,
+                        "mask_map_50_95": 0.523,
+                        "crack_mask_ap_50": 0.538,
+                        "crack_mask_ap_50_95": 0.169,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.877
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-m (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 65.57,
+                        "flops_g": 228.4,
+                        "fps": 160.52,
+                        "box_map_50": 0.876,
+                        "box_map_50_95": 0.773,
+                        "crack_box_ap_50": 0.765,
+                        "crack_box_ap_50_95": 0.588,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.958,
+                        "mask_map_50": 0.779,
+                        "mask_map_50_95": 0.539,
+                        "crack_mask_ap_50": 0.575,
+                        "crack_mask_ap_50_95": 0.192,
+                        "spalling_mask_ap_50": 0.982,
+                        "spalling_mask_ap_50_95": 0.885
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "FasterNet-l (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 109.29,
+                        "flops_g": 349.8,
+                        "fps": 124.97,
+                        "box_map_50": 0.884,
+                        "box_map_50_95": 0.782,
+                        "crack_box_ap_50": 0.78,
+                        "crack_box_ap_50_95": 0.602,
+                        "spalling_box_ap_50": 0.989,
+                        "spalling_box_ap_50_95": 0.962,
+                        "mask_map_50": 0.785,
+                        "mask_map_50_95": 0.545,
+                        "crack_mask_ap_50": 0.588,
+                        "crack_mask_ap_50_95": 0.199,
+                        "spalling_mask_ap_50": 0.983,
+                        "spalling_mask_ap_50_95": 0.889
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s50 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 2.19,
+                        "flops_g": 8.9,
+                        "fps": 828.82,
+                        "box_map_50": 0.729,
+                        "box_map_50_95": 0.61,
+                        "crack_box_ap_50": 0.488,
+                        "crack_box_ap_50_95": 0.319,
+                        "spalling_box_ap_50": 0.971,
+                        "spalling_box_ap_50_95": 0.9,
+                        "mask_map_50": 0.676,
+                        "mask_map_50_95": 0.46,
+                        "crack_mask_ap_50": 0.391,
+                        "crack_mask_ap_50_95": 0.112,
+                        "spalling_mask_ap_50": 0.961,
+                        "spalling_mask_ap_50_95": 0.808
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s100 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 2.69,
+                        "flops_g": 10.4,
+                        "fps": 689.58,
+                        "box_map_50": 0.768,
+                        "box_map_50_95": 0.65,
+                        "crack_box_ap_50": 0.56,
+                        "crack_box_ap_50_95": 0.382,
+                        "spalling_box_ap_50": 0.975,
+                        "spalling_box_ap_50_95": 0.918,
+                        "mask_map_50": 0.699,
+                        "mask_map_50_95": 0.475,
+                        "crack_mask_ap_50": 0.431,
+                        "crack_mask_ap_50_95": 0.128,
+                        "spalling_mask_ap_50": 0.967,
+                        "spalling_mask_ap_50_95": 0.822
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s150 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 3.19,
+                        "flops_g": 11.2,
+                        "fps": 665.89,
+                        "box_map_50": 0.771,
+                        "box_map_50_95": 0.651,
+                        "crack_box_ap_50": 0.567,
+                        "crack_box_ap_50_95": 0.385,
+                        "spalling_box_ap_50": 0.976,
+                        "spalling_box_ap_50_95": 0.917,
+                        "mask_map_50": 0.708,
+                        "mask_map_50_95": 0.478,
+                        "crack_mask_ap_50": 0.447,
+                        "crack_mask_ap_50_95": 0.132,
+                        "spalling_mask_ap_50": 0.968,
+                        "spalling_mask_ap_50_95": 0.824
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s1 (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 8.45,
+                        "flops_g": 30.8,
+                        "fps": 480.88,
+                        "box_map_50": 0.823,
+                        "box_map_50_95": 0.713,
+                        "crack_box_ap_50": 0.665,
+                        "crack_box_ap_50_95": 0.483,
+                        "spalling_box_ap_50": 0.981,
+                        "spalling_box_ap_50_95": 0.942,
+                        "mask_map_50": 0.748,
+                        "mask_map_50_95": 0.515,
+                        "crack_mask_ap_50": 0.521,
+                        "crack_mask_ap_50_95": 0.172,
+                        "spalling_mask_ap_50": 0.975,
+                        "spalling_mask_ap_50_95": 0.859
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s2 (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 16.4,
+                        "flops_g": 91.6,
+                        "fps": 341.02,
+                        "box_map_50": 0.856,
+                        "box_map_50_95": 0.754,
+                        "crack_box_ap_50": 0.725,
+                        "crack_box_ap_50_95": 0.551,
+                        "spalling_box_ap_50": 0.987,
+                        "spalling_box_ap_50_95": 0.956,
+                        "mask_map_50": 0.77,
+                        "mask_map_50_95": 0.534,
+                        "crack_mask_ap_50": 0.563,
+                        "crack_mask_ap_50_95": 0.184,
+                        "spalling_mask_ap_50": 0.978,
+                        "spalling_mask_ap_50_95": 0.883
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s3 (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 21.7,
+                        "flops_g": 104.3,
+                        "fps": 287.39,
+                        "box_map_50": 0.86,
+                        "box_map_50_95": 0.754,
+                        "crack_box_ap_50": 0.733,
+                        "crack_box_ap_50_95": 0.555,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.953,
+                        "mask_map_50": 0.774,
+                        "mask_map_50_95": 0.534,
+                        "crack_mask_ap_50": 0.568,
+                        "crack_mask_ap_50_95": 0.187,
+                        "spalling_mask_ap_50": 0.98,
+                        "spalling_mask_ap_50_95": 0.881
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "Starnet-s4 (x)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 43.3,
+                        "flops_g": 223.0,
+                        "fps": 173.83,
+                        "box_map_50": 0.866,
+                        "box_map_50_95": 0.761,
+                        "crack_box_ap_50": 0.744,
+                        "crack_box_ap_50_95": 0.567,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.955,
+                        "mask_map_50": 0.783,
+                        "mask_map_50_95": 0.541,
+                        "crack_mask_ap_50": 0.586,
+                        "crack_mask_ap_50_95": 0.198,
+                        "spalling_mask_ap_50": 0.98,
+                        "spalling_mask_ap_50_95": 0.884
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "ConvNeXtV2-nano (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 17.91,
+                        "flops_g": 47.8,
+                        "fps": 210.86,
+                        "box_map_50": 0.876,
+                        "box_map_50_95": 0.796,
+                        "crack_box_ap_50": 0.774,
+                        "crack_box_ap_50_95": 0.638,
+                        "spalling_box_ap_50": 0.978,
+                        "spalling_box_ap_50_95": 0.954,
+                        "mask_map_50": 0.791,
+                        "mask_map_50_95": 0.558,
+                        "crack_mask_ap_50": 0.607,
+                        "crack_mask_ap_50_95": 0.23,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.886
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "ConvNeXtV2-tiny (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 35.36,
+                        "flops_g": 97.7,
+                        "fps": 136.16,
+                        "box_map_50": 0.878,
+                        "box_map_50_95": 0.797,
+                        "crack_box_ap_50": 0.775,
+                        "crack_box_ap_50_95": 0.632,
+                        "spalling_box_ap_50": 0.982,
+                        "spalling_box_ap_50_95": 0.962,
+                        "mask_map_50": 0.793,
+                        "mask_map_50_95": 0.565,
+                        "crack_mask_ap_50": 0.607,
+                        "crack_mask_ap_50_95": 0.227,
+                        "spalling_mask_ap_50": 0.978,
+                        "spalling_mask_ap_50_95": 0.904
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "ConvNeXtV2-base (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 103.21,
+                        "flops_g": 335.6,
+                        "fps": 60.87,
+                        "box_map_50": 0.89,
+                        "box_map_50_95": 0.81,
+                        "crack_box_ap_50": 0.797,
+                        "crack_box_ap_50_95": 0.659,
+                        "spalling_box_ap_50": 0.983,
+                        "spalling_box_ap_50_95": 0.962,
+                        "mask_map_50": 0.806,
+                        "mask_map_50_95": 0.57,
+                        "crack_mask_ap_50": 0.632,
+                        "crack_mask_ap_50_95": 0.243,
+                        "spalling_mask_ap_50": 0.979,
+                        "spalling_mask_ap_50_95": 0.897
+                  }
+            },
+            {
+                  "model_family": "Conv-based",
+                  "method": "ConvNeXtV2-large (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 217.03,
+                        "flops_g": 656.9,
+                        "fps": 37.58,
+                        "box_map_50": 0.901,
+                        "box_map_50_95": 0.825,
+                        "crack_box_ap_50": 0.818,
+                        "crack_box_ap_50_95": 0.684,
+                        "spalling_box_ap_50": 0.985,
+                        "spalling_box_ap_50_95": 0.967,
+                        "mask_map_50": 0.815,
+                        "mask_map_50_95": 0.577,
+                        "crack_mask_ap_50": 0.651,
+                        "crack_mask_ap_50_95": 0.251,
+                        "spalling_mask_ap_50": 0.98,
+                        "spalling_mask_ap_50_95": 0.904
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "Swin-Transformer-Tiny (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 29.97,
+                        "flops_g": 81.5,
+                        "fps": 200.99,
+                        "box_map_50": 0.826,
+                        "box_map_50_95": 0.723,
+                        "crack_box_ap_50": 0.674,
+                        "crack_box_ap_50_95": 0.504,
+                        "spalling_box_ap_50": 0.979,
+                        "spalling_box_ap_50_95": 0.942,
+                        "mask_map_50": 0.74,
+                        "mask_map_50_95": 0.519,
+                        "crack_mask_ap_50": 0.507,
+                        "crack_mask_ap_50_95": 0.172,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.865
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "Swin-Transformer-Small (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 55.57,
+                        "flops_g": 168.8,
+                        "fps": 129.89,
+                        "box_map_50": 0.862,
+                        "box_map_50_95": 0.762,
+                        "crack_box_ap_50": 0.741,
+                        "crack_box_ap_50_95": 0.57,
+                        "spalling_box_ap_50": 0.983,
+                        "spalling_box_ap_50_95": 0.953,
+                        "mask_map_50": 0.763,
+                        "mask_map_50_95": 0.537,
+                        "crack_mask_ap_50": 0.547,
+                        "crack_mask_ap_50_95": 0.189,
+                        "spalling_mask_ap_50": 0.979,
+                        "spalling_mask_ap_50_95": 0.885
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "Swin-Transformer-Base (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 62.77,
+                        "flops_g": 228.0,
+                        "fps": 111.19,
+                        "box_map_50": 0.871,
+                        "box_map_50_95": 0.776,
+                        "crack_box_ap_50": 0.755,
+                        "crack_box_ap_50_95": 0.59,
+                        "spalling_box_ap_50": 0.986,
+                        "spalling_box_ap_50_95": 0.961,
+                        "mask_map_50": 0.773,
+                        "mask_map_50_95": 0.546,
+                        "crack_mask_ap_50": 0.564,
+                        "crack_mask_ap_50_95": 0.198,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.895
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "Swin-Transformer-Large (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 66.04,
+                        "flops_g": 237.4,
+                        "fps": 101.03,
+                        "box_map_50": 0.879,
+                        "box_map_50_95": 0.783,
+                        "crack_box_ap_50": 0.772,
+                        "crack_box_ap_50_95": 0.609,
+                        "spalling_box_ap_50": 0.986,
+                        "spalling_box_ap_50_95": 0.958,
+                        "mask_map_50": 0.782,
+                        "mask_map_50_95": 0.55,
+                        "crack_mask_ap_50": 0.583,
+                        "crack_mask_ap_50_95": 0.204,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.896
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "CSwin-Transformer-Tiny (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 23.94,
+                        "flops_g": 74.4,
+                        "fps": 210.68,
+                        "box_map_50": 0.818,
+                        "box_map_50_95": 0.692,
+                        "crack_box_ap_50": 0.663,
+                        "crack_box_ap_50_95": 0.462,
+                        "spalling_box_ap_50": 0.972,
+                        "spalling_box_ap_50_95": 0.922,
+                        "mask_map_50": 0.729,
+                        "mask_map_50_95": 0.497,
+                        "crack_mask_ap_50": 0.491,
+                        "crack_mask_ap_50_95": 0.144,
+                        "spalling_mask_ap_50": 0.968,
+                        "spalling_mask_ap_50_95": 0.849
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "CSwin-Transformer-Small (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 40.39,
+                        "flops_g": 129.1,
+                        "fps": 136.11,
+                        "box_map_50": 0.844,
+                        "box_map_50_95": 0.728,
+                        "crack_box_ap_50": 0.715,
+                        "crack_box_ap_50_95": 0.523,
+                        "spalling_box_ap_50": 0.974,
+                        "spalling_box_ap_50_95": 0.933,
+                        "mask_map_50": 0.762,
+                        "mask_map_50_95": 0.521,
+                        "crack_mask_ap_50": 0.555,
+                        "crack_mask_ap_50_95": 0.176,
+                        "spalling_mask_ap_50": 0.968,
+                        "spalling_mask_ap_50_95": 0.867
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "CSwin-Transformer-Base (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 90.53,
+                        "flops_g": 318.7,
+                        "fps": 72.24,
+                        "box_map_50": 0.861,
+                        "box_map_50_95": 0.75,
+                        "crack_box_ap_50": 0.747,
+                        "crack_box_ap_50_95": 0.56,
+                        "spalling_box_ap_50": 0.975,
+                        "spalling_box_ap_50_95": 0.941,
+                        "mask_map_50": 0.773,
+                        "mask_map_50_95": 0.538,
+                        "crack_mask_ap_50": 0.579,
+                        "crack_mask_ap_50_95": 0.189,
+                        "spalling_mask_ap_50": 0.968,
+                        "spalling_mask_ap_50_95": 0.887
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "CSwin-Transformer-Large (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 190.15,
+                        "flops_g": 621.2,
+                        "fps": 42.75,
+                        "box_map_50": 0.864,
+                        "box_map_50_95": 0.753,
+                        "crack_box_ap_50": 0.752,
+                        "crack_box_ap_50_95": 0.567,
+                        "spalling_box_ap_50": 0.976,
+                        "spalling_box_ap_50_95": 0.939,
+                        "mask_map_50": 0.785,
+                        "mask_map_50_95": 0.545,
+                        "crack_mask_ap_50": 0.596,
+                        "crack_mask_ap_50_95": 0.201,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.889
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M0 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 3.99,
+                        "flops_g": 11.8,
+                        "fps": 641.55,
+                        "box_map_50": 0.791,
+                        "box_map_50_95": 0.674,
+                        "crack_box_ap_50": 0.603,
+                        "crack_box_ap_50_95": 0.419,
+                        "spalling_box_ap_50": 0.979,
+                        "spalling_box_ap_50_95": 0.929,
+                        "mask_map_50": 0.716,
+                        "mask_map_50_95": 0.486,
+                        "crack_mask_ap_50": 0.457,
+                        "crack_mask_ap_50_95": 0.131,
+                        "spalling_mask_ap_50": 0.975,
+                        "spalling_mask_ap_50_95": 0.842
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M1 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 4.63,
+                        "flops_g": 16.5,
+                        "fps": 546.71,
+                        "box_map_50": 0.813,
+                        "box_map_50_95": 0.693,
+                        "crack_box_ap_50": 0.644,
+                        "crack_box_ap_50_95": 0.454,
+                        "spalling_box_ap_50": 0.981,
+                        "spalling_box_ap_50_95": 0.933,
+                        "mask_map_50": 0.736,
+                        "mask_map_50_95": 0.501,
+                        "crack_mask_ap_50": 0.501,
+                        "crack_mask_ap_50_95": 0.151,
+                        "spalling_mask_ap_50": 0.972,
+                        "spalling_mask_ap_50_95": 0.851
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M2 (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 9.81,
+                        "flops_g": 35.2,
+                        "fps": 474.59,
+                        "box_map_50": 0.842,
+                        "box_map_50_95": 0.73,
+                        "crack_box_ap_50": 0.7,
+                        "crack_box_ap_50_95": 0.513,
+                        "spalling_box_ap_50": 0.983,
+                        "spalling_box_ap_50_95": 0.948,
+                        "mask_map_50": 0.76,
+                        "mask_map_50_95": 0.523,
+                        "crack_mask_ap_50": 0.542,
+                        "crack_mask_ap_50_95": 0.174,
+                        "spalling_mask_ap_50": 0.978,
+                        "spalling_mask_ap_50_95": 0.871
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M3 (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 19.71,
+                        "flops_g": 97.8,
+                        "fps": 312.0,
+                        "box_map_50": 0.87,
+                        "box_map_50_95": 0.767,
+                        "crack_box_ap_50": 0.752,
+                        "crack_box_ap_50_95": 0.576,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.959,
+                        "mask_map_50": 0.782,
+                        "mask_map_50_95": 0.544,
+                        "crack_mask_ap_50": 0.583,
+                        "crack_mask_ap_50_95": 0.198,
+                        "spalling_mask_ap_50": 0.98,
+                        "spalling_mask_ap_50_95": 0.89
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M4 (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 24.88,
+                        "flops_g": 109.2,
+                        "fps": 264.32,
+                        "box_map_50": 0.873,
+                        "box_map_50_95": 0.772,
+                        "crack_box_ap_50": 0.757,
+                        "crack_box_ap_50_95": 0.583,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.961,
+                        "mask_map_50": 0.787,
+                        "mask_map_50_95": 0.547,
+                        "crack_mask_ap_50": 0.592,
+                        "crack_mask_ap_50_95": 0.203,
+                        "spalling_mask_ap_50": 0.982,
+                        "spalling_mask_ap_50_95": 0.89
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "EfficientViT-M5 (x)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 48.6,
+                        "flops_g": 236.1,
+                        "fps": 172.96,
+                        "box_map_50": 0.89,
+                        "box_map_50_95": 0.794,
+                        "crack_box_ap_50": 0.791,
+                        "crack_box_ap_50_95": 0.622,
+                        "spalling_box_ap_50": 0.99,
+                        "spalling_box_ap_50_95": 0.965,
+                        "mask_map_50": 0.8,
+                        "mask_map_50_95": 0.56,
+                        "crack_mask_ap_50": 0.618,
+                        "crack_mask_ap_50_95": 0.218,
+                        "spalling_mask_ap_50": 0.982,
+                        "spalling_mask_ap_50_95": 0.902
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "RepViT-m09 (n)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 6.68,
+                        "flops_g": 20.9,
+                        "fps": 504.95,
+                        "box_map_50": 0.825,
+                        "box_map_50_95": 0.711,
+                        "crack_box_ap_50": 0.669,
+                        "crack_box_ap_50_95": 0.488,
+                        "spalling_box_ap_50": 0.98,
+                        "spalling_box_ap_50_95": 0.938,
+                        "mask_map_50": 0.752,
+                        "mask_map_50_95": 0.514,
+                        "crack_mask_ap_50": 0.53,
+                        "crack_mask_ap_50_95": 0.169,
+                        "spalling_mask_ap_50": 0.974,
+                        "spalling_mask_ap_50_95": 0.86
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "RepViT-m10 (s)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 12.5,
+                        "flops_g": 42.4,
+                        "fps": 384.8,
+                        "box_map_50": 0.862,
+                        "box_map_50_95": 0.759,
+                        "crack_box_ap_50": 0.737,
+                        "crack_box_ap_50_95": 0.563,
+                        "spalling_box_ap_50": 0.988,
+                        "spalling_box_ap_50_95": 0.954,
+                        "mask_map_50": 0.781,
+                        "mask_map_50_95": 0.543,
+                        "crack_mask_ap_50": 0.581,
+                        "crack_mask_ap_50_95": 0.204,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.883
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "RepViT-m11 (m)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 21.1,
+                        "flops_g": 105.2,
+                        "fps": 294.08,
+                        "box_map_50": 0.87,
+                        "box_map_50_95": 0.772,
+                        "crack_box_ap_50": 0.752,
+                        "crack_box_ap_50_95": 0.58,
+                        "spalling_box_ap_50": 0.989,
+                        "spalling_box_ap_50_95": 0.964,
+                        "mask_map_50": 0.787,
+                        "mask_map_50_95": 0.548,
+                        "crack_mask_ap_50": 0.592,
+                        "crack_mask_ap_50_95": 0.206,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.89
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "RepViT-m15 (l)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 30.2,
+                        "flops_g": 129.7,
+                        "fps": 239.38,
+                        "box_map_50": 0.873,
+                        "box_map_50_95": 0.772,
+                        "crack_box_ap_50": 0.759,
+                        "crack_box_ap_50_95": 0.585,
+                        "spalling_box_ap_50": 0.986,
+                        "spalling_box_ap_50_95": 0.958,
+                        "mask_map_50": 0.788,
+                        "mask_map_50_95": 0.548,
+                        "crack_mask_ap_50": 0.595,
+                        "crack_mask_ap_50_95": 0.203,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.894
+                  }
+            },
+            {
+                  "model_family": "Transformer-based",
+                  "method": "RepViT-m23 (x)",
+                  "code_url": "https://benyunzhao.github.io/CUBIT-Dataset/",
+                  "metrics": {
+                        "params_m": 59.3,
+                        "flops_g": 281.0,
+                        "fps": 129.65,
+                        "box_map_50": 0.877,
+                        "box_map_50_95": 0.775,
+                        "crack_box_ap_50": 0.764,
+                        "crack_box_ap_50_95": 0.591,
+                        "spalling_box_ap_50": 0.989,
+                        "spalling_box_ap_50_95": 0.959,
+                        "mask_map_50": 0.792,
+                        "mask_map_50_95": 0.549,
+                        "crack_mask_ap_50": 0.602,
+                        "crack_mask_ap_50_95": 0.208,
+                        "spalling_mask_ap_50": 0.981,
+                        "spalling_mask_ap_50_95": 0.89
+                  }
+            }
+      ]
+},
+    {
+      "id": "buildingsense-building-function-classification",
+      "name": "BuildingSense: Building Function Classification",
+      "task": "Building function classification",
+      "dataset_id": "BuildingSense",
+      "dataset_name": "BuildingSense: Multimodal building function classification dataset",
+      "page_title": "BuildingSense: Building Function Classification",
+      "summary": "Reported large-model baselines for BuildingSense using text (T), remote sensing imagery (R), street-view imagery (S), and fused multimodal combinations.",
+      "task_description": "Building function classification assigns each building to a functional usage category. BuildingSense evaluates large models with different multimodal data combinations under 26-category and 14-category settings.",
+      "source_label": "BuildingSense paper",
+      "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+      "dataset_url": "https://doi.org/10.6084/m9.figshare.30645776.v2",
+      "primary_metric_key": "f1",
+      "method_column_label": "Large model",
+      "hide_year_column": true,
+      "row_columns": [
+        { "key": "category", "label": "Category", "min_width": "88px" },
+        { "key": "data_combination", "label": "Data combination", "min_width": "148px", "position": "after_method" }
+      ],
+      "metric_columns": [
+        { "key": "acc", "label": "Acc", "direction": "higher", "precision": 2 },
+        { "key": "pre", "label": "Pre", "direction": "higher", "precision": 2 },
+        { "key": "recall", "label": "Recall", "direction": "higher", "precision": 2 },
+        { "key": "f1", "label": "F1", "direction": "higher", "precision": 2 }
+      ],
+      "comparison_chart": {
+        "enabled": false
+      },
+      "results": [
+        {
+          "category": "26",
+          "method": "Deepseek-chat",
+          "model_id": "deepseek-chat",
+          "data_combination": "T",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.08,
+            "pre": 0.21,
+            "recall": 0.08,
+            "f1": 0.09
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "QVQ-plus",
+          "model_id": "qvq-plus",
+          "data_combination": "R",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.12,
+            "pre": 0.37,
+            "recall": 0.12,
+            "f1": 0.15
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "QVQ-plus",
+          "model_id": "qvq-plus",
+          "data_combination": "RT",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.29,
+            "pre": 0.49,
+            "recall": 0.29,
+            "f1": 0.30
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "QVQ-plus",
+          "model_id": "qvq-plus",
+          "data_combination": "S",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.24,
+            "pre": 0.47,
+            "recall": 0.24,
+            "f1": 0.27
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "QVQ-plus",
+          "model_id": "qvq-plus",
+          "data_combination": "ST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.34,
+            "pre": 0.59,
+            "recall": 0.34,
+            "f1": 0.36
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Claude-sonnet-4",
+          "model_id": "claude-sonnet-4",
+          "data_combination": "ST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.38,
+            "pre": 0.50,
+            "recall": 0.38,
+            "f1": 0.39
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Claude-sonnet-4",
+          "model_id": "claude-sonnet-4",
+          "data_combination": "RS",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.27,
+            "pre": 0.42,
+            "recall": 0.27,
+            "f1": 0.30
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Claude-sonnet-4",
+          "model_id": "claude-sonnet-4",
+          "data_combination": "RST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.39,
+            "pre": 0.49,
+            "recall": 0.39,
+            "f1": 0.40
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Gemini-2.5-flash (Thinking)",
+          "model_id": "gemini-2-5-flash-thinking",
+          "data_combination": "ST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.42,
+            "pre": 0.53,
+            "recall": 0.42,
+            "f1": 0.43
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Gemini-2.5-flash (Thinking)",
+          "model_id": "gemini-2-5-flash-thinking",
+          "data_combination": "RS",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.35,
+            "pre": 0.51,
+            "recall": 0.35,
+            "f1": 0.37
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "26",
+          "method": "Gemini-2.5-flash (Thinking)",
+          "model_id": "gemini-2-5-flash-thinking",
+          "data_combination": "RST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.43,
+            "pre": 0.53,
+            "recall": 0.43,
+            "f1": 0.44
+          },
+          "notes": "Reported 26-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "14",
+          "method": "Gemini-2.5-flash (Thinking)",
+          "model_id": "gemini-2-5-flash-thinking",
+          "data_combination": "ST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.55,
+            "pre": 0.63,
+            "recall": 0.55,
+            "f1": 0.56
+          },
+          "notes": "Reported 14-category baseline transcribed from the provided BuildingSense results table."
+        },
+        {
+          "category": "14",
+          "method": "QVQ-plus",
+          "model_id": "qvq-plus",
+          "data_combination": "ST",
+          "source_label": "BuildingSense paper",
+          "source_url": "https://doi.org/10.5194/essd-18-2609-2026",
+          "code_url": "https://doi.org/10.6084/m9.figshare.30645776",
+          "metrics": {
+            "acc": 0.40,
+            "pre": 0.65,
+            "recall": 0.40,
+            "f1": 0.43
+          },
+          "notes": "Reported 14-category baseline transcribed from the provided BuildingSense results table."
+        }
+      ]
+    },
+    {
+      "id": "nysolarforecastlab-day-ahead-pv-forecasting-results",
+      "name": "Solar PV Power of 100 Plants in NY: Day-Ahead Photovoltaic Power Forecasting",
+      "task": "Photovoltaic power forecasting",
+      "dataset_id": "NYSolarForecastLab",
+      "dataset_name": "Solar PV power of 100 plants in NY",
+      "page_title": "Solar PV Power of 100 Plants in NY: Benchmark Results",
+      "summary": "Reported RMSE benchmark results for day-ahead photovoltaic power forecasting on 100 solar PV plants in New York State.",
+      "task_description": "Day-ahead photovoltaic power forecasting across 100 New York State solar PV plants.",
+      "source_label": "NYSolarForecastLab paper",
+      "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+      "dataset_url": "https://doi.org/10.7910/DVN/3VKAGM",
+      "primary_metric_key": "rmse",
+      "method_column_label": "Model",
+      "hide_year_column": true,
+      "row_columns": [
+        { "key": "data_source", "label": "Dataset", "min_width": "140px" }
+      ],
+      "metric_columns": [
+        { "key": "rmse", "label": "RMSE", "direction": "lower", "precision": 2 },
+        { "key": "rmse_std", "label": "RMSE +/-", "direction": "lower", "precision": 2 }
+      ],
+      "comparison_chart": {
+        "orientation": "horizontal-grouped",
+        "metric_label": "RMSE",
+        "x_axis_label": "RMSE",
+        "min_value": 0,
+        "max_value": 10.5,
+        "series_order": ["LGBM", "XGB", "RF", "GRU", "LSTM", "LR", "Transformer", "TCN"],
+        "series_colors": {
+          "LGBM": "#8cc6ff",
+          "XGB": "#abf19b",
+          "RF": "#f5c48a",
+          "GRU": "#d9c4a7",
+          "LSTM": "#ee9999",
+          "LR": "#8f8de6",
+          "Transformer": "#b9d6f2",
+          "TCN": "#d8a48f"
+        },
+        "caption": "Reported RMSE by model for day-ahead photovoltaic power forecasting on 100 New York solar PV plants."
+      },
+      "results": [
+        {
+          "data_source": "100 NY PV plants",
+          "method": "LR",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 7.27,
+            "rmse_std": 1.67
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "RF",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 6.71,
+            "rmse_std": 1.22
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "XGB",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 5.98,
+            "rmse_std": 1.09
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "LGBM",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 5.96,
+            "rmse_std": 1.08
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "LSTM",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 6.94,
+            "rmse_std": 1.19
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "GRU",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 6.92,
+            "rmse_std": 1.12
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "TCN",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 9.77,
+            "rmse_std": 1.57
+          }
+        },
+        {
+          "data_source": "100 NY PV plants",
+          "method": "Transformer",
+          "paper_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "code_url": "https://github.com/zhesun-0209/NYSolarForecastLab",
+          "source_label": "NYSolarForecastLab paper",
+          "source_url": "https://doi.org/10.1016/j.tra.2026.105040",
+          "metrics": {
+            "rmse": 7.52,
+            "rmse_std": 1.51
+          }
+        }
+      ]
+    }
+  ]
+}

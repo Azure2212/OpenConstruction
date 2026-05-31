@@ -1,0 +1,192 @@
+/* Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+   SPDX-License-Identifier: Apache-2.0
+
+   OpenConstruction Assistant — an assistant-style layer that extends the
+   existing hero search bar. 100% client-side retrieval over the catalog
+   JSON: grounded, citation-based recommendations with zero server/LLM cost. */
+
+/* ---- mode toggle (Search | Ask) inside the hero search ---- */
+.oc-search-modes{
+  display:inline-flex;
+  align-items:center;
+  gap:.25rem;
+  margin:0 auto .6rem;
+  padding:.2rem;
+  border:1px solid var(--oc-border);
+  border-radius:999px;
+  background:var(--oc-muted);
+}
+.oc-search-mode{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:var(--oc-subtle);
+  font-weight:700;
+  font-size:.84rem;
+  padding:.34rem .9rem;
+  border-radius:999px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  transition:background .15s ease, color .15s ease;
+}
+.oc-search-mode[aria-pressed="true"]{
+  background:var(--oc-brand-ink);
+  color:#fff;
+}
+.oc-search-mode .oc-mode-spark{ font-size:.95em; }
+
+/* Submit affordance shown only in Ask mode */
+.oc-ask-submit{
+  display:none;
+  margin-top:.6rem;
+}
+.oc-ask-mode .oc-ask-submit{ display:inline-flex; }
+.oc-ask-mode .hero-search-results{ display:none !important; } /* suppress instant dropdown while asking */
+.oc-ask-btn{
+  appearance:none;
+  border:0;
+  border-radius:999px;
+  background:var(--oc-brand-accent);
+  color:#3a2606;
+  font-weight:800;
+  font-size:.9rem;
+  padding:.5rem 1.25rem;
+  cursor:pointer;
+  box-shadow:var(--oc-shadow);
+}
+.oc-ask-btn:disabled{ opacity:.55; cursor:default; }
+
+/* example prompt chips */
+.oc-ask-examples{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+  justify-content:center;
+  margin-top:.7rem;
+}
+.oc-ask-example{
+  appearance:none;
+  border:1px dashed var(--oc-border);
+  background:#fff;
+  color:var(--oc-link);
+  font-size:.8rem;
+  font-weight:600;
+  padding:.3rem .7rem;
+  border-radius:999px;
+  cursor:pointer;
+}
+.oc-ask-example:hover{ border-style:solid; background:var(--oc-muted); }
+
+/* ---- the assistant answer panel ---- */
+.oc-assistant{
+  max-width:760px;
+  margin:1.4rem auto 0;
+  text-align:left;
+  border:1px solid var(--oc-border);
+  border-radius:var(--oc-radius);
+  background:var(--oc-card);
+  box-shadow:var(--oc-shadow);
+  overflow:hidden;
+}
+.oc-assistant[hidden]{ display:none !important; }
+.oc-assistant-head{
+  display:flex;
+  align-items:flex-start;
+  gap:.7rem;
+  padding:1rem 1.15rem;
+  border-bottom:1px solid var(--oc-border);
+  background:linear-gradient(180deg,#fbfdff,#ffffff);
+}
+.oc-assistant-avatar{
+  flex:0 0 auto;
+  width:34px;height:34px;
+  border-radius:10px;
+  display:grid;place-items:center;
+  background:var(--oc-brand-ink);
+  color:#fff;font-weight:800;font-size:.9rem;
+}
+.oc-assistant-intro{ font-size:.95rem; color:var(--oc-text); line-height:1.45; }
+.oc-assistant-intro strong{ color:var(--oc-brand-ink); }
+.oc-assistant-sub{ color:var(--oc-subtle); font-size:.82rem; margin-top:.15rem; }
+
+.oc-assistant-body{ padding:.4rem .6rem .6rem; }
+
+/* grouped results */
+.oc-rec-group-title{
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--oc-subtle);
+  padding:.7rem .65rem .25rem;
+}
+.oc-rec{
+  display:flex;
+  gap:.7rem;
+  padding:.7rem .65rem;
+  border-radius:10px;
+  text-decoration:none;
+  color:inherit;
+}
+.oc-rec:hover{ background:#fbfdff; }
+.oc-rec + .oc-rec{ border-top:1px solid var(--oc-border); }
+.oc-rec-rank{
+  flex:0 0 auto;
+  width:22px;height:22px;
+  border-radius:6px;
+  background:var(--oc-muted);
+  color:var(--oc-brand-accent-2);
+  font-weight:800;font-size:.78rem;
+  display:grid;place-items:center;
+  margin-top:.1rem;
+}
+.oc-rec-main{ min-width:0; flex:1 1 auto; }
+.oc-rec-type{
+  font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:#fff;background:var(--oc-brand-accent-2);
+  padding:.05rem .4rem;border-radius:5px;display:inline-block;margin-bottom:.2rem;
+}
+.oc-rec-type.is-dataset{ background:#1f6f54; }
+.oc-rec-type.is-model{ background:#123c62; }
+.oc-rec-type.is-workflow{ background:#8a5418; }
+.oc-rec-type.is-oer{ background:#5b3a8a; }
+.oc-rec-title{ font-weight:700; color:var(--oc-brand-ink); line-height:1.3; }
+.oc-rec-title:hover{ text-decoration:underline; }
+/* citation line — the key deliverable: grounded, cite-able */
+.oc-rec-cite{ color:var(--oc-subtle); font-size:.85rem; margin-top:.15rem; line-height:1.4; }
+.oc-rec-cite a{ color:var(--oc-link); }
+.oc-rec-why{
+  margin-top:.35rem;
+  display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;
+}
+.oc-rec-why-label{ font-size:.72rem;color:var(--oc-subtle); }
+.oc-rec-term{
+  font-size:.72rem;font-weight:600;
+  background:#fff4e3;color:#8a5418;
+  border:1px solid #f4dcae;
+  padding:.04rem .4rem;border-radius:999px;
+}
+
+/* footer / sustainability + MCP note */
+.oc-assistant-foot{
+  display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;
+  padding:.7rem 1.15rem;
+  border-top:1px solid var(--oc-border);
+  background:var(--oc-muted);
+  font-size:.78rem;color:var(--oc-subtle);
+}
+.oc-assistant-foot .oc-foot-badge{
+  display:inline-flex;align-items:center;gap:.35rem;font-weight:700;color:var(--oc-brand-ink);
+}
+.oc-assistant-foot a{ color:var(--oc-link);font-weight:700;text-decoration:none; }
+.oc-assistant-foot a:hover{ text-decoration:underline; }
+
+.oc-assistant-empty{ padding:1.2rem 1.15rem;color:var(--oc-subtle);font-size:.92rem; }
+.oc-assistant-empty strong{ color:var(--oc-brand-ink); }
+
+@media (max-width:600px){
+  .oc-assistant{ margin-left:.5rem;margin-right:.5rem; }
+  .oc-assistant-foot{ flex-direction:column;align-items:flex-start; }
+}

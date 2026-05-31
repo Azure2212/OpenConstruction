@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstruction · Schema</title>
+  <meta name="description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <link rel="canonical" href="https://www.openconstruction.org/schema.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+  <meta property="og:title" content="OpenConstruction · Schema">
+  <meta property="og:description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <meta property="og:url" content="https://www.openconstruction.org/schema.html">
+  <meta property="og:image" content="https://www.openconstruction.org/assets/img/icon.png">
+
+  <!-- Bootstrap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/shared-site.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --oc-bg:#ffffff; --oc-text:#1e2a36; --oc-subtle:#4f5d6c; --oc-border:#e7edf3;
+      --oc-ink:#0f2e4b; --oc-accent:#f2a238; --oc-link:#0b66c3;
+      --oc-card:#ffffff; --oc-shadow:0 8px 24px rgba(15,46,75,.06);
+      --oc-radius:14px; --oc-muted:#f6f9fc; --oc-focus:#86b7fe;
+    }
+	.oc-container{ max-width:1080px; }
+
+    .hl{ background:linear-gradient(180deg,transparent 60%,rgba(242,162,56,.25) 0); padding:0 .06em; font-weight:700; }
+    /* shared shell styles live in assets/css/shared-site.css */
+
+    .oc-section{ margin-top:34px; }
+    .oc-kicker{ font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; color:var(--oc-subtle); }
+    .oc-card{ background:var(--oc-card); border:1px solid var(--oc-border); border-radius:var(--oc-radius); box-shadow:var(--oc-shadow); }
+    .oc-card-body{ padding:1.25rem; }
+
+    .note{ background:var(--oc-muted); border:1px solid var(--oc-border); border-radius:12px; padding:12px 14px; color:var(--oc-subtle); }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:.92em; background:#fff; border:1px solid var(--oc-border); border-radius:10px; padding:.2rem .45rem; color:var(--oc-ink); white-space:nowrap; }
+    pre.code{ background:#0b1726; color:#eaf2ff; border-radius:12px; padding:12px 12px; overflow:auto; border:1px solid rgba(255,255,255,.08); box-shadow:0 8px 18px rgba(15,46,75,.08); margin:0; }
+
+    :focus-visible{ outline:2px solid var(--oc-focus); outline-offset:2px; border-radius:6px; }
+  
+
+    /* --- schema page additions --- */
+    .oc-pre{
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      overflow: auto;
+      border: 1px solid rgba(15,23,42,.18);
+    }
+    .oc-pre code{ color: inherit; }
+    .oc-table thead th{
+      background: rgba(16, 185, 129, 0.06);
+      border-bottom: 1px solid rgba(30,41,59,.12);
+      font-weight: 700;
+    }
+    .oc-table td, .oc-table th{
+      border-color: rgba(30,41,59,.10);
+    }
+	
+	    /* ---- Floating Suggestion Button ---- */
+    .issue-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      text-decoration: none;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .issue-btn:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+      color: #fff;
+      text-decoration: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-white sticky-top oc-nav">
+    <div class="container oc-container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <img src="assets/img/icon.png" alt="OpenConstruction logo" class="oc-logo">
+        <span class="brand-wordmark">
+          <span class="oc-open">OpenConstruction</span>
+          <span class="oc-construction">Open Science</span>
+        </span>
+      </a>
+
+      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+        <li class="nav-item"><a class="nav-link plain" href="index.html" data-route="index">Home</a></li>
+		<li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddLibraries" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddLibraries">
+            <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+            <li><a class="dropdown-item" href="models.html">Models</a></li>
+            <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+			<li><a class="dropdown-item" href="oer.html">OERs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="benchmarks.html" data-route="models">Benchmarks</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+            <li><a class="dropdown-item" href="schema.html">Schema</a></li>
+            <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+            <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+            <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="contribute.html" data-route="contribute">Contribute</a></li>
+        <li class="nav-item"><a class="nav-link plain" href="contributors.html" data-route="contributors">Community</a></li>
+
+          <li class="nav-item">
+            <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener" aria-label="OpenConstruction on GitHub" title="View on GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                         0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                         0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                         0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0
+                         1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+                         0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013
+                         8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+              </svg>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <button type="button" class="nav-link px-2 icon-only btn-subscribe-icon" data-bs-toggle="modal" data-bs-target="#subscribeModal" aria-label="Subscribe for updates" title="Subscribe">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" aria-hidden="true" class="icon-bell">
+                <path d="M8 16a2 2 0 0 0 1.985-1.75H6.015A2 2 0 0 0 8 16zm.5-14a.5.5 0 0
+                         0-1 0 7 7 0 0 0-5.468 6.37c-.084.58-.272 1.204-.653 1.856-.356.617-.879 1.104-1.379
+                         1.357V13h14v-1.417c-.5-.253-1.023-.74-1.379-1.357-.38-.652-.569-1.276-.653-1.856A7
+                         7 0 0 0 8.5 2z"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+
+  <main class="container oc-container">
+
+  <section class="oc-section">
+    <div class="oc-kicker mb-2">Metadata Schema</div>
+    <h1 class="oc-title">OpenConstruction metadata fields</h1>
+    <p class="oc-lead">
+      This page documents the complete metadata fields currently used in OpenConstruction catalogs:
+      <strong>Datasets</strong>, <strong>Models</strong>, <strong>Use Cases</strong>, and <strong>Open Educational Resources (OER)</strong>.
+      It also shows how to publish structured data (JSON-LD) that aligns with
+      <a href="https://schema.org/" target="_blank" rel="noopener">schema.org</a>.
+    </p>
+
+    <div class="alert oc-alert mt-3">
+      <div class="small">
+        <strong>Note:</strong> Some OpenConstruction fields (e.g., <code>added_date</code>, <code>contributor</code>, <code>num_images</code>)
+        do not have a single dedicated schema.org property. For structured data, publish them via
+        <code>additionalProperty</code> (PropertyValue) or <code>variableMeasured</code>, and keep the raw fields in the catalog.
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-md-6 col-xl-3">
+        <a class="text-decoration-none" href="#datasets">
+          <div class="card oc-card h-100">
+            <div class="card-body">
+              <div class="oc-kicker">Datasets</div>
+              <div class="h5 mb-1">20 fields</div>
+              <div class="text-muted small">From <code>datasets.json</code></div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <a class="text-decoration-none" href="#models">
+          <div class="card oc-card h-100">
+            <div class="card-body">
+              <div class="oc-kicker">Models</div>
+              <div class="h5 mb-1">15 fields</div>
+              <div class="text-muted small">From <code>models.json</code></div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <a class="text-decoration-none" href="#use-cases">
+          <div class="card oc-card h-100">
+            <div class="card-body">
+              <div class="oc-kicker">Use Cases</div>
+              <div class="h5 mb-1">36 fields</div>
+              <div class="text-muted small">From <code>use-cases.json</code></div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <a class="text-decoration-none" href="#oer">
+          <div class="card oc-card h-100">
+            <div class="card-body">
+              <div class="oc-kicker">OER</div>
+              <div class="h5 mb-1">15 fields</div>
+              <div class="text-muted small">From <code>oer.json</code></div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="datasets" class="oc-section">
+    <div class="oc-kicker mb-2">Datasets</div>
+    <h2 class="oc-h2">Dataset fields in <code>datasets.json</code></h2>
+    <p class="text-muted mb-3">Structured data recommendation: <code>@type: Dataset</code> with <code>creator</code>, <code>license</code>, <code>keywords</code>, <code>identifier</code>, and <code>distribution</code> where applicable.</p>
+    
+<div class="table-responsive">
+<table class="table table-sm align-middle oc-table">
+  <thead>
+    <tr>
+      <th style="width: 22%">Field</th>
+      <th style="width: 10%">Required</th>
+      <th style="width: 28%">Schema.org mapping</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr><td><code>access</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Direct download URL or access page.</td></tr>
+<tr><td><code>added_date</code></td><td>No</td><td><span class='text-muted'>(catalog metadata) —</span></td><td>Date added to OpenConstruction catalog (YYYY-MM-DD).</td></tr>
+<tr><td><code>annotation_types</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Label/annotation types (e.g., bbox, segmentation).</td></tr>
+<tr><td><code>authors</code></td><td>No</td><td><span class='text-muted'>schema.org:creator</span></td><td>Creators/authors of the dataset (string or list).</td></tr>
+<tr><td><code>classes</code></td><td>No</td><td><span class='text-muted'>schema.org:variableMeasured / additionalProperty</span></td><td>List of class names.</td></tr>
+<tr><td><code>contributor</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>GitHub handle or name of submitter.</td></tr>
+<tr><td><code>contributor_url</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Profile/org URL for submitter.</td></tr>
+<tr><td><code>data_modality</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Primary modality (e.g., images, point clouds).</td></tr>
+<tr><td><code>doi</code></td><td>No</td><td><span class='text-muted'>schema.org:identifier</span></td><td>DOI if available.</td></tr>
+<tr><td><code>geographical_location</code></td><td>No</td><td><span class='text-muted'>schema.org:variableMeasured / additionalProperty</span></td><td>Location/region covered (if relevant).</td></tr>
+<tr><td><code>id</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Stable short identifier used in URLs and JSON key.</td></tr>
+<tr><td><code>image_url</code></td><td>No</td><td><span class='text-muted'>schema.org:image</span></td><td>Preview/thumbnail URL.</td></tr>
+<tr><td><code>license</code></td><td>Yes</td><td><span class='text-muted'>schema.org:license</span></td><td>License name or SPDX-like identifier.</td></tr>
+<tr><td><code>name</code></td><td>Yes</td><td><span class='text-muted'>schema.org:name</span></td><td>Human-readable dataset name.</td></tr>
+<tr><td><code>num_classes</code></td><td>No</td><td><span class='text-muted'>schema.org:variableMeasured / additionalProperty</span></td><td>Number of classes/labels.</td></tr>
+<tr><td><code>num_images</code></td><td>No</td><td><span class='text-muted'>schema.org:variableMeasured / additionalProperty</span></td><td>Number of images (if applicable).</td></tr>
+<tr><td><code>paper</code></td><td>Yes</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Primary paper or landing page URL for the dataset.</td></tr>
+<tr><td><code>potential_tasks</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Supported tasks. Values should match the controlled vocabulary in <code>site/data/task-vocabulary.json</code> or one of its accepted aliases.</td></tr>
+<tr><td><code>resolution</code></td><td>No</td><td><span class='text-muted'>schema.org:variableMeasured / additionalProperty</span></td><td>Spatial/image resolution info (free text).</td></tr>
+<tr><td><code>year</code></td><td>Yes</td><td><span class='text-muted'>schema.org:datePublished</span></td><td>Publication/release year.</td></tr></tbody></table></div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example catalog record</div>
+            <pre class="oc-pre"><code>{
+  &quot;id&quot;: &quot;CISI&quot;,
+  &quot;name&quot;: &quot;Critical Infrastructure Sensor Imagery (CISI)&quot;,
+  &quot;year&quot;: 2025,
+  &quot;authors&quot;: [
+    &quot;First Last&quot;
+  ],
+  &quot;doi&quot;: &quot;10.xxxx/xxxx&quot;,
+  &quot;paper&quot;: &quot;https://example.org/paper&quot;,
+  &quot;license&quot;: &quot;CC BY 4.0&quot;,
+  &quot;access&quot;: &quot;https://example.org/download&quot;,
+  &quot;data_modality&quot;: [&quot;image&quot;],
+  &quot;annotation_types&quot;: [&quot;bbox&quot;],
+  &quot;potential_tasks&quot;: [&quot;detection&quot;],
+  &quot;geographical_location&quot;: &quot;United States&quot;,
+  &quot;resolution&quot;: &quot;1024x768&quot;,
+  &quot;num_images&quot;: 12345,
+  &quot;num_classes&quot;: 5,
+  &quot;classes&quot;: [&quot;bridge&quot],
+  &quot;image_url&quot;: &quot;https://example.org/preview.png&quot;,
+  &quot;added_date&quot;: &quot;2026-01-09&quot;,
+  &quot;contributor&quot;: &quot;@someone&quot;,
+  &quot;contributor_url&quot;: &quot;https://github.com/someone&quot;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example JSON-LD (Dataset)</div>
+            <pre class="oc-pre"><code>{
+  &quot;@context&quot;: &quot;https://schema.org&quot;,
+  &quot;@type&quot;: &quot;Dataset&quot;,
+  &quot;name&quot;: &quot;Critical Infrastructure Sensor Imagery (CISI)&quot;,
+  &quot;description&quot;: &quot;OpenConstruction dataset catalog entry.&quot;,
+  &quot;identifier&quot;: &quot;CISI&quot;,
+  &quot;creator&quot;: [{&quot;@type&quot;:&quot;Person&quot;,&quot;name&quot;:&quot;First Last&quot;}],
+  &quot;datePublished&quot;: &quot;2025&quot;,
+  &quot;license&quot;: &quot;CC BY 4.0&quot;,
+  &quot;url&quot;: &quot;https://www.openconstruction.org/datasets/detail.html?id=CISI&quot;,
+  &quot;sameAs&quot;: &quot;https://example.org/paper&quot;,
+  &quot;keywords&quot;: [&quot;image&quot;,&quot;detection&quot;,&quot;bbox&quot;],
+  &quot;distribution&quot;: [{
+    &quot;@type&quot;: &quot;DataDownload&quot;,
+    &quot;contentUrl&quot;: &quot;https://example.org/download&quot;
+  }],
+  &quot;additionalProperty&quot;: [
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;num_images&quot;,&quot;value&quot;:&quot;12345&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;num_classes&quot;,&quot;value&quot;:&quot;5&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;classes&quot;,&quot;value&quot;:&quot;bridge, road, rail, pipeline, powerline&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;added_date&quot;,&quot;value&quot;:&quot;2026-01-09&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;contributor&quot;,&quot;value&quot;:&quot;@someone&quot;}
+  ]
+}</code></pre>
+            <div class="text-muted small">Tip: embed this JSON-LD in the dataset detail page <code>&lt;head&gt;</code>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="models" class="oc-section">
+    <div class="oc-kicker mb-2">Models</div>
+    <h2 class="oc-h2">Model fields in <code>models.json</code></h2>
+    <p class="text-muted mb-3">Structured data recommendation: treat a model as <code>SoftwareSourceCode</code> (if code-first) or <code>CreativeWork</code> (if publication-first). Use <code>keywords</code> for modalities/tasks.</p>
+    
+<div class="table-responsive">
+<table class="table table-sm align-middle oc-table">
+  <thead>
+    <tr>
+      <th style="width: 22%">Field</th>
+      <th style="width: 10%">Required</th>
+      <th style="width: 28%">Schema.org mapping</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr><td><code>abstract</code></td><td>No</td><td><span class='text-muted'>schema.org:description</span></td><td>Short description/summary.</td></tr>
+<tr><td><code>added_date</code></td><td>No</td><td><span class='text-muted'>(catalog metadata) —</span></td><td>Date added to OpenConstruction catalog (YYYY-MM-DD).</td></tr>
+<tr><td><code>applications</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Application domains/use cases.</td></tr>
+<tr><td><code>authors</code></td><td>No</td><td><span class='text-muted'>schema.org:creator</span></td><td>Creators/authors of the model.</td></tr>
+<tr><td><code>code_url</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Code repository URL.</td></tr>
+<tr><td><code>contributor</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>GitHub handle or name of submitter.</td></tr>
+<tr><td><code>contributor_url</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Profile/org URL for submitter.</td></tr>
+<tr><td><code>id</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Stable short identifier used in URLs.</td></tr>
+<tr><td><code>license</code></td><td>Yes</td><td><span class='text-muted'>schema.org:license</span></td><td>Model/license terms.</td></tr>
+<tr><td><code>modalities</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Input modalities (e.g., image, text, point cloud).</td></tr>
+<tr><td><code>paper_url</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Paper or preprint URL.</td></tr>
+<tr><td><code>tasks</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Supported tasks. Values should match the controlled vocabulary in <code>site/data/task-vocabulary.json</code> or one of its accepted aliases.</td></tr>
+<tr><td><code>thumbnail</code></td><td>No</td><td><span class='text-muted'>schema.org:image</span></td><td>Preview image URL.</td></tr>
+<tr><td><code>title</code></td><td>Yes</td><td><span class='text-muted'>schema.org:name</span></td><td>Model name/title.</td></tr>
+<tr><td><code>year</code></td><td>Yes</td><td><span class='text-muted'>schema.org:datePublished</span></td><td>Release/publication year.</td></tr></tbody></table></div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example catalog record</div>
+            <pre class="oc-pre"><code>{
+  &quot;id&quot;: &quot;bim-llm&quot;,
+  &quot;title&quot;: &quot;BIM-QA LLM&quot;,
+  &quot;year&quot;: 2025,
+  &quot;authors&quot;: [&quot;First Last&quot;],
+  &quot;abstract&quot;: &quot;A language model fine-tuned for BIM question answering.&quot;,
+  &quot;paper_url&quot;: &quot;https://example.org/paper&quot;,
+  &quot;code_url&quot;: &quot;https://github.com/org/repo&quot;,
+  &quot;license&quot;: &quot;Apache-2.0&quot;,
+  &quot;modalities&quot;: [&quot;text&quot;],
+  &quot;tasks&quot;: [&quot;question answering&quot;],
+  &quot;applications&quot;: [&quot;BIM compliance checking&quot;],
+  &quot;thumbnail&quot;: &quot;https://example.org/thumb.png&quot;,
+  &quot;added_date&quot;: &quot;2026-01-09&quot;,
+  &quot;contributor&quot;: &quot;@someone&quot;,
+  &quot;contributor_url&quot;: &quot;https://github.com/someone&quot;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example JSON-LD (SoftwareSourceCode)</div>
+            <pre class="oc-pre"><code>{
+  &quot;@context&quot;:&quot;https://schema.org&quot;,
+  &quot;@type&quot;:&quot;SoftwareSourceCode&quot;,
+  &quot;name&quot;:&quot;BIM-QA LLM&quot;,
+  &quot;description&quot;:&quot;A language model fine-tuned for BIM question answering.&quot;,
+  &quot;codeRepository&quot;:&quot;https://github.com/org/repo&quot;,
+  &quot;license&quot;:&quot;Apache-2.0&quot;,
+  &quot;datePublished&quot;:&quot;2025&quot;,
+  &quot;url&quot;:&quot;https://www.openconstruction.org/models/detail.html?id=bim-llm&quot;,
+  &quot;sameAs&quot;:&quot;https://example.org/paper&quot;,
+  &quot;keywords&quot;:[&quot;LLM&quot;,&quot;text&quot;,&quot;question answering&quot;,&quot;BIM compliance checking&quot;],
+  &quot;additionalProperty&quot;:[
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;added_date&quot;,&quot;value&quot;:&quot;2026-01-09&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;contributor&quot;,&quot;value&quot;:&quot;@someone&quot;}
+  ]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="use-cases" class="oc-section">
+    <div class="oc-kicker mb-2">Use Cases</div>
+    <h2 class="oc-h2">Use case fields in <code>use-cases.json</code></h2>
+    <p class="text-muted mb-3">Structured data recommendation: use <code>CreativeWork</code> (or <code>CaseStudy</code> when appropriate) and attach evidence links, organizations, and outcomes via <code>additionalProperty</code>.</p>
+    
+<div class="table-responsive">
+<table class="table table-sm align-middle oc-table">
+  <thead>
+    <tr>
+      <th style="width: 22%">Field</th>
+      <th style="width: 10%">Required</th>
+      <th style="width: 28%">Schema.org mapping</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr><td><code>added_date</code></td><td>No</td><td><span class='text-muted'>(catalog metadata) —</span></td><td>Date added to OpenConstruction catalog (YYYY-MM-DD).</td></tr>
+<tr><td><code>ai_tech</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>AI techniques used (e.g., CV, LLMs).</td></tr>
+<tr><td><code>applications</code></td><td>Yes</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Application areas (e.g., safety monitoring).</td></tr>
+<tr><td><code>companies</code></td><td>Yes</td><td><span class='text-muted'>schema.org:publisher / provider</span></td><td>Company list (name/url).</td></tr>
+<tr><td><code>companies[].name</code></td><td>No</td><td><span class='text-muted'>schema.org:publisher / provider</span></td><td>Company name.</td></tr>
+<tr><td><code>companies[].url</code></td><td>No</td><td><span class='text-muted'>schema.org:publisher / provider</span></td><td>Company website URL.</td></tr>
+<tr><td><code>contributor</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>GitHub handle or name of submitter.</td></tr>
+<tr><td><code>contributor_url</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Profile/org URL for submitter.</td></tr>
+<tr><td><code>data_modalities</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Data types/modalities used.</td></tr>
+<tr><td><code>deployment_stage</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Stage of deployment (pilot, production).</td></tr>
+<tr><td><code>evidence_level</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Strength of evidence (case study, peer-reviewed, etc.).</td></tr>
+<tr><td><code>geography</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Geographic scope/region.</td></tr>
+<tr><td><code>license</code></td><td>No</td><td><span class='text-muted'>schema.org:license</span></td><td>License/terms for linked assets (if applicable).</td></tr>
+<tr><td><code>links</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>External links (paper, code, demo, etc.).</td></tr>
+<tr><td><code>links.additional</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Other relevant URL(s).</td></tr>
+<tr><td><code>links.code</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Code repository URL(s).</td></tr>
+<tr><td><code>links.doi</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>—</td></tr>
+<tr><td><code>links.paper</code></td><td>No</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Paper URL(s).</td></tr>
+<tr><td><code>links.source</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>—</td></tr>
+<tr><td><code>media</code></td><td>No</td><td><span class='text-muted'>schema.org:associatedMedia</span></td><td>Media assets (type/url).</td></tr>
+<tr><td><code>media[].alt</code></td><td>No</td><td><span class='text-muted'>schema.org:associatedMedia</span></td><td>—</td></tr>
+<tr><td><code>media[].type</code></td><td>No</td><td><span class='text-muted'>schema.org:associatedMedia</span></td><td>Media type (image, video, etc.).</td></tr>
+<tr><td><code>media[].url</code></td><td>No</td><td><span class='text-muted'>schema.org:associatedMedia</span></td><td>Media URL.</td></tr>
+<tr><td><code>notes</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Curator notes.</td></tr>
+<tr><td><code>organizations</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Organizations involved.</td></tr>
+<tr><td><code>outcomes</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Outcome metrics (value/metric/note).</td></tr>
+<tr><td><code>outcomes[].metric</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Outcome metric name.</td></tr>
+<tr><td><code>outcomes[].note</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Notes/assumptions for the metric.</td></tr>
+<tr><td><code>outcomes[].value</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Outcome value.</td></tr>
+<tr><td><code>phase</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Project lifecycle phase (e.g., design, construction).</td></tr>
+<tr><td><code>provider</code></td><td>No</td><td><span class='text-muted'>schema.org:publisher</span></td><td>Technology provider (if applicable).</td></tr>
+<tr><td><code>stakeholders</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Primary stakeholder groups.</td></tr>
+<tr><td><code>summary</code></td><td>Yes</td><td><span class='text-muted'>schema.org:description</span></td><td>Short description of the use case.</td></tr>
+<tr><td><code>tags</code></td><td>No</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Tag list.</td></tr>
+<tr><td><code>title</code></td><td>Yes</td><td><span class='text-muted'>schema.org:name</span></td><td>Use case title.</td></tr>
+<tr><td><code>year</code></td><td>Yes</td><td><span class='text-muted'>schema.org:datePublished</span></td><td>Year of the referenced deployment/publication.</td></tr></tbody></table></div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example catalog record</div>
+            <pre class="oc-pre"><code>{
+  &quot;title&quot;: &quot;Jobsite PPE compliance monitoring&quot;,
+  &quot;summary&quot;: &quot;Computer vision detects PPE compliance on live site cameras.&quot;,
+  &quot;phase&quot;: &quot;Construction&quot;,
+  &quot;stakeholders&quot;: [&quot;General contractor&quot;],
+  &quot;ai_tech&quot;: [&quot;Computer vision&quot;],
+  &quot;applications&quot;: [&quot;Safety monitoring&quot;],
+  &quot;data_modalities&quot;: [&quot;Video&quot;],
+  &quot;deployment_stage&quot;: &quot;Pilot&quot;,
+  &quot;evidence_level&quot;: &quot;Case study&quot;,
+  &quot;geography&quot;: &quot;United States&quot;,
+  &quot;companies&quot;: [
+    {
+      &quot;name&quot;: &quot;Example Co.&quot;,
+      &quot;url&quot;: &quot;https://example.com&quot;
+    }
+  ],
+  &quot;provider&quot;: &quot;Example CV Vendor&quot;,
+  &quot;outcomes&quot;: [
+    {
+      &quot;metric&quot;: &quot;Recordable incidents&quot;,
+    }
+  ],
+  &quot;media&quot;: [
+    {
+      &quot;type&quot;: &quot;image&quot;,
+      &quot;url&quot;: &quot;https://example.org/fig1.png&quot;
+    }
+  ],
+  &quot;links&quot;: {&quot;code&quot;: &quot;https://github.com/org/repo&quot;,},
+  &quot;license&quot;: &quot;CC BY 4.0&quot;,
+  &quot;tags&quot;: [&quot;Safety&quot;],
+  &quot;notes&quot;: &quot;Curated from public case study.&quot;,
+  &quot;added_date&quot;: &quot;2026-01-09&quot;,
+  &quot;contributor&quot;: &quot;@someone&quot;,
+  &quot;contributor_url&quot;: &quot;https://github.com/someone&quot;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example JSON-LD (CreativeWork)</div>
+            <pre class="oc-pre"><code>{
+  &quot;@context&quot;:&quot;https://schema.org&quot;,
+  &quot;@type&quot;:&quot;CreativeWork&quot;,
+  &quot;name&quot;:&quot;Jobsite PPE compliance monitoring&quot;,
+  &quot;description&quot;:&quot;Computer vision detects PPE compliance on live site cameras.&quot;,
+  &quot;datePublished&quot;:&quot;2025&quot;,
+  &quot;keywords&quot;:[&quot;Construction&quot;,&quot;Safety monitoring&quot;,&quot;Computer vision&quot;,&quot;Video&quot;],
+  &quot;url&quot;:&quot;https://www.openconstruction.org/use-cases/detail.html?id=jobsite-ppe&quot;,
+  &quot;publisher&quot;:[{&quot;@type&quot;:&quot;Organization&quot;,&quot;name&quot;:&quot;Example Co.&quot;,&quot;url&quot;:&quot;https://example.com&quot;}],
+  &quot;sameAs&quot;:[&quot;https://example.org/paper&quot;,&quot;https://example.org/demo&quot;],
+  &quot;associatedMedia&quot;:[{&quot;@type&quot;:&quot;MediaObject&quot;,&quot;contentUrl&quot;:&quot;https://example.org/fig1.png&quot;}],
+  &quot;additionalProperty&quot;:[
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;deployment_stage&quot;,&quot;value&quot;:&quot;Pilot&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;evidence_level&quot;,&quot;value&quot;:&quot;Case study&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;outcome_recordable_incidents&quot;,&quot;value&quot;:&quot;-12% (over 6 months)&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;added_date&quot;,&quot;value&quot;:&quot;2026-01-09&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;contributor&quot;,&quot;value&quot;:&quot;@someone&quot;}
+  ]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="oer" class="oc-section">
+    <div class="oc-kicker mb-2">Open Educational Resources</div>
+    <h2 class="oc-h2">OER fields in <code>oer.json</code></h2>
+    <p class="text-muted mb-3">Structured data recommendation: use <code>LearningResource</code> (or <code>CreativeWork</code>) and publish <code>keywords</code>, <code>inLanguage</code>, <code>license</code>, and <code>url</code>.</p>
+    
+<div class="table-responsive">
+<table class="table table-sm align-middle oc-table">
+  <thead>
+    <tr>
+      <th style="width: 22%">Field</th>
+      <th style="width: 10%">Required</th>
+      <th style="width: 28%">Schema.org mapping</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr><td><code>added</code></td><td>No</td><td><span class='text-muted'>(catalog metadata) —</span></td><td>Date added to OpenConstruction catalog (YYYY-MM-DD).</td></tr>
+<tr><td><code>contributor</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>GitHub handle or name of submitter.</td></tr>
+<tr><td><code>contributor_url</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Profile/org URL for submitter.</td></tr>
+<tr><td><code>id</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Stable short identifier used in URLs.</td></tr>
+<tr><td><code>image</code></td><td>No</td><td><span class='text-muted'>schema.org:image</span></td><td>Preview image URL.</td></tr>
+<tr><td><code>institutions</code></td><td>No</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Associated institutions.</td></tr>
+<tr><td><code>language</code></td><td>Yes</td><td><span class='text-muted'>schema.org:additionalProperty</span></td><td>Language code or name.</td></tr>
+<tr><td><code>license</code></td><td>Yes</td><td><span class='text-muted'>schema.org:license</span></td><td>License (e.g., CC BY).</td></tr>
+<tr><td><code>media</code></td><td>No</td><td><span class='text-muted'>schema.org:associatedMedia</span></td><td>Media formats (video, pdf, interactive, etc.).</td></tr>
+<tr><td><code>provider</code></td><td>Yes</td><td><span class='text-muted'>schema.org:publisher</span></td><td>Provider/host organization.</td></tr>
+<tr><td><code>publisher</code></td><td>No</td><td><span class='text-muted'>schema.org:publisher</span></td><td>Publisher (if different from provider).</td></tr>
+<tr><td><code>source</code></td><td>Yes</td><td><span class='text-muted'>schema.org:url / schema.org:sameAs</span></td><td>Canonical source URL.</td></tr>
+<tr><td><code>title</code></td><td>Yes</td><td><span class='text-muted'>schema.org:name</span></td><td>Resource title.</td></tr>
+<tr><td><code>topics</code></td><td>Yes</td><td><span class='text-muted'>schema.org:keywords</span></td><td>Topic tags (professional phrasing).</td></tr>
+<tr><td><code>year</code></td><td>Yes</td><td><span class='text-muted'>schema.org:datePublished</span></td><td>Publication year (if known).</td></tr></tbody></table></div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example catalog record</div>
+            <pre class="oc-pre"><code>{
+  &quot;id&quot;: &quot;bluebeam-takeoff-basics&quot;,
+  &quot;title&quot;: &quot;Quantity Takeoff Basics in Bluebeam&quot;,
+  &quot;year&quot;: 2024,
+  &quot;language&quot;: &quot;English&quot;,
+  &quot;topics&quot;: [&quot;Construction estimating&quot;],
+  &quot;media&quot;: [&quot;Video&quot;],
+  &quot;license&quot;: &quot;CC BY-NC 4.0&quot;,
+  &quot;provider&quot;: &quot;OER Commons&quot;,
+  &quot;publisher&quot;: &quot;OER Commons&quot;,
+  &quot;institutions&quot;: [
+    &quot;Kent State University&quot;
+  ],
+  &quot;source&quot;: &quot;https://oercommons.org/...&quot;,
+  &quot;image&quot;: &quot;https://example.org/oer.png&quot;,
+  &quot;added&quot;: &quot;2026-01-09&quot;,
+  &quot;contributor&quot;: &quot;@someone&quot;,
+  &quot;contributor_url&quot;: &quot;https://github.com/someone&quot;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card oc-card h-100">
+          <div class="card-body">
+            <div class="oc-kicker mb-2">Example JSON-LD (LearningResource)</div>
+            <pre class="oc-pre"><code>{
+  &quot;@context&quot;:&quot;https://schema.org&quot;,
+  &quot;@type&quot;:&quot;LearningResource&quot;,
+  &quot;name&quot;:&quot;Quantity Takeoff Basics in Bluebeam&quot;,
+  &quot;description&quot;:&quot;OpenConstruction OER catalog entry.&quot;,
+  &quot;inLanguage&quot;:&quot;en&quot;,
+  &quot;datePublished&quot;:&quot;2024&quot;,
+  &quot;license&quot;:&quot;CC BY-NC 4.0&quot;,
+  &quot;url&quot;:&quot;https://oercommons.org/...&quot;,
+  &quot;image&quot;:&quot;https://example.org/oer.png&quot;,
+  &quot;keywords&quot;:[&quot;Construction estimating&quot;,&quot;Quantity takeoff&quot;,&quot;Bluebeam&quot;],
+  &quot;publisher&quot;:{&quot;@type&quot;:&quot;Organization&quot;,&quot;name&quot;:&quot;OER Commons&quot;},
+  &quot;additionalProperty&quot;:[
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;media&quot;,&quot;value&quot;:&quot;Video, PDF&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;institutions&quot;,&quot;value&quot;:&quot;Kent State University&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;added&quot;,&quot;value&quot;:&quot;2026-01-09&quot;},
+    {&quot;@type&quot;:&quot;PropertyValue&quot;,&quot;name&quot;:&quot;contributor&quot;,&quot;value&quot;:&quot;@someone&quot;}
+  ]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="py-4 mt-3 oc-site-footer">
+  <div class="container oc-container small text-muted text-center">
+    <div>
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;"> © <span id="yearNow"></span> OpenConstruction Open Science Initiative
+    </div>
+    <div class="mt-1">
+      <small>
+        Licensed under Apache 2.0.
+        Images and thumbnails are © their respective creators unless otherwise noted.
+      </small>
+    </div>
+    <div class="mt-1">
+      <small>
+        <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+        <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+        <a href="contribute.html#data-policy" class="text-muted">Data Usage</a> ·
+        <a href="contribute.html#citation" class="text-muted">Citation</a>
+      </small>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating button -->
+<a href="https://github.com/ruoxinx/open-construction/issues/new?template=suggestion.yml"
+   class="issue-btn" target="_blank" rel="noopener">
+  Issue or Suggestion?
+</a>
+
+<!-- Subscribe Modal -->
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content p-3 rounded-3 shadow">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="m-0 fw-semibold">Subscribe</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="https://github.us5.list-manage.com/subscribe/post?u=12fa0b9a59e8110ba3a89fc76&amp;id=696e3eb0b3&amp;f_id=006fbeedf0"
+            method="post" target="_blank" novalidate>
+        <label for="sub-email" class="form-label small text-muted mb-1">Email</label>
+        <input type="email" id="sub-email" name="EMAIL" class="form-control mb-2" placeholder="you@university.edu" required>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Subscribe</button>
+        <div style="position:absolute; left:-5000px" aria-hidden="true">
+          <input type="text" name="b_12fa0b9a59e8110ba3a89fc76_696e3eb0b3" tabindex="-1" value="">
+        </div>
+        <p class="small text-muted mt-2 mb-0">We’ll email only when new datasets or models are added. Unsubscribe anytime.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

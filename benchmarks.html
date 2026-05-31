@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstruction · Benchmarks</title>
+  <meta name="description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <link rel="canonical" href="https://www.openconstruction.org/benchmarks.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+  <meta property="og:title" content="OpenConstruction · Benchmarks">
+  <meta property="og:description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <meta property="og:url" content="https://www.openconstruction.org/benchmarks.html">
+  <meta property="og:image" content="https://www.openconstruction.org/assets/img/icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/shared-site.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --oc-bg:#ffffff; --oc-text:#1e2a36; --oc-subtle:#4f5d6c; --oc-border:#e7edf3;
+      --oc-ink:#0f2e4b; --oc-accent:#f2a238; --oc-link:#0b66c3;
+      --oc-card:#ffffff; --oc-shadow:0 8px 24px rgba(15,46,75,.06);
+      --oc-radius:14px; --oc-muted:#f6f9fc; --oc-focus:#86b7fe;
+    }
+	.oc-container{ max-width:1080px; }
+
+    .hl{ background:linear-gradient(180deg,transparent 60%,rgba(242,162,56,.25) 0); padding:0 .06em; font-weight:700; }
+    /* shared shell styles live in assets/css/shared-site.css */
+
+    /* Search bar */
+    .search-wrap{
+      position:sticky; top:72px; z-index:50;
+      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
+      backdrop-filter:saturate(120%) blur(6px);
+      border:1px solid var(--oc-border);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow:0 10px 24px rgba(15,46,75,.06);
+      margin-top:18px;
+    }
+    .search-wrap .form-control{ border:0; box-shadow:none; border-radius:999px; background:transparent; }
+    .search-wrap .form-control:focus{ box-shadow:none; }
+    .search-hint{ color:var(--oc-subtle); font-size:.9rem; margin-top:10px; text-align:center; }
+
+    .oc-section{ margin-top:34px; }
+    .oc-kicker{ font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; color:var(--oc-subtle); }
+
+    /* Index cards */
+	.index-grid{
+	  display:grid;
+	  gap:16px;
+	  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 per row */
+	}
+    .index-grid.is-loading{
+      min-height:248px;
+    }
+    .index-grid-skeleton{
+      display:grid;
+      gap:16px;
+      grid-template-columns:inherit;
+      grid-column:1 / -1;
+    }
+    .index-skeleton-card{
+      min-height:104px;
+      border:1px solid var(--oc-border);
+      border-radius:14px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.7) 50%, rgba(255,255,255,0) 100%),
+        var(--oc-muted);
+      background-size:220px 100%, auto;
+      animation:benchSkeleton 1.2s ease-in-out infinite;
+      box-shadow:var(--oc-shadow);
+    }
+    .stat-value{
+      min-height:2.5rem;
+      display:flex;
+      align-items:center;
+    }
+    @keyframes benchSkeleton{
+      from{ background-position:-220px 0, 0 0; }
+      to{ background-position:220px 0, 0 0; }
+    }
+    .index-card{
+      background:#fff; border:1px solid var(--oc-border); border-radius:14px; box-shadow:var(--oc-shadow);
+      padding:14px 14px 12px; text-decoration:none; color:inherit;
+      transition:transform .12s ease, border-color .12s ease;
+      display:flex; gap:12px; align-items:flex-start;
+    }
+    .index-card:hover{ transform:translateY(-1px); border-color:#d9e3ee; }
+
+    /* thumbnail (PNG-first) */
+	.index-thumb{
+	  width:72px; height:72px;              
+	  border-radius:14px;
+	  border:1px solid var(--oc-border);
+	  object-fit:cover;
+	  background:var(--oc-muted);
+	  flex:0 0 auto;
+	  box-shadow:0 10px 22px rgba(15,46,75,.10);
+	}
+
+    .index-title{ font-weight:500; color:var(--oc-ink); line-height:1.15; margin:0; }
+    .index-meta{ color:var(--oc-subtle); font-size:.88rem; margin-top:6px; display:flex; flex-direction:column; gap:2px; }
+    .index-meta .dotline{ display:flex; gap:8px; align-items:center; }
+    .index-meta .dotline span{ display:inline-flex; gap:6px; align-items:center; }
+    .index-meta svg{ width:14px; height:14px; opacity:.85; }
+
+    .oc-card{ background:var(--oc-card); border:1px solid var(--oc-border); border-radius:var(--oc-radius); box-shadow:var(--oc-shadow); }
+    .oc-card-body{ padding:1.25rem; }
+    .oc-card-title{ font-weight:700; color:var(--oc-ink); }
+
+    :focus-visible{ outline:2px solid var(--oc-focus); outline-offset:2px; border-radius:6px; }
+
+	@media (max-width: 991.98px){
+	  .index-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	
+	@media (max-width: 991.98px){
+	  .index-thumb{ width:96px; height:96px; }
+	}
+
+	/* Mobile: 1 per row */
+	@media (max-width: 575.98px){
+	  .index-grid{ grid-template-columns: 1fr; }
+	}
+
+    /* ---- Floating Suggestion Button ---- */
+    .issue-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      text-decoration: none;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .issue-btn:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg bg-white sticky-top oc-nav">
+  <div class="container oc-container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" class="oc-logo">
+      <span class="brand-wordmark">
+        <span class="oc-open">OpenConstruction</span>
+        <span class="oc-construction">Open Science</span>
+      </span>
+    </a>
+    <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+        <li class="nav-item"><a class="nav-link plain" href="index.html" data-route="index">Home</a></li>
+		<li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddLibraries" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddLibraries">
+            <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+            <li><a class="dropdown-item" href="models.html">Models</a></li>
+            <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+			<li><a class="dropdown-item" href="oer.html">OERs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain active" href="benchmarks.html" data-route="models">Benchmarks</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+            <li><a class="dropdown-item" href="schema.html">Schema</a></li>
+            <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+            <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+            <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="contribute.html" data-route="contribute">Contribute</a></li>
+        <li class="nav-item"><a class="nav-link plain" href="contributors.html" data-route="contributors">Community</a></li>
+
+        <li class="nav-item">
+          <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener"
+             aria-label="OpenConstruction on GitHub" title="View on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                       0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                       0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                       0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0
+                       1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+                       0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013
+                       8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+            </svg>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <button type="button" class="nav-link px-2 icon-only btn-subscribe-icon"
+                  data-bs-toggle="modal" data-bs-target="#subscribeModal"
+                  aria-label="Subscribe for updates" title="Subscribe">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 16 16" aria-hidden="true" class="icon-bell">
+              <path d="M8 16a2 2 0 0 0 1.985-1.75H6.015A2 2 0 0 0 8 16zm.5-14a.5.5 0 0
+                       0-1 0 7 7 0 0 0-5.468 6.37c-.084.58-.272 1.204-.653 1.856-.356.617-.879 1.104-1.379
+                       1.357V13h14v-1.417c-.5-.253-1.023-.74-1.379-1.357-.38-.652-.569-1.276-.653-1.856A7
+                       7 0 0 0 8.5 2z"/>
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container content">
+    <h1>OpenConstruction AEC Benchmarks</h1>
+
+    <p class="lead">
+      Browse <span class="hl">tasks</span> and <span class="hl">applications</span> across AEC datasets and models.
+    </p>
+
+    <!-- Search -->
+    <div class="search-wrap mt-4 mx-auto" style="max-width: 840px;">
+      <div class="d-flex align-items-center gap-2 px-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+             viewBox="0 0 16 16" aria-hidden="true" style="opacity:.75;">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+        </svg>
+        <input id="globalSearch" class="form-control" type="search"
+               placeholder="Search tasks, applications, datasets, models…"
+               aria-label="Search benchmarks">
+      </div>
+    </div>
+
+    <!-- Quick filters (outside search bar) -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mt-3"
+         aria-label="Quick filters">
+      <button class="btn btn-sm btn-outline-dark" type="button" data-q="Object detection">
+        Object detection
+      </button>
+      <button class="btn btn-sm btn-outline-dark" type="button" data-q="Segmentation">
+        Segmentation
+      </button>
+      <button class="btn btn-sm btn-outline-dark" type="button" data-q="Safety">
+        Safety
+      </button>
+      <button class="btn btn-sm btn-outline-dark" type="button" data-q="Progress monitoring">
+        Progress monitoring
+      </button>
+    </div>
+
+    <div class="text-center text-muted small mt-2">
+      Tip: quick filters prefill the search box and update both indices.
+    </div>
+  </div>
+</header>
+
+
+<!-- Add this small JS once (anywhere after your existing scripts load) -->
+<script>
+  // Quick filter buttons fill the search box and trigger your existing filtering
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-q]');
+    if (!btn) return;
+    const q = btn.getAttribute('data-q') || '';
+    const input = document.getElementById('globalSearch');
+    if (!input) return;
+    input.value = q;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+</script>
+
+
+<main class="container oc-container">
+	<section class="oc-section">
+	  <div class="oc-kicker mb-2">Overview</div>
+	  <p class="text-muted mb-3">
+		Summary statistics across all benchmarkable tasks, applications, datasets, and models in OpenConstruction.
+	  </p>
+
+	  <div class="row g-3">
+		<div class="col-md-4">
+		  <div class="oc-card h-100">
+			<div class="oc-card-body">
+			  <div class="oc-card-title">Tasks</div>
+			  <div class="display-6 fw-bold mb-1 stat-value" id="statTasks">—</div>
+			</div>
+		  </div>
+		</div>
+
+		<div class="col-md-4">
+		  <div class="oc-card h-100">
+			<div class="oc-card-body">
+			  <div class="oc-card-title">Applications</div>
+			  <div class="display-6 fw-bold mb-1 stat-value" id="statApps">—</div>
+			</div>
+		  </div>
+		</div>
+
+		<div class="col-md-4">
+		  <div class="oc-card h-100">
+			<div class="oc-card-body">
+			  <div class="oc-card-title">Datasets / Models</div>
+			  <div class="display-6 fw-bold mb-1 stat-value">
+				<span id="statDatasets">—</span> / <span id="statModels">—</span>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</section>
+
+  <section class="oc-section">
+    <div class="oc-kicker mb-2">Browse</div>
+    <h2 class="h4 fw-bold mb-3" style="color:var(--oc-ink);">Task index</h2>
+    <div class="index-grid is-loading" id="taskGrid">
+      <div class="index-grid-skeleton" aria-hidden="true">
+        <div class="index-skeleton-card"></div>
+        <div class="index-skeleton-card"></div>
+        <div class="index-skeleton-card"></div>
+      </div>
+    </div>
+    <div class="mt-3 text-center text-muted small" id="taskGridNote"></div>
+  </section>
+
+  <section class="oc-section">
+    <div class="oc-kicker mb-2">Browse</div>
+    <h2 class="h4 fw-bold mb-3" style="color:var(--oc-ink);">Application index</h2>
+    <div class="index-grid is-loading" id="appGrid">
+      <div class="index-grid-skeleton" aria-hidden="true">
+        <div class="index-skeleton-card"></div>
+        <div class="index-skeleton-card"></div>
+        <div class="index-skeleton-card"></div>
+      </div>
+    </div>
+    <div class="mt-3 text-center text-muted small" id="appGridNote"></div>
+  </section>
+</main>
+
+<footer class="py-4 mt-3 oc-site-footer">
+  <div class="container oc-container small text-muted text-center">
+    <div><img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;"> © <span id="yearNow"></span> OpenConstruction Open Science Initiative</div>
+    <div class="mt-1">
+      <small>
+        Licensed under Apache 2.0.
+        Images and thumbnails are © their respective creators unless otherwise noted.
+      </small>
+    </div>
+    <div class="mt-1">
+      <small>
+        <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+        <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+        <a href="contribute.html#data-policy" class="text-muted">Data Usage</a> ·
+        <a href="contribute.html#citation" class="text-muted">Citation</a>
+      </small>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating button -->
+<a href="https://github.com/ruoxinx/open-construction/issues/new?template=suggestion.yml"
+   class="issue-btn" target="_blank" rel="noopener">
+  Issue or Suggestion?
+</a>
+
+<!-- Subscribe Modal -->
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content p-3 rounded-3 shadow">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="m-0 fw-semibold">Subscribe</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="https://github.us5.list-manage.com/subscribe/post?u=12fa0b9a59e8110ba3a89fc76&amp;id=696e3eb0b3&amp;f_id=006fbeedf0"
+            method="post" target="_blank" novalidate>
+        <label for="sub-email" class="form-label small text-muted mb-1">Email</label>
+        <input type="email" id="sub-email" name="EMAIL" class="form-control mb-2" placeholder="you@university.edu" required>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Subscribe</button>
+        <div style="position:absolute; left:-5000px" aria-hidden="true">
+          <input type="text" name="b_12fa0b9a59e8110ba3a89fc76_696e3eb0b3" tabindex="-1" value="">
+        </div>
+        <p class="small text-muted mt-2 mb-0">We’ll email only when new datasets or models are added. Unsubscribe anytime.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>document.getElementById('yearNow').textContent = new Date().getFullYear();</script>
+
+<script>
+  // Auto-active current nav link
+  (function(){
+    const path = (location.pathname || '').replace(/\/+$/,'');
+    const file = path.split('/').pop() || 'benchmarks.html';
+    const routeByFile = {
+      '': 'index',
+      'index': 'index', 'index.html': 'index',
+      'dataset': 'dataset', 'dataset.html': 'dataset',
+      'models': 'models', 'models.html': 'models',
+      'deployments': 'usecases', 'deployments.html': 'usecases',
+      'oer': 'oers', 'oer.html': 'oers',
+      'benchmarks': 'benchmarks', 'benchmarks.html': 'benchmarks',
+      'contribute': 'contribute', 'contribute.html': 'contribute',
+      'contributors': 'contributors', 'contributors.html': 'contributors'
+    };
+    const route = routeByFile[file] || '';
+    document.querySelectorAll('.navbar .nav-link.plain').forEach(a=>{
+      if(a.dataset.route===route){ a.classList.add('active'); a.setAttribute('aria-current','page'); }
+    });
+  })();
+</script>
+
+<script>
+  // ---------- Helpers ----------
+  const esc = (s) => String(s ?? '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'","&#39;");
+
+  const normArray = (v) => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+  const normStr = (v) => (v == null ? '' : String(v).trim());
+
+  function canonKey(s){ return normStr(s).toLowerCase().replace(/\s+/g,' ').trim(); }
+  function niceLabel(s){
+    const raw = normStr(s);
+    if(!raw) return '';
+    const hasCaps = /[A-Z]/.test(raw);
+    if(hasCaps && raw.length <= 14) return raw;
+    return raw.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+  function slugifyKey(s){
+    return normStr(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0, 90) || 'key';
+  }
+
+  function iconStack(){
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8.974 1.5a1 1 0 0 0-1.948 0l-.3 1.2a1 1 0 0 1-.757.727l-1.22.29a1 1 0 0 0 0 1.946l1.22.29a1 1 0 0 1 .757.727l.3 1.2a1 1 0 0 0 1.948 0l.3-1.2a1 1 0 0 1 .757-.727l1.22-.29a1 1 0 0 0 0-1.946l-1.22-.29a1 1 0 0 1-.757-.727l-.3-1.2z"/>
+      <path d="M5.5 9.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5z"/>
+    </svg>`;
+  }
+  function iconModel(){
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8.186.113a1 1 0 0 0-.372 0L2.5 1.385a1 1 0 0 0-.7.957v3.316a1 1 0 0 0 .553.894l5.314 2.657a1 1 0 0 0 .894 0l5.314-2.657a1 1 0 0 0 .553-.894V2.342a1 1 0 0 0-.7-.957L8.186.113zM3 2.9 8 1.65l5 1.25L8 4.15 3 2.9z"/>
+      <path d="M2.8 6.42v3.06c0 .379.214.725.553.894l4.947 2.474V9.79L2.8 6.42zm10.4 0L7.7 9.79v5.058l4.947-2.474a1 1 0 0 0 .553-.894V6.42z"/>
+    </svg>`;
+  }
+
+  // Prefer PNG; fallback to original (e.g., GIF) if PNG fails
+  function toPngFirst(url){
+    const u = normStr(url);
+    if(!u) return { primary:'', fallback:'' };
+    if (/\.png(\?|#|$)/i.test(u)) return { primary:u, fallback:'' };
+    if (/\.gif(\?|#|$)/i.test(u)) {
+      const png = u.replace(/\.gif(\?|#|$)/i, '.png$1');
+      return { primary: png, fallback: u };
+    }
+    return { primary:u, fallback:'' };
+  }
+  function isPng(u){ return /\.png(\?|#|$)/i.test(normStr(u)); }
+
+  function betterImage(currentPrimary, candidatePrimary){
+    const c = normStr(currentPrimary);
+    const n = normStr(candidatePrimary);
+    if(!c) return n;
+    if(!n) return c;
+    if(isPng(c)) return c;
+    if(isPng(n)) return n;
+    return c;
+  }
+
+  // ---------- Field normalizers ----------
+  function getDatasetTasks(ds){
+    return [...normArray(ds.tasks), ...normArray(ds.task), ...normArray(ds.potential_tasks)]
+      .map(normStr).filter(Boolean);
+  }
+  function getModelTasks(m){
+    return [...normArray(m.tasks), ...normArray(m.task)]
+      .map(normStr).filter(Boolean);
+  }
+  function getDatasetApps(ds){
+    return [...normArray(ds.applications), ...normArray(ds.application), ...normArray(ds.use_cases)]
+      .map(normStr).filter(Boolean);
+  }
+  function getModelApps(m){
+    return [...normArray(m.applications), ...normArray(m.application), ...normArray(m.use_cases)]
+      .map(normStr).filter(Boolean);
+  }
+  function getModelCardImage(m){
+    return normStr(m.thumbnail || m.image_url || '')
+      || (m.id ? `assets/img/models/${encodeURIComponent(m.id)}.png` : '');
+  }
+
+  async function loadJsonSafe(url){
+    try{
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const data = await res.json();
+      if(Array.isArray(data)) return data;
+      if(data?.items && Array.isArray(data.items)) return data.items;
+      if(data && typeof data === 'object') return Object.values(data).filter(v => v && typeof v === 'object');
+      return [];
+    }catch(err){
+      console.warn('Could not load', url, err);
+      return [];
+    }
+  }
+
+  function emptyTaskVocabulary(){
+    return { byCanonical: new Map(), byAlias: new Map() };
+  }
+
+  function buildTaskVocabulary(payload){
+    const vocab = emptyTaskVocabulary();
+    const tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
+    tasks.forEach(task => {
+      const canonical = canonKey(task.canonical_key || task.preferred_label || '');
+      if(!canonical) return;
+      const entry = {
+        ...task,
+        canonical_key: canonical,
+        preferred_label: normStr(task.preferred_label || task.canonical_key || '')
+      };
+      vocab.byCanonical.set(canonical, entry);
+      [entry.canonical_key, entry.preferred_label, ...normArray(entry.aliases)].forEach(alias => {
+        const aliasKey = canonKey(alias);
+        if(aliasKey) vocab.byAlias.set(aliasKey, entry);
+      });
+    });
+    return vocab;
+  }
+
+  function normalizeTaskTerm(raw, vocab){
+    const rawText = normStr(raw);
+    const rawCanon = canonKey(rawText);
+    const entry = vocab?.byAlias?.get(rawCanon) || null;
+    if(entry){
+      return {
+        canon: entry.canonical_key,
+        label: entry.preferred_label || niceLabel(rawText),
+        taskId: entry.id || '',
+        entry
+      };
+    }
+    return {
+      canon: rawCanon,
+      label: niceLabel(rawText),
+      taskId: '',
+      entry: null
+    };
+  }
+  function formatApplicationLabel(raw){
+    const key = canonKey(raw);
+    if(!key) return '';
+    const acronymPattern = /^(2d|3d|4d|ai|bim|cad|hvac|lod3|ui)$/i;
+    let isFirstWord = true;
+    return key.split(' ').map(word => {
+      const rendered = word.split('/').map(segment =>
+        segment.split('-').map(part => {
+          if(!part) return part;
+          if (acronymPattern.test(part)) return part.toUpperCase();
+          if (isFirstWord) {
+            isFirstWord = false;
+            return `${part.charAt(0).toUpperCase()}${part.slice(1)}`;
+          }
+          return part;
+        }).join('-')
+      ).join('/');
+      if (rendered) isFirstWord = false;
+      return rendered;
+    }).join(' ');
+  }
+  function normalizeApplicationTerm(raw){
+    const rawText = normStr(raw);
+    return {
+      canon: canonKey(rawText),
+      label: formatApplicationLabel(rawText),
+      taskId: '',
+      entry: null
+    };
+  }
+
+  function buildMergedIndex({datasets, models, extractor, imageGetter, normalizer}){
+    // canonical -> { label, canon, dsCount, modelCount, imgPrimary, imgFallback }
+    const map = new Map();
+
+    function touch(raw){
+      const normalized = normalizer ? normalizer(raw) : { canon: canonKey(raw), label: niceLabel(raw), taskId: '', entry: null };
+      const canon = normalized.canon;
+      if(!canon) return null;
+      if(!map.has(canon)){
+        map.set(canon, {
+          canon,
+          label: normalized.label,
+          idSlug: slugifyKey(normalized.label || canon),
+          taskId: normalized.taskId || '',
+          dsCount:0,
+          modelCount:0,
+          imgPrimary:'',
+          imgFallback:''
+        });
+      }
+      return map.get(canon);
+    }
+
+    datasets.forEach(ds=>{
+      const img = toPngFirst(imageGetter(ds, 'dataset'));
+      const seen = new Set();
+      extractor(ds, 'dataset').forEach(k=>{
+        const node = touch(k);
+        if(node && !seen.has(node.canon)){
+          seen.add(node.canon);
+          node.dsCount += 1;
+          node.imgPrimary = betterImage(node.imgPrimary, img.primary);
+          if(!node.imgFallback && img.fallback) node.imgFallback = img.fallback;
+        }
+      });
+    });
+
+    models.forEach(m=>{
+      const img = toPngFirst(imageGetter(m, 'model'));
+      const seen = new Set();
+      extractor(m, 'model').forEach(k=>{
+        const node = touch(k);
+        if(node && !seen.has(node.canon)){
+          seen.add(node.canon);
+          node.modelCount += 1;
+          node.imgPrimary = betterImage(node.imgPrimary, img.primary);
+          if(!node.imgFallback && img.fallback) node.imgFallback = img.fallback;
+        }
+      });
+    });
+
+    const arr = Array.from(map.values());
+    arr.sort((a,b)=> a.label.localeCompare(b.label));
+    return arr;
+  }
+
+  // -------- Progressive reveal --------
+  const gridState = {
+    task: { all: [], shown: 0, batch: 20 },
+    app:  { all: [], shown: 0, batch: 20 }
+  };
+
+  function thumbHtml(x){
+    const src = normStr(x.imgPrimary) || 'assets/img/icon.png';
+    const fb  = normStr(x.imgFallback);
+    const onerr = fb
+      ? `this.onerror=null;this.src='${esc(fb)}';`
+      : `this.onerror=null;`;
+    return `<img class="index-thumb" src="${esc(src)}" alt="${esc(x.label || x.canon)}" onerror="${onerr}">`;
+  }
+
+  function renderIndexGrid({items, elId, noteId, hrefBuilder, kind, reset=false}){
+    const el = document.getElementById(elId);
+    const note = document.getElementById(noteId);
+    if(el) el.classList.remove('is-loading');
+
+    if(reset){
+      gridState[kind].all = items.slice();
+      gridState[kind].shown = 0;
+    } else {
+      gridState[kind].all = items.slice();
+    }
+
+    const state = gridState[kind];
+    const total = state.all.length;
+
+    if(!total){
+      el.innerHTML = `
+        <div class="oc-card"><div class="oc-card-body">
+          <div class="oc-card-title mb-1">No entries found</div>
+          <div class="text-muted">Add the corresponding fields in JSON to populate this index.</div>
+        </div></div>`;
+      note.textContent = '';
+      return;
+    }
+
+    const nextShown = Math.min(total, state.shown + state.batch);
+    const shownItems = state.all.slice(0, nextShown);
+    state.shown = nextShown;
+
+	el.innerHTML = shownItems.map(x=>{
+	  const label = x.label || x.canon;
+	  const href = hrefBuilder(x);
+
+	  const metaHtml = (kind === 'app')
+		? `
+		  <div class="index-meta">
+			<div class="dotline"><span>${iconModel()} <strong>${x.modelCount}</strong> model${x.modelCount===1?'':'s'}</span></div>
+		  </div>
+		`
+		: `
+		  <div class="index-meta">
+			<div class="dotline"><span>${iconStack()} <strong>${x.dsCount}</strong> dataset${x.dsCount===1?'':'s'}</span></div>
+			<div class="dotline"><span>${iconModel()} <strong>${x.modelCount}</strong> model${x.modelCount===1?'':'s'}</span></div>
+		  </div>
+		`;
+
+	  return `
+		<a class="index-card" href="${esc(href)}" data-index-card="1" data-label="${esc(label)}" aria-label="Open benchmark for ${esc(label)}">
+		  ${thumbHtml(x)}
+		  <div>
+			<div class="index-title">${esc(label)}</div>
+			${metaHtml}
+		  </div>
+		</a>`;
+	}).join('');
+
+
+    const remaining = total - state.shown;
+    if(remaining > 0){
+      el.insertAdjacentHTML('beforeend', `
+        <div class="d-grid" style="grid-column: 1 / -1;">
+          <button class="btn btn-outline-dark" type="button" data-show-more="${kind}">
+            Show more (${remaining} remaining)
+          </button>
+        </div>
+      `);
+    } else {
+      note.textContent = '';
+    }
+  }
+
+  function applyFilter(q){
+    const needle = q.trim().toLowerCase();
+    const isSearching = needle.length > 0;
+
+    const taskBuilder = (x) => `benchmark_task.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`;
+    const appBuilder  = (x) => `benchmark_application.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`;
+
+    function renderAllMatches(kind, elId, noteId, hrefBuilder){
+      const all = gridState[kind].all || [];
+      const filtered = !needle ? all : all.filter(x => (x.label || x.canon || '').toLowerCase().includes(needle));
+
+      const el = document.getElementById(elId);
+      const note = document.getElementById(noteId);
+      if(el) el.classList.remove('is-loading');
+
+      if(!filtered.length){
+        el.innerHTML = `<div class="text-muted">No matches.</div>`;
+        note.textContent = '';
+        return;
+      }
+
+	el.innerHTML = filtered.map(x=>{
+	  const label = x.label || x.canon;
+	  const href = hrefBuilder(x);
+
+	  const metaHtml = (kind === 'app')
+		? `
+		  <div class="index-meta">
+			<div class="dotline"><span>${iconModel()} <strong>${x.modelCount}</strong> model${x.modelCount===1?'':'s'}</span></div>
+		  </div>
+		`
+		: `
+		  <div class="index-meta">
+			<div class="dotline"><span>${iconStack()} <strong>${x.dsCount}</strong> dataset${x.dsCount===1?'':'s'}</span></div>
+			<div class="dotline"><span>${iconModel()} <strong>${x.modelCount}</strong> model${x.modelCount===1?'':'s'}</span></div>
+		  </div>
+		`;
+
+	  return `
+		<a class="index-card" href="${esc(href)}" data-index-card="1" data-label="${esc(label)}" aria-label="Open benchmark for ${esc(label)}">
+		  ${thumbHtml(x)}
+		  <div>
+			<div class="index-title">${esc(label)}</div>
+			${metaHtml}
+		  </div>
+		</a>`;
+	}).join('');
+
+      note.textContent = `Search results: ${filtered.length}.`;
+    }
+
+    if(isSearching){
+      renderAllMatches('task', 'taskGrid', 'taskGridNote', taskBuilder);
+      renderAllMatches('app',  'appGrid',  'appGridNote',  appBuilder);
+    } else {
+      renderIndexGrid({ items: gridState.task.all, elId:'taskGrid', noteId:'taskGridNote', hrefBuilder: taskBuilder, kind:'task', reset:true });
+      renderIndexGrid({ items: gridState.app.all,  elId:'appGrid',  noteId:'appGridNote',  hrefBuilder: appBuilder,  kind:'app',  reset:true });
+    }
+  }
+
+  async function init(){
+    // Keep your existing site paths:
+    // - data/datasets.json is an object keyed by id (we read Object.values)
+    // - data/models.json is an array
+    const [datasets, models, taskVocabularyPayload] = await Promise.all([
+      loadJsonSafe('data/datasets.json'),
+      loadJsonSafe('data/models.json'),
+      (async () => {
+        try{
+          const res = await fetch('data/task-vocabulary.json', {cache:'no-store'});
+          if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+          return await res.json();
+        }catch(err){
+          console.warn('Could not load task-vocabulary.json', err);
+          return {};
+        }
+      })()
+    ]);
+    const taskVocabulary = buildTaskVocabulary(taskVocabularyPayload);
+
+    document.getElementById('statDatasets').textContent = String(datasets.length || 0);
+    document.getElementById('statModels').textContent   = String(models.length || 0);
+
+    // Build PNG-first index for TASKS
+	const tasks = buildMergedIndex({
+	  datasets,
+	  models,
+	  extractor: (obj, kind) =>
+		kind === 'dataset'
+		  ? getDatasetTasks(obj)
+		  : getModelTasks(obj),
+	  normalizer: (raw) => normalizeTaskTerm(raw, taskVocabulary),
+	  imageGetter: (obj, kind) =>
+		kind === 'dataset'
+		  ? (obj.image_url || obj.thumbnail || '')
+		  : getModelCardImage(obj)
+	})
+
+    // Build PNG-first index for APPLICATIONS
+    const apps = buildMergedIndex({
+      datasets, models,
+      extractor: (obj, kind) => kind === 'dataset' ? getDatasetApps(obj) : getModelApps(obj),
+      normalizer: normalizeApplicationTerm,
+      imageGetter: (obj, kind) => kind === 'dataset'
+        ? (obj.image_url || obj.thumbnail || '')
+        : getModelCardImage(obj)
+    });
+
+    document.getElementById('statTasks').textContent = String(tasks.length || 0);
+    document.getElementById('statApps').textContent  = String(apps.length || 0);
+
+    gridState.task.all = tasks.slice();
+    gridState.app.all  = apps.slice();
+
+    renderIndexGrid({
+      items: tasks,
+      elId: 'taskGrid',
+      noteId: 'taskGridNote',
+      hrefBuilder: (x) => `benchmark_task.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`,
+      kind: 'task',
+      reset: true
+    });
+
+    renderIndexGrid({
+      items: apps,
+      elId: 'appGrid',
+      noteId: 'appGridNote',
+      hrefBuilder: (x) => `benchmark_application.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`,
+      kind: 'app',
+      reset: true
+    });
+
+    // search
+    const input = document.getElementById('globalSearch');
+    input.addEventListener('input', (e)=> applyFilter(e.target.value));
+
+    // show more buttons
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-show-more]');
+      if(!btn) return;
+      const kind = btn.getAttribute('data-show-more');
+      if(kind === 'task'){
+        renderIndexGrid({
+          items: gridState.task.all,
+          elId: 'taskGrid',
+          noteId: 'taskGridNote',
+          hrefBuilder: (x) => `benchmark_task.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`,
+          kind: 'task',
+          reset: false
+        });
+      } else if(kind === 'app'){
+        renderIndexGrid({
+          items: gridState.app.all,
+          elId: 'appGrid',
+          noteId: 'appGridNote',
+          hrefBuilder: (x) => `benchmark_application.html?key=${encodeURIComponent(x.canon)}&label=${encodeURIComponent(x.label || x.canon)}`,
+          kind: 'app',
+          reset: false
+        });
+      }
+    });
+
+    // url preset query
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if(q){ input.value = q; applyFilter(q); }
+  }
+
+  init();
+</script>
+</body>
+</html>
+

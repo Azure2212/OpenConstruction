@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+  SPDX-License-Identifier: Apache-2.0
+  https://github.com/ruoxinx/open-construction
+-->
+<html lang="en">
+<head>
+  <!-- Favicons / PWA -->
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<link rel="manifest" href="/site.webmanifest" />
+	<meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ===== SEO & Identity ===== -->
+  <link rel="canonical" href="https://www.openconstruction.org/">
+  <title>OpenConstruction Open Science Initiative for AEC Datasets, Models, Workflows, and Educational Resources</title>
+  <meta name="description" content="An open-science platform connecting datasets, AI models, workflows, and educational resources for the Architecture, Engineering, and Construction (AEC) community.">
+  <meta name="keywords" content="OpenConstruction, AEC datasets, construction AI, construction education, open data">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="OpenConstruction.org Team">
+  <meta name="referrer" content="origin-when-cross-origin">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+  <meta property="og:title" content="OpenConstruction Open Science Initiative">
+  <meta property="og:description" content="Explore open datasets, AI models, workflows, and educational resources for construction and infrastructure.">
+  <meta property="og:url" content="https://www.openconstruction.org/">
+  <meta property="og:image" content="https://www.openconstruction.org/assets/img/icon.png">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "OpenConstruction Initiative",
+    "url": "https://www.openconstruction.org",
+    "logo": "https://www.openconstruction.org/favicon.ico",
+    "description": "An open-science platform for datasets, AI models, workflows, and educational resources in the Architecture, Engineering, and Construction (AEC) community.",
+    "foundingDate": "2022",
+    "sameAs": [
+      "https://github.com/OpenConstruction",
+      "https://www.linkedin.com/company/openconstruction"
+    ]
+  }
+  </script>
+
+  <!-- Bootstrap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/assistant.css" rel="stylesheet">
+
+  <!-- Design tokens -->
+  <style>
+    :root{
+      --oc-bg:#ffffff; --oc-text:#1e2a36; --oc-subtle:#4f5d6c; --oc-border:#e7edf3;
+      --oc-brand-ink:#0f2e4b; --oc-brand-accent:#f2a238; --oc-brand-accent-2:#123c62;
+      --oc-link:#0b66c3; --oc-card:#ffffff; --oc-shadow:0 8px 24px rgba(15,46,75,.06);
+      --oc-radius:14px; --oc-muted:#f6f9fc; --oc-focus:#86b7fe;
+    }
+
+    html,body{
+      background:var(--oc-bg);
+      color:var(--oc-text);
+      font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    a{ color:var(--oc-link); }
+	.oc-container{ max-width:1080px; }
+
+    /* Utility highlight (for key phrases) */
+    .hl{
+      background:linear-gradient(180deg, transparent 60%, rgba(242,162,56,.25) 0);
+      padding:0 .06em;
+      font-weight:700;
+    }
+
+    /* Focus-visible for keyboard users */
+    :focus-visible{
+      outline:2px solid var(--oc-focus);
+      outline-offset:2px;
+      border-radius:6px;
+    }
+
+    /* Navbar */
+    .oc-nav{
+      backdrop-filter:saturate(120%) blur(6px);
+      border-bottom:1px solid var(--oc-border)!important;
+      z-index:1030 !important; /* below Bootstrap modal */
+    }
+    .brand-wordmark{
+      display:flex;
+      flex-direction:column;
+      line-height:1;
+      gap:0;
+      align-items:flex-start;
+      color:#0F2E4B;
+    }
+    .brand-wordmark .oc-open{
+      font-size:0.75rem;
+      font-weight:400;
+      letter-spacing:0.15em;
+      text-transform:uppercase;
+      opacity:0.7;
+      margin-bottom:-0.1rem;
+    }
+    .brand-wordmark .oc-sep{display:none}
+    .brand-wordmark .oc-construction{
+      font-size:1.35rem;
+      font-weight:700;
+      letter-spacing:-0.01em;
+    }
+    .oc-logo{ height:44px; width:44px; }
+
+    .navbar .nav-link.plain{
+      font-weight:700; color:var(--oc-text); padding:.5rem .6rem;
+    }
+    .navbar .nav-link.plain:hover,
+    .navbar .nav-link.plain.active{
+      color:var(--oc-brand-ink);
+      text-decoration:underline; text-underline-offset:3px;
+    }
+    .nav-link.icon-only{
+      line-height:1;
+      padding-top:.375rem;
+      padding-bottom:.375rem;
+    }
+    .nav-link.icon-only svg{
+      display:block;
+      width:20px;
+      height:20px;
+      color:inherit;
+      opacity:.9;
+    }
+    .nav-link.icon-only:hover svg{
+      opacity:1;
+    }
+
+    /* Hero */
+    .hero{
+      background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      color:var(--oc-brand-ink);
+      border-bottom:1px solid var(--oc-border);
+    }
+    .hero .content{ padding:64px 0 48px; text-align:center; }
+    .hero-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.35rem .8rem;
+      border:1px solid #dbe6f0;
+      border-radius:999px;
+      background:#f8fbff;
+      color:var(--oc-brand-ink);
+      font-size:.78rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .hero-kicker::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--oc-brand-accent);
+      box-shadow:0 0 0 4px rgba(242,162,56,.16);
+    }
+    .hero-title{
+      font-weight:700; letter-spacing:.2px; line-height:1.2;
+      font-size:clamp(1.6rem, 1.1rem + 1.8vw, 2.35rem);
+      margin:.7rem 0 .55rem;
+      max-width:26ch;
+      margin-inline:auto;
+    }
+    .hero-title-line{
+      display:block;
+    }
+    .hero p.lead{ max-width:54ch; margin:0 auto; color:var(--oc-subtle); font-size:1.06rem; line-height:1.55; }
+    .hero-search{
+      width:min(920px, 100%);
+      margin:1.1rem auto 0;
+      text-align:left;
+    }
+    .hero-search-form{
+      display:block;
+      padding:0;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+    }
+    .hero-search-field{
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      min-width:0;
+      min-height:60px;
+      padding:.35rem .4rem .35rem .48rem;
+      border:1px solid var(--oc-border);
+      border-radius:16px;
+      background:#fff;
+      box-shadow:0 10px 24px rgba(12, 47, 79, .08);
+      transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .hero-search-field:focus-within{
+      border-color:#bfd1e1;
+      box-shadow:0 14px 30px rgba(12, 47, 79, .12);
+      transform:translateY(-1px);
+    }
+    .hero-search-icon{
+      flex:0 0 auto;
+      color:var(--oc-subtle);
+      margin-left:.15rem;
+    }
+    .hero-search-scope{
+      flex:0 0 152px;
+      border:0;
+      border-right:1px solid var(--oc-border);
+      border-radius:0;
+      padding:.8rem 2rem .8rem .35rem;
+      font:inherit;
+      font-size:.94rem;
+      font-weight:700;
+      color:var(--oc-brand-ink);
+      background:
+        linear-gradient(45deg, transparent 50%, var(--oc-subtle) 50%),
+        linear-gradient(135deg, var(--oc-subtle) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px);
+      background-size:6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+      appearance:none;
+      -webkit-appearance:none;
+      min-width:0;
+    }
+    .hero-search-scope:focus{ outline:none; }
+    .hero-search-input{
+      border:0;
+      padding:1rem .2rem;
+      font:inherit;
+      font-size:1.04rem;
+      color:var(--oc-text);
+      background:transparent;
+      min-width:0;
+      width:100%;
+    }
+    .hero-search-input:focus{ outline:none; }
+    .hero-search-results{
+      margin-top:.75rem;
+      border:1px solid var(--oc-border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--oc-shadow);
+      overflow:hidden;
+    }
+    .hero-search-results[hidden]{ display:none !important; }
+    .search-results-head{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      align-items:center;
+      padding:.85rem 1rem;
+      border-bottom:1px solid var(--oc-border);
+      color:var(--oc-subtle);
+      font-size:.88rem;
+    }
+    .search-results-list{
+      display:grid;
+    }
+    .search-result{
+      display:flex;
+      flex-direction:column;
+      gap:.18rem;
+      padding:.9rem 1rem;
+      color:inherit;
+      text-decoration:none;
+    }
+    .search-result + .search-result{
+      border-top:1px solid var(--oc-border);
+    }
+    .search-result:hover{
+      background:#fbfdff;
+    }
+    .search-result-type{
+      color:var(--oc-subtle);
+      font-size:.73rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .search-result-title{
+      font-weight:700;
+      color:var(--oc-brand-ink);
+    }
+    .search-result-meta{
+      color:var(--oc-subtle);
+      font-size:.9rem;
+    }
+    /* Buttons */
+    .btn-ink{
+      background:var(--oc-brand-ink); color:#fff; border-radius:999px; border:1px solid var(--oc-brand-ink);
+      padding:.55rem 1rem; font-weight:700;
+    }
+    .btn-ink:hover{ filter:brightness(1.05); color:#fff; }
+    .btn-accent{
+      background:#fff; color:var(--oc-brand-ink); border-radius:999px; border:1px solid var(--oc-brand-ink);
+      padding:.55rem 1rem; font-weight:700;
+    }
+    .btn-accent:hover{ background:#f7fbff; }
+
+    .hero-center { display:flex; flex-direction:column; align-items:center; gap:.55rem; }
+
+    .featured-rail-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1rem;
+    }
+    .featured-rail-copy{
+      min-width:0;
+      flex:1;
+    }
+    .featured-rail-footer{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      margin-top:1rem;
+    }
+    .section-text-link{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      color:var(--oc-brand-ink);
+      font-size:.9rem;
+      font-weight:700;
+      line-height:1.2;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .section-text-link span[aria-hidden="true"]{
+      color:var(--oc-brand-accent);
+    }
+    .section-text-link:hover{
+      color:var(--oc-brand-ink);
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+    .featured-rail-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:42px;
+      height:42px;
+      border:1px solid var(--oc-border);
+      border-radius:999px;
+      background:#fff;
+      color:var(--oc-brand-ink);
+      box-shadow:0 6px 16px rgba(15,46,75,.06);
+      transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+    }
+    .featured-rail-btn:hover{
+      background:#f8fbff;
+      border-color:#d6e2ee;
+      transform:translateY(-1px);
+    }
+    .featured-rail-btn[disabled]{
+      opacity:.42;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+    .featured-rail-btn svg{
+      width:18px;
+      height:18px;
+    }
+    .featured-rail-viewport{
+      position:relative;
+      overflow:hidden;
+    }
+    .featured-rail-btn-floating{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+    }
+    .featured-rail-btn-floating.prev{
+      left:12px;
+    }
+    .featured-rail-btn-floating.next{
+      right:12px;
+    }
+    .featured-rail-fade{
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:76px;
+      pointer-events:none;
+      z-index:2;
+      transition:opacity .18s ease;
+    }
+    .featured-rail-fade.left{
+      left:0;
+      background:linear-gradient(90deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.72) 45%, rgba(255,255,255,0) 100%);
+    }
+    .featured-rail-fade.right{
+      right:0;
+      background:linear-gradient(270deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.72) 45%, rgba(255,255,255,0) 100%);
+    }
+    .featured-rail-fade.is-hidden{
+      opacity:0;
+    }
+    .featured-grid{
+      display:grid;
+      grid-auto-flow:column;
+      grid-auto-columns:calc((100% - (1.15rem * 3)) / 4);
+      gap:1.15rem;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+      padding-bottom:.2rem;
+    }
+    .featured-grid::-webkit-scrollbar{
+      display:none;
+    }
+    .featured-card{
+      background:#fff;
+      border:1px solid var(--oc-border);
+      border-radius:16px;
+      box-shadow:var(--oc-shadow);
+      overflow:hidden;
+      height:100%;
+      scroll-snap-align:start;
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .featured-card:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 32px rgba(15,46,75,.1);
+    }
+    .featured-card .featured-card-link{
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      color:inherit;
+      text-decoration:none;
+    }
+    .featured-media{
+      position:relative;
+      aspect-ratio:16 / 9;
+      background:#f3f6fa;
+      overflow:hidden;
+    }
+    .featured-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .featured-media .submitted-by{
+      position:absolute;
+      right:8px;
+      bottom:8px;
+      background:rgba(255,255,255,.96);
+      border:1px solid #e0e6ef;
+      border-radius:10px;
+      padding:2px 8px;
+      font-size:.75rem;
+      line-height:1.25;
+      color:#1e2a36;
+      font-weight:500;
+      box-shadow:0 2px 6px rgba(0,0,0,.06);
+      max-width:90%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .featured-media .submitted-by.is-clickable{
+      cursor:pointer;
+    }
+    .featured-media .submitted-by.is-clickable:hover{
+      color:#0f2e4b;
+      border-color:#cfd8e6;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+    .featured-body{
+      padding:1rem 1.05rem 1.05rem;
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+      flex:1;
+    }
+    .featured-topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      flex-wrap:wrap;
+    }
+    .featured-type{
+      display:inline-flex;
+      align-self:flex-start;
+      padding:.2rem .55rem;
+      border-radius:999px;
+      background:#eef4fb;
+      border:1px solid #dbe6f0;
+      color:var(--oc-brand-ink);
+      font-size:.74rem;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .featured-year{
+      color:var(--oc-subtle);
+      font-size:.82rem;
+      font-weight:700;
+    }
+    .featured-title{
+      margin:0;
+      font-size:1.02rem;
+      font-weight:700;
+      color:var(--oc-brand-ink);
+      line-height:1.35;
+    }
+    .featured-desc{
+      margin:0;
+      color:var(--oc-text);
+      font-size:.93rem;
+      line-height:1.45;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .featured-meta{
+      margin:0;
+      color:var(--oc-subtle);
+      font-size:.88rem;
+    }
+    .featured-link{
+      margin-top:auto;
+      color:var(--oc-link);
+      font-weight:700;
+      font-size:.9rem;
+    }
+    .logo-marquee{
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      gap:4px;
+      padding:8px 0;
+    }
+    .row-marquee{ position:relative; overflow:hidden; }
+    .logo-track{
+      display:flex;
+      align-items:center;
+      gap:28px;
+      padding:6px 12px;
+      width:max-content;
+      will-change:transform;
+    }
+    .logo-marquee:hover .logo-track { animation-play-state: paused; }
+    .logo{
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+      height:84px;
+      width:168px;
+      overflow:hidden;
+      position:relative;
+    }
+    .logo::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg, #f6f8fb 0%, #eef3f8 50%, #f6f8fb 100%);
+      background-size:200% 100%;
+      animation:oc-skeleton 1.2s ease-in-out infinite;
+    }
+    .logo.loaded::before { opacity:0; transition:opacity .2s ease; }
+    .logo img{
+      max-height:60px;
+      max-width:150px;
+      width:auto;
+      height:auto;
+      object-fit:contain;
+      filter:grayscale(8%);
+      transition:transform .16s ease, opacity .2s ease;
+      display:block;
+      opacity:0;
+    }
+    .logo.loaded img{ opacity:1; }
+    .logo img:hover{ transform:scale(1.03); }
+    @keyframes oc-marquee-left {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @keyframes oc-marquee-right {
+      from { transform: translateX(-50%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes oc-skeleton {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logo-track { animation:none; }
+    }
+    @media (min-width: 992px) {
+      .logo { height:92px; width:184px; }
+      .logo img { max-height:66px; max-width:160px; }
+    }
+    @media (max-width: 767.98px){
+      .logo{ width:132px; height:72px; }
+      .logo img{ max-width:118px; max-height:50px; }
+    }
+    /* Sections & cards */
+    .oc-section{ margin-top:56px; }
+    .oc-card{
+      background:var(--oc-card);
+      border:1px solid var(--oc-border);
+      border-radius:16px;
+      box-shadow:var(--oc-shadow);
+    }
+    .oc-card .oc-card-title{ font-weight:700; color:var(--oc-brand-ink); letter-spacing:-.01em; line-height:1.25; }
+    .oc-card .oc-card-body{ padding:1.45rem; }
+    .oc-kicker{
+      font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--oc-subtle); font-weight:700;
+    }
+    .oc-ul{ margin-bottom:0; padding-left:1.1rem; }
+    .oc-ul li{ margin:.42rem 0; }
+
+    /* Reference block */
+    pre.oc-bib{
+      background:var(--oc-muted); color:#415367; border:1px solid var(--oc-border);
+      border-radius:10px; padding:1rem; overflow:auto;
+    }
+
+    /* About section – icon bullets */
+    .about-list{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .about-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:.7rem;
+      margin:.55rem 0;
+      font-size:.95rem;
+      line-height:1.5;
+    }
+    .about-list .about-icon{
+      flex-shrink:0;
+      width:32px;
+      height:32px;
+      border-radius:8px;
+      background:var(--oc-muted);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:.1rem;
+    }
+    .about-list .about-icon svg{
+      width:18px;
+      height:18px;
+      color:var(--oc-brand-ink);
+    }
+
+    /* Policy & Feedback – two-column */
+    .pf-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:1.15rem;
+    }
+    .pf-card{
+      display:flex;
+      flex-direction:column;
+      gap:.8rem;
+      background:var(--oc-card);
+      border:1px solid var(--oc-border);
+      border-radius:16px;
+      padding:1.45rem;
+      box-shadow:var(--oc-shadow);
+      color:var(--oc-text);
+    }
+    .pf-head{
+      display:flex;
+      align-items:center;
+      gap:.65rem;
+    }
+    .pf-icon{
+      display:inline-grid;
+      place-items:center;
+      width:34px;
+      height:34px;
+      border:1px solid #dbe6f0;
+      border-radius:8px;
+      background:#f8fbff;
+      color:var(--oc-brand-ink);
+      flex:0 0 auto;
+    }
+    .pf-icon svg{
+      width:18px;
+      height:18px;
+    }
+    .pf-eyebrow{
+      color:var(--oc-subtle);
+      font-size:.72rem;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .pf-card h4{
+      font-size:1.18rem;
+      font-weight:700;
+      color:var(--oc-brand-ink);
+      margin:0;
+      letter-spacing:-.01em;
+      line-height:1.3;
+    }
+    .pf-card p{
+      font-size:.95rem;
+      color:var(--oc-text);
+      margin:0;
+      line-height:1.6;
+    }
+    .pf-card p a{
+      color:var(--oc-link);
+      font-weight:600;
+      text-decoration:underline;
+      text-decoration-color:rgba(11,102,195,.35);
+      text-underline-offset:3px;
+    }
+    .pf-card p a:hover{
+      color:var(--oc-link);
+      text-decoration-color:var(--oc-brand-accent);
+    }
+    .pf-actions{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:.85rem 1rem;
+      margin-top:auto;
+      padding-top:.2rem;
+    }
+    .pf-link{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      color:var(--oc-brand-ink);
+      font-size:.9rem;
+      font-weight:700;
+      text-decoration:none;
+    }
+    .pf-link span[aria-hidden="true"]{
+      color:var(--oc-brand-accent);
+    }
+    .pf-link:hover{
+      color:var(--oc-brand-ink);
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+    @media (max-width:575.98px){
+      .pf-grid{ grid-template-columns:1fr; }
+    }
+
+    @media (max-width:991.98px){
+      .featured-grid{
+        grid-auto-columns:calc((100% - 1.15rem) / 2);
+      }
+    }
+
+    @media (max-width:767.98px){
+      .featured-rail-head{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .featured-rail-footer{
+        width:100%;
+        justify-content:flex-start;
+      }
+      .featured-grid{
+        grid-auto-columns:100%;
+      }
+      .featured-rail-fade{
+        width:52px;
+      }
+      .featured-rail-btn-floating.prev{
+        left:8px;
+      }
+      .featured-rail-btn-floating.next{
+        right:8px;
+      }
+    }
+
+/* ===== Milestones – stepper ===== */
+
+    .ms-stepper{
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0, 1fr));
+      gap:.8rem;
+      position:relative;
+      counter-reset:ms;
+      min-height:260px;
+      padding:1rem 0;
+    }
+
+    .ms-step{
+      flex:1 1 0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      position:relative;
+      min-height:230px;
+      padding:0;
+      counter-increment:ms;
+    }
+
+    /* ---- connector line ---- */
+    .ms-step + .ms-step::before{
+      content:"";
+      position:absolute;
+      top:50%;
+      right:50%;
+      width:100%;
+      height:1px;
+      background:rgba(15, 46, 75, 0.22);
+      transform:translateY(-50%);
+      z-index:0;
+    }
+    .ms-step.ms-upcoming + .ms-step.ms-upcoming::before,
+    .ms-step + .ms-step.ms-upcoming::before{
+      background:repeating-linear-gradient(90deg, rgba(15,46,75,.22) 0 6px, transparent 6px 12px);
+    }
+    /* short line extensions past the first and last dots */
+    .ms-step:first-child::before,
+    .ms-step:last-child::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      width:24px;
+      height:1px;
+      background:rgba(15, 46, 75, 0.22);
+      transform:translateY(-50%);
+      z-index:0;
+    }
+    .ms-step:first-child::before{ right:calc(50% + 7px); }
+    .ms-step:last-child::after{ left:calc(50% + 7px); }
+
+    /* ---- year pill — sits on the centre line ---- */
+    .ms-year{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      z-index:2;
+      font-size:.72rem;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:#fff;
+      background:var(--oc-brand-ink);
+      padding:.22rem .65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .ms-upcoming .ms-year{
+      background:var(--oc-brand-accent);
+    }
+
+    /* ---- card panel ---- */
+    .ms-card{
+      position:absolute;
+      left:0;
+      background:#fff;
+      border:1px solid var(--oc-border);
+      border-radius:16px;
+      padding:.6rem .65rem;
+      width:100%;
+      min-height:80px;
+      box-shadow:var(--oc-shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform .22s ease, box-shadow .22s ease;
+      color:var(--oc-text);
+    }
+    .ms-step:nth-child(odd) .ms-card{
+      bottom:calc(50% + 1.1rem);
+    }
+    .ms-step:nth-child(even) .ms-card{
+      top:calc(50% + 1.1rem);
+    }
+    .ms-step:hover .ms-card{
+      transform:translateY(-3px);
+      box-shadow:0 12px 32px rgba(15,46,75,.1);
+    }
+
+    /* ---- milestone text ---- */
+    .ms-desc{
+      font-size:.82rem;
+      font-weight:400;
+      color:var(--oc-text);
+      line-height:1.4;
+      margin:0;
+      text-align:center;
+    }
+    .ms-desc a{
+      color:var(--oc-link);
+      text-decoration:none;
+    }
+    .ms-desc a:hover{ text-decoration:underline; }
+
+    /* ---- responsive ---- */
+    @media (max-width:767.98px){
+      .ms-stepper{
+        min-height:0;
+        overflow-x:auto;
+        overflow-y:hidden;
+        scroll-snap-type:x proximity;
+        padding:2.45rem 0 1rem;
+        scrollbar-width:thin;
+      }
+      .ms-step{
+        flex:0 0 200px;
+        min-height:0;
+        scroll-snap-align:start;
+      }
+      .ms-step:nth-child(n) .ms-card{
+        position:relative;
+        top:auto;
+        bottom:auto;
+        left:auto;
+        width:100%;
+        min-height:104px;
+        padding:.85rem .7rem;
+      }
+      .ms-step + .ms-step::before{
+        top:-1.2rem;
+        transform:none;
+      }
+      .ms-step:first-child::before,
+      .ms-step:last-child::after{ display:none; }
+      .ms-desc{ font-size:.8rem; }
+    }
+
+    /* Story-rail treatment for the trajectory section */
+    .ms-intro{
+      max-width:none;
+      color:var(--oc-subtle);
+      line-height:1.6;
+      margin:.35rem 0 0;
+    }
+    .ms-stepper{
+      align-items:stretch;
+      grid-template-columns:repeat(6, minmax(0, 1fr));
+      gap:.8rem;
+      min-height:0;
+      margin-top:1.45rem;
+      padding:2.1rem 0 0;
+    }
+    .ms-stepper::before{
+      content:"";
+      position:absolute;
+      top:.9rem;
+      left:calc(100% / 12);
+      right:calc(100% / 12);
+      height:1px;
+      background:linear-gradient(90deg, rgba(15,46,75,.2), rgba(15,46,75,.34) 72%, rgba(242,162,56,.58));
+      z-index:0;
+    }
+    .ms-step,
+    .ms-step:first-child,
+    .ms-step:last-child{
+      display:block;
+      min-height:0;
+      padding:0;
+      text-align:left;
+    }
+    .ms-step::before,
+    .ms-step:first-child::before,
+    .ms-step:last-child::after{
+      display:none;
+    }
+    .ms-year{
+      top:-2.1rem;
+      left:50%;
+      min-width:52px;
+      min-height:28px;
+      border:2px solid #fff;
+      box-shadow:0 4px 12px rgba(15,46,75,.12);
+      font-weight:700;
+      transform:translateX(-50%);
+    }
+    .ms-upcoming .ms-year{
+      color:#17212d;
+    }
+    .ms-card{
+      position:relative;
+      top:auto !important;
+      bottom:auto !important;
+      left:auto;
+      display:block;
+      height:100%;
+      min-height:138px;
+      border-radius:12px;
+      padding:1rem .95rem;
+    }
+    .ms-step:hover .ms-card{
+      border-color:#d6e2ee;
+      transform:translateY(-2px);
+    }
+    .ms-phase{
+      display:block;
+      margin-bottom:.45rem;
+      color:var(--oc-subtle);
+      font-size:.72rem;
+      font-weight:700;
+      letter-spacing:.14em;
+      line-height:1.2;
+      text-transform:uppercase;
+    }
+    .ms-desc{
+      font-size:.88rem;
+      font-weight:400;
+      line-height:1.45;
+      text-align:left;
+    }
+    .ms-desc a{
+      font-weight:600;
+    }
+    @media (max-width:991.98px){
+      .ms-stepper{
+        grid-template-columns:repeat(3, minmax(0, 1fr));
+        row-gap:2.6rem;
+      }
+      .ms-stepper::before{ display:none; }
+      .ms-year{ top:-1.85rem; }
+    }
+    @media (max-width:767.98px){
+      .ms-stepper{
+        display:flex;
+        gap:.85rem;
+        padding:2.05rem .1rem .3rem;
+      }
+      .ms-step{ flex:0 0 220px; }
+      .ms-year{ top:-2rem; }
+      .ms-card{ min-height:132px; }
+      .ms-desc{ font-size:.86rem; }
+    }
+    /* Footer */
+    footer{
+      border-top:1px solid var(--oc-border);
+      background:linear-gradient(180deg, transparent, rgba(0,0,0,.02));
+    }
+    .icon{ width:1.15em; height:1.15em; display:inline-block; vertical-align:-.2em; }
+
+    /* ==============================
+       Hero Metrics (rings)
+       ============================== */
+    .metrics{
+      display:flex; gap:1rem 1.2rem; justify-content:center; align-items:center;
+      flex-wrap:wrap; margin:.7rem 0 0;
+    }
+    .metric{
+      display:flex;
+      align-items:center;
+      gap:.85rem;
+      min-width:220px;
+      padding:.55rem .7rem;
+      background:transparent;
+      border:none;
+      border-radius:18px;
+      color:inherit;
+      text-decoration:none;
+      transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+    .metric:hover{
+      background:rgba(255,255,255,.72);
+      box-shadow:0 10px 24px rgba(15,46,75,.08);
+      transform:translateY(-1px);
+    }
+    .metric:focus-visible{
+      outline:3px solid rgba(15, 46, 75, .18);
+      outline-offset:3px;
+      background:rgba(255,255,255,.84);
+      box-shadow:0 12px 28px rgba(15,46,75,.12);
+      transform:translateY(-1px);
+    }
+    .metric svg{ width:120px; height:120px; filter:drop-shadow(0 4px 10px rgba(15,46,75,.08)); }
+    .metric .ring-bg{ stroke:#e7edf3; stroke-width:4; }
+    .metric .ring-val{
+      stroke:var(--oc-brand-accent);
+      stroke-width:4; stroke-linecap:round;
+      stroke-dasharray:0 999; stroke-dashoffset:0;
+    }
+    .ring-ready .ring-val{ transition:stroke-dashoffset .9s ease; }
+    .metric .label{ display:flex; flex-direction:column; line-height:1.05; }
+    .metric .value{ font-weight:700; color:var(--oc-brand-ink); font-size:1.28rem; }
+    .metric .name{ font-size:.78rem; color:var(--oc-subtle); letter-spacing:.12em; text-transform:uppercase; }
+
+    .metric[data-kind="datasets"] .ring-val{ stroke: var(--oc-brand-accent); }
+    .metric[data-kind="models"]  .ring-val{ stroke: var(--oc-brand-accent); }
+    .metric[data-kind="usecases"] .ring-val{ stroke: var(--oc-brand-accent); }
+    .metric[data-kind="oers"]    .ring-val{ stroke: var(--oc-brand-accent); }
+
+    @media (prefers-reduced-motion: reduce){
+      .ring-ready .ring-val{ transition:none; }
+    }
+
+    @media (max-width: 991.98px){
+      .featured-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 575.98px){
+      .featured-grid{ grid-template-columns:1fr; }
+      .hero .content{ padding:48px 0 36px; }
+      .hero-search-field{
+        flex-wrap:wrap;
+        align-items:center;
+      }
+      .hero-search-scope{
+        flex:1 1 100%;
+        border-right:0;
+        border-bottom:1px solid var(--oc-border);
+        padding:.75rem 2rem .7rem .2rem;
+        background-position:
+          calc(100% - 10px) calc(50% - 2px),
+          calc(100% - 4px) calc(50% - 2px);
+      }
+      .hero-search-results{ left:0; right:0; }
+      .metrics{ gap:.65rem; }
+      .metric{ gap:.7rem; min-width:min(100%, 280px); padding:.35rem .2rem; }
+      .metric svg{ width:94px; height:94px; }
+      .metric .value{ font-size:1.14rem; }
+      .metric .name{ font-size:.72rem; }
+      .oc-card .oc-card-body{ padding:1.2rem; }
+      .oc-section{ margin-top:40px; }
+      .logo{ width:132px; height:72px; }
+      .logo img{ max-width:118px; max-height:50px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logo-track { animation: none !important; }
+    }
+
+    html, body, .oc-container { transform: none !important; }
+    .oc-modal-compact{ padding:16px 16px 14px; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.12); }
+
+    /* About list (icon + keyword) */
+    .about-list{
+      margin:.9rem 0 0;
+      padding-left:0;
+      list-style:none;
+    }
+    .about-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:.65rem;
+      font-size:.95rem;
+      color:var(--oc-subtle);
+      line-height:1.55;
+      margin-bottom:.5rem;
+    }
+    .about-list li strong{
+      color:var(--oc-brand-ink);
+      margin-right:.15rem;
+    }
+    .about-icon{
+      width:20px;
+      height:20px;
+      flex-shrink:0;
+      margin-top:1px;
+      color:var(--oc-accent);
+    }
+
+    /* Centered section header */
+    .oc-section-center{ text-align:center; }
+    .oc-section-sub{
+      font-size:.95rem; color:var(--oc-subtle);
+      margin:.25rem auto .9rem; max-width:52ch;
+    }
+    .oc-modal-compact .form-control{ height:40px; border-radius:10px; }
+
+    /* Yellow bell only */
+    .btn-subscribe-icon{
+      background:transparent;
+      border:0;
+      padding:.25rem .4rem;
+      line-height:1;
+    }
+    .btn-subscribe-icon svg{ fill:var(--oc-brand-accent); }
+    .btn-subscribe-icon:hover svg{ filter:brightness(1.15); }
+    .btn-subscribe-icon:focus-visible{ outline: 2px solid var(--oc-focus); outline-offset: 2px; border-radius: 999px; }
+
+	/* Dark buttons */
+	.btn-ink,
+	.btn-ink:visited,
+	.btn-ink:focus,
+	.btn-ink:active,
+	.btn-ink:focus-visible {
+	  color: #fff !important;
+	  background: var(--oc-brand-ink) !important;
+	  border-color: var(--oc-brand-ink) !important;
+	}
+
+	/* Light buttons */
+	.btn-accent,
+	.btn-accent:visited,
+	.btn-accent:focus,
+	.btn-accent:active,
+	.btn-accent:focus-visible {
+	  color: var(--oc-brand-ink) !important;
+	  background: #fff !important;
+	  border-color: var(--oc-brand-ink) !important;
+	}
+
+	.btn-ink:active,
+	.btn-accent:active {
+	  transform: translateY(1px);
+	}
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-white sticky-top oc-nav">
+  <div class="container oc-container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" class="oc-logo">
+	<span class="brand-wordmark">
+	  <span class="oc-open">OpenConstruction</span>
+	  <span class="oc-construction">Open Science</span>
+	</span>
+
+    </a>
+
+    <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+        <li class="nav-item"><a class="nav-link plain active" href="index.html" data-route="index">Home</a></li>
+		<li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddLibraries" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddLibraries">
+            <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+            <li><a class="dropdown-item" href="models.html">Models</a></li>
+            <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+			<li><a class="dropdown-item" href="oer.html">OERs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="benchmarks.html" data-route="models">Benchmarks</a></li>
+        <li class="nav-item dropdown">
+            <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+              <li><a class="dropdown-item" href="schema.html">Schema</a></li>
+              <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+              <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+              <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+            </ul>
+          </li>
+        <li class="nav-item"><a class="nav-link plain" href="contribute.html" data-route="contribute">Contribute</a></li>
+        <li class="nav-item"><a class="nav-link plain" href="contributors.html" data-route="contributors">Community</a></li>
+        <li class="nav-item">
+          <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener"
+             aria-label="OpenConstruction on GitHub" title="View on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 
+                       0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                       0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                       0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 
+                       1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 
+                       0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 
+                       0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+            </svg>
+          </a>
+        </li>
+
+        <!-- 🔔 Subscribe button -->
+        <li class="nav-item">
+          <button type="button"
+                  class="nav-link px-2 icon-only btn-subscribe-icon"
+                  data-bs-toggle="modal" data-bs-target="#subscribeModal"
+                  aria-label="Subscribe for updates" title="Subscribe">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 16 16" aria-hidden="true" class="icon-bell">
+              <path d="M8 16a2 2 0 0 0 1.985-1.75H6.015A2 2 0 0 0 8 16zm.5-14a.5.5 0 0 
+                       0-1 0 7 7 0 0 0-5.468 6.37c-.084.58-.272 1.204-.653 1.856-.356.617-.879 1.104-1.379 
+                       1.357V13h14v-1.417c-.5-.253-1.023-.74-1.379-1.357-.38-.652-.569-1.276-.653-1.856A7 
+                       7 0 0 0 8.5 2z"/>
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container oc-container content">
+    <div class="hero-kicker">Open AEC Resource Library</div>
+    <h1 class="hero-title mb-1">
+      <span class="hero-title-line">Discover open digital assets</span>
+      <span class="hero-title-line">for the AEC community</span>
+    </h1>
+    <!-- grouped metrics -->
+    <div class="hero-center">
+      <!-- metrics -->
+      <div class="metrics" id="heroMetrics" role="group" aria-label="Catalog statistics">
+        <!-- Dataset metric -->
+        <a class="metric" data-kind="datasets" href="dataset.html" aria-describedby="countDatasets">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+            <circle class="ring-bg" cx="22" cy="22" r="17" fill="none"></circle>
+            <circle class="ring-val" id="ringDatasets" cx="22" cy="22" r="17" fill="none"
+                    stroke-linecap="round" transform="rotate(-90 22 22)"></circle>
+            <g transform="translate(15,15)" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="0" y="0" width="6" height="6" rx="1"/>
+              <rect x="9" y="0" width="6" height="6" rx="1"/>
+              <rect x="4.5" y="9" width="6" height="6" rx="1"/>
+            </g>
+          </svg>
+          <span class="label">
+            <span class="value" id="countDatasets">—</span>
+            <span class="name">Datasets</span>
+          </span>
+        </a>
+
+        <!-- Models metric -->
+        <a class="metric" data-kind="models" href="models.html" aria-describedby="countModels">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+            <circle class="ring-bg" cx="22" cy="22" r="17" fill="none"></circle>
+            <circle class="ring-val" id="ringModels" cx="22" cy="22" r="17" fill="none"
+                    stroke-linecap="round" transform="rotate(-90 22 22)"></circle>
+            <g transform="translate(13,13)" fill="none" stroke="currentColor" stroke-width="1.2">
+              <circle cx="9" cy="9" r="3"/>
+              <path d="M9 0v3M9 15v3M0 9h3M15 9h3M2.5 2.5l2 2M15.5 15.5l2 2M15.5 2.5l-2 2M2.5 15.5l-2 2"/>
+            </g>
+          </svg>
+          <span class="label">
+            <span class="value" id="countModels">—</span>
+            <span class="name">Models</span>
+          </span>
+        </a>
+
+        <!-- Use Cases metric -->
+        <a class="metric" data-kind="usecases" href="deployments.html" aria-describedby="countUsecases">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+            <circle class="ring-bg" cx="22" cy="22" r="17" fill="none"></circle>
+            <circle class="ring-val" id="ringUsecases" cx="22" cy="22" r="17" fill="none"
+                    stroke-linecap="round" transform="rotate(-90 22 22)"></circle>
+            <!-- briefcase icon -->
+            <g transform="translate(13,13)" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="1" y="5" width="16" height="9" rx="2"/>
+              <path d="M6 5v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/>
+              <path d="M1 9h16"/>
+            </g>
+          </svg>
+          <span class="label">
+            <span class="value" id="countUsecases">—</span>
+            <span class="name">Workflows</span>
+          </span>
+        </a>
+
+    <!-- OERs metric -->
+    <a class="metric" data-kind="oers" href="oer.html" aria-describedby="countOERs">
+      <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <circle class="ring-bg" cx="22" cy="22" r="17" fill="none"></circle>
+        <circle class="ring-val" id="ringOERs" cx="22" cy="22" r="17" fill="none"
+            stroke-linecap="round" transform="rotate(-90 22 22)"></circle>
+        <!-- book icon centered -->
+        <g transform="translate(14,14)" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M0 2h10a4 4 0 0 1 4 4v11H4a4 4 0 0 0-4 4V2Z"/>
+          <path d="M0 2h10a4 4 0 0 1 4 4H4a4 4 0 0 0-4 4"/>
+        </g>
+      </svg>
+      <span class="label">
+        <span class="value" id="countOERs">—</span>
+        <span class="name">OERs</span>
+      </span>
+    </a>
+
+
+      </div><!-- /metrics -->
+    </div><!-- /hero-center -->
+
+      <div class="hero-search" aria-labelledby="home-search-heading">
+        <div id="home-search-heading" class="visually-hidden">Search the OpenConstruction catalog</div>
+        <form class="hero-search-form" id="homeSearchForm">
+          <div class="hero-search-field">
+            <span class="hero-search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <label class="visually-hidden" for="homeSearchScope">Filter search by resource type</label>
+            <select id="homeSearchScope" class="hero-search-scope" aria-label="Filter search by resource type">
+              <option value="all">All resources</option>
+              <option value="dataset">Datasets</option>
+              <option value="model">Models</option>
+              <option value="workflow">Workflows</option>
+              <option value="oer">OERs</option>
+            </select>
+            <input
+              id="homeSearchInput"
+              class="hero-search-input"
+              type="search"
+              placeholder="Search resources, authors, titles, or keywords ..."
+              aria-label="Search the catalog"
+              autocomplete="off">
+          </div>
+        </form>
+        <div class="hero-search-results" id="homeSearchResults" hidden aria-live="polite"></div>
+      </div>
+
+  </div>
+</header>
+
+<main class="container oc-container">
+
+  <!-- 1. Latest catalog additions — clickable resources first -->
+  <section class="oc-section" aria-labelledby="featured-resources-heading">
+    <div class="oc-card">
+      <div class="oc-card-body">
+        <div class="oc-kicker mb-2">Latest catalog additions</div>
+        <div class="featured-rail-viewport">
+          <div class="featured-rail-fade left is-hidden" id="featuredLeftFade" aria-hidden="true"></div>
+          <button class="featured-rail-btn featured-rail-btn-floating prev" id="featuredPrevBtn" type="button" aria-label="Show earlier updates" disabled>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M14.5 6.5 9 12l5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="featured-grid" id="featuredResourcesGrid" aria-live="polite">
+            <div class="featured-card">
+              <div class="featured-body">
+                <span class="featured-type">Loading</span>
+                <p class="featured-meta">Pulling the latest updates from the catalog...</p>
+              </div>
+            </div>
+          </div>
+          <div class="featured-rail-fade right" id="featuredRightFade" aria-hidden="true"></div>
+          <button class="featured-rail-btn featured-rail-btn-floating next" id="featuredNextBtn" type="button" aria-label="Show more updates">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9.5 6.5 15 12l-5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="featured-rail-footer">
+          <a class="section-text-link" href="monthly-highlights.html">Community digest <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Overview — about the platform -->
+  <section class="oc-section">
+    <div class="oc-card">
+      <div class="oc-card-body">
+        <div class="oc-kicker mb-2">About the Platform</div>
+        <h3 class="oc-card-title">Open infrastructure for reusable AEC digital assets</h3>
+        <ul class="about-list">
+          <li>
+            <svg class="about-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            <div><strong>Metadata</strong> Standardized metadata and validation for consistent discovery.</div>
+          </li>
+          <li>
+            <svg class="about-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <div><strong>Benchmarks</strong> Context for research, teaching, and deployment decisions.</div>
+          </li>
+          <li>
+            <svg class="about-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <div><strong>Governance</strong> Open contribution, review, and long-term stewardship.</div>
+          </li>
+        </ul>
+        <p class="mt-3 mb-0 small text-muted">
+          Visit <a href="contribute.html">Contribute</a> for beginner-friendly next steps or meet the people behind the project in <a href="contributors.html">Community</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Trajectory -->
+  <section class="oc-section" aria-labelledby="milestones-heading">
+    <div class="oc-card">
+      <div class="oc-card-body">
+        <div class="oc-kicker mb-2">Trajectory</div>
+        <h3 id="milestones-heading" class="oc-card-title mb-0">From research foundations to shared AEC infrastructure</h3>
+        <div class="ms-stepper" role="list" aria-label="OpenConstruction milestones">
+
+          <div class="ms-step" role="listitem">
+            <div class="ms-year">2022-23</div>
+            <div class="ms-card">
+              <span class="ms-phase">Foundations</span>
+              <p class="ms-desc"><a href="https://doi.org/10.1007/978-3-031-25082-8_15" target="_blank" rel="noopener">Lifelong learning</a> and <a href="https://doi.org/10.1061/JCCEE5.CPENG-5077" target="_blank" rel="noopener">data sharing</a> frame the need for reusable AEC knowledge.</p>
+            </div>
+          </div>
+
+          <div class="ms-step" role="listitem">
+            <div class="ms-year">2024</div>
+            <div class="ms-card">
+              <span class="ms-phase">Infrastructure</span>
+              <p class="ms-desc">Core team and open infrastructure turn the concept into a real platform.</p>
+            </div>
+          </div>
+
+          <div class="ms-step" role="listitem">
+            <div class="ms-year">2024</div>
+            <div class="ms-card">
+              <span class="ms-phase">Landscape</span>
+              <p class="ms-desc"><a href="https://doi.org/10.48550/arXiv.2508.11482" target="_blank" rel="noopener">OpenConstruction</a> dataset survey maps the fragmented data landscape.</p>
+            </div>
+          </div>
+
+          <div class="ms-step" role="listitem">
+            <div class="ms-year">2025</div>
+            <div class="ms-card">
+              <span class="ms-phase">Launch</span>
+              <p class="ms-desc">Datasets, models, workflows, and OERs launch as connected catalogs.</p>
+            </div>
+          </div>
+
+          <div class="ms-step" role="listitem">
+            <div class="ms-year">2026</div>
+            <div class="ms-card">
+              <span class="ms-phase">Ecosystem</span>
+              <p class="ms-desc"><a href="https://www.sciencedirect.com/science/article/pii/S2666165926000670" target="_blank" rel="noopener">Open science ecosystem</a> connects research, education, and practice.</p>
+            </div>
+          </div>
+
+          <div class="ms-step ms-upcoming" role="listitem">
+            <div class="ms-year">Next</div>
+            <div class="ms-card">
+              <span class="ms-phase">Next</span>
+              <p class="ms-desc">Benchmarks, integrations, and community governance.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Policy & Feedback -->
+
+  <section class="oc-section">
+    <div class="oc-kicker mb-3">Policies &amp; Support</div>
+    <div class="pf-grid">
+      <article class="pf-card">
+        <div class="pf-head">
+          <span class="pf-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+          </span>
+          <span class="pf-eyebrow">Content Policy</span>
+        </div>
+        <h4>Open metadata, credited creators.</h4>
+        <p>OpenConstruction indexes public metadata and points back to original sources. Inclusion is descriptive, not endorsement; corrections and removal requests go to <a href="mailto:support@openconstruction.org">support@openconstruction.org</a>.</p>
+        <div class="pf-actions">
+          <a class="pf-link" href="contribute.html#terms">Read policy <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+      <article class="pf-card">
+        <div class="pf-head">
+          <span class="pf-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
+          </span>
+          <span class="pf-eyebrow">Feedback &amp; Ideas</span>
+        </div>
+        <h4>Shape what's next, in the open.</h4>
+        <p>Roadmap items, schema changes, and governance decisions happen on GitHub. <a href="https://github.com/ruoxinx/open-construction/issues/new?template=suggestion.yml" target="_blank" rel="noopener">Open a suggestion</a>, join <a href="https://github.com/ruoxinx/open-construction/discussions" target="_blank" rel="noopener">discussions</a>, or email <a href="mailto:support@openconstruction.org">support@openconstruction.org</a>.</p>
+        <div class="pf-actions">
+          <a class="pf-link" href="https://github.com/ruoxinx/open-construction/discussions" target="_blank" rel="noopener">Go to GitHub <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 5. Institutions — social proof -->
+  <section class="oc-section oc-section">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+      <div class="oc-kicker mb-0">Contributing Institutions &amp; Organizations</div>
+      <a class="section-text-link" href="contributors.html">All contributors <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="logo-marquee" id="indexInstitutionMarquee" aria-label="Affiliated institutions and organizations">
+      <div class="row-marquee" data-direction="right">
+        <div class="logo-track" role="list" data-speed="46"></div>
+      </div>
+      <div class="row-marquee" data-direction="left">
+        <div class="logo-track" role="list" data-speed="46"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="py-4 mt-5" role="contentinfo" aria-label="Site footer">
+  <div class="container oc-container small text-muted text-center">
+    <div>
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;">
+      © <span id="yearNow"></span> OpenConstruction Open Science Initiative
+    </div>
+    <div class="mt-1">
+      <small>Licensed under Apache 2.0.
+      Images and thumbnails are © their respective creators unless otherwise noted.</small>
+    </div>
+    <div class="mt-1">
+      <small>
+        <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+        <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+        <a href="contribute.html#data-policy" class="text-muted">Data Usage</a> ·
+        <a href="contribute.html#citation" class="text-muted">Citation</a>
+      </small>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+  // Year
+  document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+  // Copy BibTeX
+  const copyBtn = document.getElementById('copyBib');
+  if (copyBtn){
+    copyBtn.addEventListener('click', async () => {
+      const txt = document.getElementById('bibtex').innerText;
+      try{
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => copyBtn.textContent = 'Copy', 1600);
+      }catch(e){
+        window.prompt('Copy to clipboard: Ctrl/Cmd+C, Enter', txt);
+      }
+    });
+  }
+
+  /* no timeline JS needed — horizontal layout is pure CSS */
+
+  // ===== Hero Metrics: counts + re-animating rings on view =====
+  (function(){
+    const metrics = document.getElementById('heroMetrics');
+    const countElDatasets = document.getElementById('countDatasets');
+    const countElModels   = document.getElementById('countModels');
+    const countElUsecases = document.getElementById('countUsecases');
+    const countElOERs     = document.getElementById('countOERs');    // NEW
+    const ringDatasets = document.getElementById('ringDatasets');
+    const ringModels   = document.getElementById('ringModels');
+    const ringUsecases = document.getElementById('ringUsecases');
+    const ringOERs     = document.getElementById('ringOERs');        // NEW
+    const rings = [ringDatasets, ringModels, ringUsecases, ringOERs].filter(Boolean); // UPDATED
+    const R = 17, CIRC = 2 * Math.PI * R;
+
+    rings.forEach(r => { r.style.strokeDasharray = `${CIRC}`; r.style.strokeDashoffset = `${CIRC}`; });
+
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    function countUp(el, to, dur=900){
+      if(!el) return;
+      const start = performance.now();
+      const from = 0;
+      function step(now){
+        const t = Math.min(1, (now - start)/dur);
+        const v = Math.round(from + (to - from)*ease(t));
+        el.textContent = v.toString();
+        if(t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    async function fetchFirst(paths){
+      for(const p of paths){
+        try{
+          const res = await fetch(p, { cache:'no-cache' });
+          if(res.ok){ return res.json(); }
+        }catch(e){}
+      }
+      throw new Error('All JSON paths failed');
+    }
+    function arrayishLength(json){
+      if (Array.isArray(json)) return json.length;
+
+      if (json && typeof json === 'object'){
+        // explicit containers
+        if (Array.isArray(json.use_cases)) return json.use_cases.length; // use-cases schema
+        if (Array.isArray(json.resources)) return json.resources.length; // OER schema (NEW)
+        if (Array.isArray(json.items))     return json.items.length;
+        if (Array.isArray(json.data))      return json.data.length;
+
+        // maps (e.g., datasetId -> datasetObject); ignore metadata keys
+        const ignore = new Set(['schema', '$schema', 'meta']);
+        return Object.keys(json).filter(k => !ignore.has(k)).length;
+      }
+      return 0;
+    }
+
+    function setRings(offset){ rings.forEach(r => r && (r.style.strokeDashoffset = String(offset))); }
+    function playRings(){
+      document.body.classList.add('ring-ready');
+      requestAnimationFrame(() => { setRings(0); });
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.target !== metrics) return;
+        if (e.isIntersecting){
+          playRings();
+        } else {
+          setRings(CIRC);
+        }
+      });
+    }, { threshold: 0.35 });
+    io.observe(metrics);
+
+    (async function(){
+      try{
+        const [datasetsJson, modelsJson, usecasesJson, oersJson] = await Promise.all([
+          fetchFirst(['data/datasets.json','assets/datasets.json','datasets.json']),
+          fetchFirst(['data/models.json','assets/models.json','models.json']),
+          // Robust fallbacks for the Use Cases schema
+          fetchFirst([
+            'data/use-cases.json','assets/deployments.json','deployments.json',
+            'data/usecases.json','assets/usecases.json','usecases.json'
+          ]),
+          fetchFirst(['data/oer.json','assets/oer.json','oer.json']) // NEW
+        ]);
+        const dCount = arrayishLength(datasetsJson);
+        const mCount = arrayishLength(modelsJson);
+        const uCount = arrayishLength(usecasesJson);
+        const oCount = arrayishLength(oersJson); // NEW
+
+        countUp(countElDatasets, dCount);
+        countUp(countElModels,   mCount);
+        countUp(countElUsecases, uCount);
+        countUp(countElOERs,     oCount); // NEW
+        const rect = metrics.getBoundingClientRect();
+        const inView = rect.top < (window.innerHeight || document.documentElement.clientHeight) && rect.bottom > 0;
+        if (inView) {
+          setRings(CIRC);
+          requestAnimationFrame(playRings);
+        }
+      }catch(err){
+        if(countElDatasets) countElDatasets.textContent = '—';
+        if(countElModels)   countElModels.textContent   = '—';
+        if(countElUsecases) countElUsecases.textContent = '—';
+        if(countElOERs)     countElOERs.textContent     = '—'; // NEW
+      }
+    })();
+  })();
+
+  // ===== Homepage featured resources =====
+  (function(){
+    const grid = document.getElementById('featuredResourcesGrid');
+    const searchForm = document.getElementById('homeSearchForm');
+    const searchInput = document.getElementById('homeSearchInput');
+    const searchScopeSelect = document.getElementById('homeSearchScope');
+    const searchResults = document.getElementById('homeSearchResults');
+    if (!grid) return;
+
+    function esc(s){
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function parseDate(value){
+      if (!value) return null;
+      const raw = String(value).trim();
+      const dateOnlyMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (dateOnlyMatch){
+        const [, year, month, day] = dateOnlyMatch;
+        // Store date-only metadata at local noon so formatting stays on the same calendar day.
+        return new Date(Number(year), Number(month) - 1, Number(day), 12).getTime();
+      }
+      const ts = Date.parse(raw);
+      return Number.isNaN(ts) ? null : ts;
+    }
+
+    async function fetchFirst(paths){
+      for (const p of paths){
+        try{
+          const res = await fetch(p, { cache:'no-cache' });
+          if (res.ok) return res.json();
+        }catch(_){}
+      }
+      throw new Error('All JSON paths failed');
+    }
+
+    function firstLine(text){
+      const clean = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!clean) return '';
+      const match = clean.match(/^.*?[.!?](?:\s|$)/);
+      const sentence = match ? match[0].trim() : clean;
+      return sentence.length > 140 ? `${sentence.slice(0, 137).trimEnd()}...` : sentence;
+    }
+
+    function normalizeText(text){
+      return String(text || '').toLowerCase();
+    }
+
+    function normalizeContributorHandle(name){
+      const text = String(name || '').trim();
+      if (!text) return '';
+      return text.startsWith('@') ? text : `@${text}`;
+    }
+
+    function normalizeContributors(item){
+      const list = [];
+      const pushContributor = (name, url) => {
+        const cleanName = String(name || '').trim();
+        const cleanUrl = String(url || '').trim();
+        if (!cleanName) return;
+        list.push({ name: cleanName, url: cleanUrl });
+      };
+
+      if (Array.isArray(item && item.contributors)){
+        item.contributors.forEach((entry) => {
+          if (!entry) return;
+          if (typeof entry === 'string'){
+            pushContributor(entry, '');
+            return;
+          }
+          if (typeof entry === 'object'){
+            pushContributor(
+              entry.name || entry.contributor || entry.handle,
+              entry.url || entry.contributor_url || entry.profile || ''
+            );
+          }
+        });
+      }
+
+      pushContributor(item && item.contributor, item && item.contributor_url);
+      pushContributor(item && item.contributor_2, item && item.contributor_url_2);
+      pushContributor(item && item.contributor_3, item && item.contributor_url_3);
+
+      return list.filter((entry, index, arr) => arr.findIndex((other) =>
+        normalizeText(other.name) === normalizeText(entry.name) &&
+        normalizeText(other.url) === normalizeText(entry.url)
+      ) === index).slice(0, 3);
+    }
+
+    function contributorOverlayHtml(contributors){
+      if (!Array.isArray(contributors) || !contributors.length) return '';
+      const names = contributors.map((entry) => {
+        const label = `<strong>${esc(normalizeContributorHandle(entry.name))}</strong>`;
+        return entry.url
+          ? `<a href="${esc(entry.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${label}</a>`
+          : label;
+      }).join(', ');
+      return `
+        <div class="submitted-by">
+          Proposed by ${names}
+        </div>
+      `;
+    }
+
+    function formatCatalogTitle(raw){
+      const text = String(raw || '').trim();
+      if (!text) return '';
+      const minorWords = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'via', 'with']);
+      const acronymPattern = /^(2d|3d|4d|rgb|rgbd|rgb-d|slam|lidar|cnn|rnn|gan|svm|ml|ai|nlp|uav|imu|sar|bim|ifc|gpr|vlm|llm|qa|hvac|lod3|ui|pcd)$/i;
+
+      return text.split(/\s+/).map((token, index, arr) => {
+        const parts = token.match(/^([^A-Za-z0-9]*)([A-Za-z0-9][A-Za-z0-9-]*)([^A-Za-z0-9]*)$/);
+        if (!parts) return token;
+        const [, prefix, core, suffix] = parts;
+
+        if ((/[A-Z].*[a-z]|[a-z].*[A-Z]/).test(core) && !/^[a-z]+$/.test(core)) {
+          return `${prefix}${core}${suffix}`;
+        }
+        if (/[A-Z]{2,}/.test(core) && !/[a-z]/.test(core)) {
+          return `${prefix}${core}${suffix}`;
+        }
+
+        const rendered = core.split('-').map(part => {
+          if (!part) return part;
+          if (acronymPattern.test(part)) return part.toUpperCase();
+          const lower = part.toLowerCase();
+          const previousToken = index > 0 ? arr[index - 1] : '';
+          const startsSegment = index === 0 || /[:.!?]["')\]]*$/.test(previousToken);
+          if (!core.includes('-') && !startsSegment && index < arr.length - 1 && minorWords.has(lower)) return lower;
+          return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+        }).join('-');
+
+        return `${prefix}${rendered}${suffix}`;
+      }).join(' ');
+    }
+
+    function datasetCountLabel(modalityVal){
+      const modalities = Array.isArray(modalityVal)
+        ? modalityVal.map(value => normalizeText(value).trim())
+        : String(modalityVal || '').split(',').map(value => normalizeText(value).trim());
+
+      if (!modalities.length) return 'samples';
+
+      const has = (pattern) => modalities.some(value => pattern.test(value));
+
+      if (has(/point\s*cloud|lidar|laser\s*scan|3d\s*scan/)) return 'point clouds';
+      if (has(/video|clip/)) return 'videos';
+      if (has(/document|text|pdf|report|specification|contract/)) return 'documents';
+      if (has(/audio|speech|sound/)) return 'audio files';
+      if (has(/bim|ifc|cad|mesh|graph/)) return 'models';
+      if (has(/timeseries|time\s*series|sensor|tabular|table|csv|database|sql/)) return 'records';
+      if (has(/image|rgb|thermal|satellite|aerial|depth/)) return 'images';
+
+      return 'samples';
+    }
+
+    function datasetCountSummary(ds){
+      const raw = ds && ds.num_images;
+      if (raw == null || raw === '') return '';
+
+      const text = String(raw).trim();
+      if (/[a-zA-Z]/.test(text)) return text;
+
+      const formatted = typeof raw === 'number' ? raw.toLocaleString() : text;
+      return `${formatted} ${datasetCountLabel(ds.data_modality)}`;
+    }
+
+    function buildSearchIndex(datasetsJson, modelsJson, usecasesJson, oersJson){
+      const datasets = Object.values(datasetsJson || {}).map(ds => ({
+        type: 'dataset',
+        label: 'Dataset',
+        title: formatCatalogTitle(ds.name || ds.id || 'Untitled dataset'),
+        href: `datasets/detail.html?id=${encodeURIComponent(ds.id || ds.name || '')}`,
+        meta: [ds.year, ds.data_modality, ds.authors ? String(ds.authors).split(',')[0].trim() : null].filter(Boolean).join(' · '),
+        text: [
+          ds.name, ds.id, ds.data_modality, ds.authors, ds.paper, ds.doi,
+          ...(Array.isArray(ds.potential_tasks) ? ds.potential_tasks : []),
+          ...(Array.isArray(ds.classes) ? ds.classes : [])
+        ].join(' ')
+      }));
+      const models = (Array.isArray(modelsJson) ? modelsJson : []).map(m => ({
+        type: 'model',
+        label: 'Model',
+        title: formatCatalogTitle(m.title || m.id || 'Untitled model'),
+        href: `models/details.html?id=${encodeURIComponent(m.id || m.title || '')}`,
+        meta: [m.year, Array.isArray(m.tasks) ? m.tasks.join(', ') : m.task, Array.isArray(m.authors) ? m.authors[0] : m.authors].filter(Boolean).join(' · '),
+        text: [
+          m.title, m.id, m.abstract, m.Paper, m.paper, m.paper_title, m.paper_url, m.doi, Array.isArray(m.authors) ? m.authors.join(' ') : m.authors,
+          ...(Array.isArray(m.tasks) ? m.tasks : normalizeText(m.task) ? [m.task] : []),
+          ...(Array.isArray(m.applications) ? m.applications : normalizeText(m.application) ? [m.application] : []),
+          ...(Array.isArray(m.modalities) ? m.modalities : normalizeText(m.modality) ? [m.modality] : [])
+        ].join(' ')
+      }));
+      const workflows = ((usecasesJson && usecasesJson.use_cases) || []).map(u => ({
+        type: 'workflow',
+        label: 'Workflow',
+        title: formatCatalogTitle(u.title || 'Untitled workflow'),
+        href: `deployments.html?q=${encodeURIComponent(u.title || '')}`,
+        meta: [u.year, Array.isArray(u.stakeholders) ? u.stakeholders[0] : null].filter(Boolean).join(' · '),
+        text: [
+          u.title, u.summary, u.phase, u.provider,
+          ...(Array.isArray(u.organizations) ? u.organizations : []),
+          ...(Array.isArray(u.companies) ? u.companies.map(c => c && c.name).filter(Boolean) : []),
+          ...(Array.isArray(u.stakeholders) ? u.stakeholders : []),
+          ...(Array.isArray(u.applications) ? u.applications : [])
+        ].join(' ')
+      }));
+      const oers = ((oersJson && oersJson.resources) || []).map(r => ({
+        type: 'oer',
+        label: 'OER',
+        title: formatCatalogTitle(r.title || 'Untitled resource'),
+        href: r.source || 'oer.html',
+        external: true,
+        meta: [r.year, r.provider || r.publisher].filter(Boolean).join(' · '),
+        text: [
+          r.title, r.provider, r.publisher, r.authors,
+          ...(Array.isArray(r.topics) ? r.topics : []),
+          ...(Array.isArray(r.institutions) ? r.institutions : [])
+        ].join(' ')
+      }));
+      return [...datasets, ...models, ...workflows, ...oers].map(item => ({
+        ...item,
+        haystack: normalizeText(`${item.title} ${item.meta} ${item.text}`)
+      }));
+    }
+
+    function renderSearchResults(items, query, scope){
+      if (!searchResults) return;
+      const scopeLabels = {
+        all: 'All resources',
+        dataset: 'Datasets',
+        model: 'Models',
+        workflow: 'Workflows',
+        oer: 'OERs'
+      };
+      const label = scopeLabels[scope] || 'All resources';
+      if (!query){
+        searchResults.hidden = true;
+        searchResults.innerHTML = '';
+        return;
+      }
+      if (!items.length){
+        searchResults.hidden = false;
+        searchResults.innerHTML = `
+          <div class="search-results-head">
+            <span>No results for "${esc(query)}"</span>
+            <span>${esc(label)}</span>
+          </div>
+          <div class="search-results-list">
+            <div class="search-result">
+              <span class="search-result-title">Try a broader keyword or switch scope.</span>
+            </div>
+          </div>`;
+        return;
+      }
+      searchResults.hidden = false;
+      searchResults.innerHTML = `
+        <div class="search-results-head">
+          <span>${items.length} result${items.length === 1 ? '' : 's'} for "${esc(query)}"</span>
+          <span>${esc(label)}</span>
+        </div>
+        <div class="search-results-list">
+          ${items.map(item => `
+            <a class="search-result" href="${esc(item.href)}"${item.external ? ' target="_blank" rel="noopener"' : ''}>
+              <span class="search-result-type">${esc(item.label)}</span>
+              <span class="search-result-title">${esc(item.title)}</span>
+              <span class="search-result-meta">${esc(item.meta || 'OpenConstruction catalog resource')}</span>
+            </a>
+          `).join('')}
+        </div>`;
+    }
+
+    function wireSearch(searchIndex){
+      if (!searchForm || !searchInput || !searchResults || !searchScopeSelect) return;
+      function runSearch(){
+        const query = searchInput.value.trim();
+        const scope = searchScopeSelect.value || 'all';
+        if (!query){
+          renderSearchResults([], '', scope);
+          return [];
+        }
+        const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const results = searchIndex
+          .filter(item => (scope === 'all' || item.type === scope) && terms.every(term => item.haystack.includes(term)))
+          .slice(0, 8);
+        renderSearchResults(results, query, scope);
+        return results;
+      }
+      searchInput.addEventListener('input', runSearch);
+      searchScopeSelect.addEventListener('change', runSearch);
+      searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const results = runSearch();
+        if (results[0]) window.location.href = results[0].href;
+      });
+      document.addEventListener('click', (event) => {
+        if (!searchResults.hidden && !searchForm.contains(event.target) && !searchResults.contains(event.target)){
+          searchResults.hidden = true;
+        }
+      });
+      searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim()) runSearch();
+      });
+    }
+
+    function pickItems(datasetsJson, modelsJson, usecasesJson, oersJson){
+      const datasets = Object.values(datasetsJson || {}).map(ds => ({
+        type: 'Dataset',
+        title: formatCatalogTitle(ds.name || 'Untitled dataset'),
+        meta: [ds.data_modality, datasetCountSummary(ds) || null].filter(Boolean).join(' · '),
+        year: ds.year,
+        href: `datasets/detail.html?id=${encodeURIComponent(ds.id || ds.name || '')}`,
+        image: ds.image_url || 'assets/img/placeholder/placeholder.png',
+        ts: parseDate(ds.added_date || ds.added),
+        cta: 'View dataset',
+        external: false,
+        contributors: normalizeContributors(ds)
+      }));
+
+      const models = (Array.isArray(modelsJson) ? modelsJson : []).map(m => ({
+        type: 'Model',
+        title: formatCatalogTitle(m.title || 'Untitled model'),
+        description: firstLine(m.abstract) || 'Model entry with tasks, code, and paper links.',
+        meta: [Array.isArray(m.tasks) ? m.tasks.join(', ') : m.task, Array.isArray(m.modalities) ? m.modalities[0] : m.modality].filter(Boolean).join(' · '),
+        year: m.year,
+        href: `models/details.html?id=${encodeURIComponent(m.id || m.title || '')}`,
+        image: m.thumbnail || (m.id ? `assets/img/models/${m.id}.png` : 'assets/img/models/_placeholder.png'),
+        ts: parseDate(m.added_date || m.added),
+        cta: 'View model',
+        external: false,
+        contributors: normalizeContributors(m)
+      }));
+
+      const usecases = ((usecasesJson && usecasesJson.use_cases) || []).map(u => ({
+        type: 'Workflow',
+        title: formatCatalogTitle(u.title || 'Untitled workflow'),
+        description: firstLine(u.summary) || 'Applied workflow connecting AI methods to field deployment.',
+        meta: [u.phase, Array.isArray(u.stakeholders) ? u.stakeholders[0] : null].filter(Boolean).join(' · '),
+        year: u.year,
+        href: `deployments.html?q=${encodeURIComponent(u.title || '')}`,
+        image: (Array.isArray(u.media) && u.media.find(media => media && media.type === 'image')?.url) || 'assets/img/placeholder/placeholder.png',
+        ts: parseDate(u.added_date || u.added),
+        cta: 'Open workflow',
+        external: false
+      }));
+
+      const oers = ((oersJson && oersJson.resources) || []).map(r => ({
+        type: 'OER',
+        title: formatCatalogTitle(r.title || 'Untitled resource'),
+        description: [Array.isArray(r.topics) ? r.topics[0] : null, Array.isArray(r.media) ? r.media[0] : null].filter(Boolean).join(' · ') || 'Open educational material for AEC teaching and training.',
+        meta: [r.provider || r.publisher, Array.isArray(r.institutions) ? r.institutions[0] : null].filter(Boolean).join(' · '),
+        year: r.year,
+        href: `oers/details.html?id=${encodeURIComponent(r.id || r.title || '')}`,
+        image: r.image || 'assets/img/placeholder/placeholder.png',
+        ts: parseDate(r.added || r.added_date),
+        cta: 'View Details',
+        external: false
+      }));
+
+      return [...datasets, ...models]
+        .filter(item => item.title && item.href)
+        .sort((a, b) => {
+          const aTime = a.ts || 0;
+          const bTime = b.ts || 0;
+          if (bTime !== aTime) return bTime - aTime;
+          return (b.year || 0) - (a.year || 0);
+        })
+        .slice(0, 12);
+    }
+
+    function render(items){
+      if (!items.length){
+        grid.innerHTML = `
+          <div class="featured-card">
+            <div class="featured-body">
+              <div class="featured-topline">
+                <span class="featured-type">Catalog</span>
+              </div>
+              <p class="featured-meta">Featured resources will appear here as data loads.</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => `
+        <article class="featured-card">
+          <div class="featured-card-link" role="link" tabindex="0"
+               onclick="${item.external ? `window.open('${esc(item.href)}', '_blank', 'noopener')` : `window.location.href='${esc(item.href)}'`}"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); ${item.external ? `window.open('${esc(item.href)}', '_blank', 'noopener')` : `window.location.href='${esc(item.href)}'`};}">
+            <div class="featured-media">
+              <img src="${esc(item.image)}" alt="${esc(item.title)}"
+                   onerror="this.onerror=null;this.src='assets/img/placeholder/placeholder.png';">
+              ${contributorOverlayHtml(item.contributors)}
+            </div>
+            <div class="featured-body">
+              <div class="featured-topline">
+                <span class="featured-type">${esc(item.type)}</span>
+                ${item.year ? `<span class="featured-year">${esc(item.year)}</span>` : ''}
+              </div>
+              <h3 class="featured-title">${esc(item.title)}</h3>
+              <p class="featured-meta">${esc(item.meta || 'OpenConstruction catalog resource')}</p>
+              <a class="featured-link" href="${esc(item.href)}"${item.external ? ' target="_blank" rel="noopener"' : ''} onclick="event.stopPropagation()">${esc(item.cta)}</a>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    const prevBtn = document.getElementById('featuredPrevBtn');
+    const nextBtn = document.getElementById('featuredNextBtn');
+    const leftFade = document.getElementById('featuredLeftFade');
+    const rightFade = document.getElementById('featuredRightFade');
+
+    function featuredCardStep(){
+      if (!grid) return 0;
+      const firstCard = grid.querySelector('.featured-card');
+      if (!firstCard) return 0;
+      const styles = window.getComputedStyle(grid);
+      const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+      return firstCard.getBoundingClientRect().width + gap;
+    }
+
+    function updateFeaturedControls(){
+      if (!grid || !prevBtn || !nextBtn) return;
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      const atStart = grid.scrollLeft <= 4;
+      const atEnd = grid.scrollLeft >= maxScroll - 4 || maxScroll <= 0;
+      prevBtn.disabled = atStart;
+      nextBtn.disabled = atEnd;
+      if (leftFade) leftFade.classList.toggle('is-hidden', atStart);
+      if (rightFade) rightFade.classList.toggle('is-hidden', atEnd);
+    }
+
+    function scrollFeatured(direction){
+      if (!grid) return;
+      const step = featuredCardStep();
+      if (!step) return;
+      grid.scrollBy({ left: direction * step, behavior: 'smooth' });
+      window.setTimeout(updateFeaturedControls, 220);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => scrollFeatured(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => scrollFeatured(1));
+    if (grid){
+      grid.addEventListener('scroll', () => window.requestAnimationFrame(updateFeaturedControls), { passive:true });
+      window.addEventListener('resize', updateFeaturedControls);
+    }
+
+    (async function(){
+      try{
+        const [datasetsJson, modelsJson, usecasesJson, oersJson] = await Promise.all([
+          fetchFirst(['data/datasets.json','assets/datasets.json','datasets.json']),
+          fetchFirst(['data/models.json','assets/models.json','models.json']),
+          fetchFirst([
+            'data/use-cases.json','assets/deployments.json','deployments.json',
+            'data/usecases.json','assets/usecases.json','usecases.json'
+          ]),
+          fetchFirst(['data/oer.json','assets/oer.json','oer.json'])
+        ]);
+        wireSearch(buildSearchIndex(datasetsJson, modelsJson, usecasesJson, oersJson));
+        render(pickItems(datasetsJson, modelsJson, usecasesJson, oersJson));
+        updateFeaturedControls();
+      }catch(_){
+        render([]);
+        updateFeaturedControls();
+      }
+    })();
+  })();
+
+  // Auto-highlight current nav
+  (function(){
+    const path = (location.pathname || '').replace(/\/+$/, '');
+    const file = path.split('/').pop() || 'index.html';
+    const routeByFile = {
+      '': 'index',
+      'index': 'index', 'index.html': 'index',
+      'dataset': 'dataset', 'dataset.html': 'dataset',
+      'models': 'models', 'models.html': 'models',
+      'contributors': 'contributors', 'contributors.html': 'contributors',
+      'deployments': 'deployments', 'deployments.html': 'deployments'
+    };
+    const route = routeByFile[file] || (file.includes('index') ? 'index' : '');
+    document.querySelectorAll('.navbar .nav-link.plain').forEach(a => {
+      if (a.dataset.route === route){
+        a.classList.add('active');
+        a.setAttribute('aria-current','page');
+      }
+    });
+  })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/institutions.js"></script>
+<script>
+  (function(){
+    var api = window.OpenConstructionInstitutions;
+    var marquee = document.getElementById('indexInstitutionMarquee');
+    if (!api || !marquee) return;
+    api.renderInstitutionMarquee({
+      target: marquee,
+      url: 'data/institutions.json',
+      speed: 46
+    }).then(function(result){
+      var el = document.getElementById('institutionCount');
+      if (el && result && result.count) {
+        var rounded = Math.floor(result.count / 10) * 10;
+        el.textContent = rounded + '+';
+      }
+    }).catch(function(){});
+  })();
+</script>
+
+<!-- Subscribe Modal -->
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+    <div class="modal-content oc-modal-compact">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="m-0 fw-semibold">Subscribe</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form action="https://github.us5.list-manage.com/subscribe/post?u=12fa0b9a59e8110ba3a89fc76&amp;id=696e3eb0b3&amp;f_id=006fbeedf0" 
+            method="post" target="_blank" novalidate>
+        <label for="sub-email" class="form-label small text-muted mb-1">Email</label>
+        <input type="email" id="sub-email" name="EMAIL" class="form-control mb-2"
+               placeholder="you@university.edu" required>
+
+        <button type="submit" class="btn btn-primary w-100 mt-2">Subscribe</button>
+
+        <!-- Mailchimp anti-bot -->
+        <div style="position:absolute; left:-5000px" aria-hidden="true">
+          <input type="text" name="b_12fa0b9a59e8110ba3a89fc76_696e3eb0b3" tabindex="-1" value="">
+        </div>
+
+        <p class="small text-muted mt-2 mb-0">
+          We’ll email only when new datasets or models are added. Unsubscribe anytime.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/assistant.js"></script>
+</body>
+</html>

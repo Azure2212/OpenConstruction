@@ -1,0 +1,867 @@
+// Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+// SPDX-License-Identifier: Apache-2.0
+
+const CLASS_LIMIT = 5;
+
+let ALL = {}; let LIST = [];
+
+let MODALITIES = new Map(); // normKey -> pretty label
+let TASKS      = new Map(); // normKey -> pretty label
+let LICENSES   = new Map(); // RAW -> formatted display
+let CLASSES    = new Map(); // normClassKey -> {label, count}
+
+const showAll = { modalities:false, tasks:false, licenses:false, classes:false };
+let facetsBound = false;
+let syncingUrlState = false;
+
+// ---------- helpers ----------
+function normKey(s){
+  if (s == null) return '';
+  return String(s).trim().replace(/[_-]+/g,' ').replace(/\s+/g,' ').toLowerCase();
+}
+function prettyLabel(raw){
+  const vocabLabel = window.ocPreferredTaskLabel ? window.ocPreferredTaskLabel(raw) : '';
+  if (vocabLabel) return vocabLabel;
+  const k = normKey(raw);
+  const preferred = {
+    'object detection': 'Object Detection',
+    'semantic segmentation': 'Semantic Segmentation',
+    'object segmentation': 'Object Segmentation',
+    'image captioning': 'Image Captioning',
+    'action recognition': 'Action Recognition',
+    'crew activity recognition': 'Crew Activity Recognition',
+    'simultaneous localization and mapping': 'Simultaneous Localization and Mapping',
+    'pose estimation': 'Pose Estimation',
+    'object tracking': 'Object Tracking',
+    'point cloud segmentation': 'Point Cloud Segmentation',
+    'point cloud generation': 'Point Cloud Generation',
+    'point cloud visualization': 'Point Cloud Visualization',
+    '3d reconstruction': '3D Reconstruction',
+    '3d registration': '3D Registration',
+    '3d rendering': '3D Rendering',
+    'image to image translation': 'Image-to-Image Translation',
+    'image synthesis': 'Image Synthesis',
+    'knowledge reasoning': 'Knowledge Reasoning',
+    'knowledge graph construction': 'Knowledge Graph Construction',
+    'information retrieval': 'Information Retrieval',
+    'question answering': 'Question Answering',
+    'visual question answering': 'Visual Question Answering',
+    'video qa': 'Video QA',
+    'vision language reasoning': 'Vision-Language Reasoning',
+    'scan to bim': 'Scan-to-BIM',
+    'text to bim': 'Text-to-BIM',
+    'floorplan to bim': 'Floorplan-to-BIM',
+    '2d to bim reconstruction': '2D-to-BIM Reconstruction',
+    'bim object classification': 'BIM Object Classification',
+    'bim alignment': 'BIM Alignment',
+    'semantic bim change detection': 'Semantic BIM Change Detection',
+    'cad generation': 'CAD Generation',
+    'model context protocol': 'Model Context Protocol',
+    'building localization': 'Building Localization',
+    'damage classification': 'Damage Classification',
+    'sewer defect classification': 'Sewer Defect Classification',
+    'safety monitoring': 'Safety Monitoring',
+    'site understanding': 'Site Understanding',
+    'structural condition monitoring': 'Structural Condition Monitoring',
+    'site mapping and navigation': 'Site Mapping and Navigation',
+    'automated structural design': 'Automated Structural Design',
+    'conceptual design': 'Conceptual Design',
+    'compliance checking': 'Compliance Checking',
+    'quality control': 'Quality Control',
+    'shear wall layout generation': 'Shear Wall Layout Generation',
+    'plan recognition': 'Plan Recognition',
+    'as built bim generation': 'As-Built BIM Generation',
+    'ergonomic assessment': 'Ergonomic Assessment',
+    'productivity monitoring': 'Productivity Monitoring',
+    'floorplan generation': 'Floorplan Generation',
+    'building energy analysis': 'Building Energy Analysis',
+    '3d building mesh generation': '3D Building Mesh Generation',
+    'design brief automation': 'Design Brief Automation',
+    'historic digital survey': 'Historic Digital Survey',
+    'progress monitoring': 'Progress Monitoring',
+    'knowledge management': 'Knowledge Management',
+    'change detection': 'Change Detection',
+    'lod3 building model generation': 'LOD3 Building Model Generation',
+    'digital twin enrichment': 'Digital Twin Enrichment',
+    'digital twin generation': 'Digital Twin Generation',
+    'computer aided design': 'Computer-Aided Design',
+    'video based ui understanding': 'Video-Based UI Understanding',
+    'work package generation': 'Work Package Generation',
+    'bim authoring assistance': 'BIM Authoring Assistance',
+    'blockchain enabled bim management': 'Blockchain-Enabled BIM Management',
+    'design change auditing': 'Design Change Auditing',
+    'cross platform bim data exchange': 'Cross-Platform BIM Data Exchange',
+    'asset management': 'Asset Management',
+    'post disaster damage assessment': 'Post-Disaster Damage Assessment',
+    'post disaster assessment': 'Post-Disaster Assessment',
+    'building performance simulation': 'Building Performance Simulation',
+    'energy modelling': 'Energy Modelling',
+    'hvac model generation': 'HVAC Model Generation',
+    'life cycle assessment': 'Life Cycle Assessment',
+    'structural defect detection': 'Structural Defect Detection',
+    'pipeline leakage detection': 'Pipeline Leakage Detection',
+    'subsurface infrastructure monitoring': 'Subsurface Infrastructure Monitoring'
+  };
+  if (preferred[k]) return preferred[k];
+  return k.split(' ').map(tok=>{
+    if (/^(2d|3d|4d|rgb|rgbd|rgb-d|slam|lidar|cnn|rnn|gan|svm|ml|ai|nlp|uav|imu|sar|bim|ifc|gpr|vlm|llm|qa|hvac|lod3|ui|pcd)$/i.test(tok)) return tok.toUpperCase();
+    return tok.charAt(0).toUpperCase()+tok.slice(1);
+  }).join(' ');
+}
+function formatDatasetTitle(raw){
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  const minorWords = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'via', 'with']);
+  const acronymPattern = /^(2d|3d|4d|rgb|rgbd|rgb-d|slam|lidar|cnn|rnn|gan|svm|ml|ai|nlp|uav|imu|sar|bim|ifc|gpr|vlm|llm|qa|hvac|lod3|ui|pcd)$/i;
+
+  return text.split(/\s+/).map((token, index, arr) => {
+    const parts = token.match(/^([^A-Za-z0-9]*)([A-Za-z0-9][A-Za-z0-9-]*)([^A-Za-z0-9]*)$/);
+    if (!parts) return token;
+    const [, prefix, core, suffix] = parts;
+
+    if ((/[A-Z].*[a-z]|[a-z].*[A-Z]/).test(core) && !/^[a-z]+$/.test(core)) {
+      return `${prefix}${core}${suffix}`;
+    }
+    if (/[A-Z]{2,}/.test(core) && !/[a-z]/.test(core)) {
+      return `${prefix}${core}${suffix}`;
+    }
+
+    const rendered = core.split('-').map(part => {
+      if (!part) return part;
+      if (acronymPattern.test(part)) return part.toUpperCase();
+      const lower = part.toLowerCase();
+      const previousToken = index > 0 ? arr[index - 1] : '';
+      const startsSegment = index === 0 || /[:.!?]["')\]]*$/.test(previousToken);
+      if (!core.includes('-') && !startsSegment && index < arr.length - 1 && minorWords.has(lower)) return lower;
+      return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+    }).join('-');
+
+    return `${prefix}${rendered}${suffix}`;
+  }).join(' ');
+}
+
+function normalizeContributorHandle(name){
+  const text = String(name || '').trim();
+  if (!text) return '';
+  return text.startsWith('@') ? text : `@${text}`;
+}
+
+function escapeHtml(text){
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeContributors(item){
+  const list = [];
+  const pushContributor = (name, url) => {
+    const cleanName = String(name || '').trim();
+    const cleanUrl = String(url || '').trim();
+    if (!cleanName) return;
+    list.push({ name: cleanName, url: cleanUrl });
+  };
+
+  if (Array.isArray(item?.contributors)){
+    item.contributors.forEach(entry => {
+      if (!entry) return;
+      if (typeof entry === 'string'){
+        pushContributor(entry, '');
+        return;
+      }
+      if (typeof entry === 'object'){
+        pushContributor(
+          entry.name || entry.contributor || entry.handle,
+          entry.url || entry.contributor_url || entry.profile || ''
+        );
+      }
+    });
+  }
+
+  pushContributor(item?.contributor, item?.contributor_url);
+  pushContributor(item?.contributor_2, item?.contributor_url_2);
+  pushContributor(item?.contributor_3, item?.contributor_url_3);
+
+  return list.filter((entry, index, arr) => arr.findIndex(other =>
+    normKey(other.name) === normKey(entry.name) && normKey(other.url) === normKey(entry.url)
+  ) === index).slice(0, 3);
+}
+
+function contributorOverlayHTML(item){
+  const contributors = normalizeContributors(item);
+  if (!contributors.length) return '';
+
+  const names = contributors.map(entry => {
+    const label = `<strong>${escapeHtml(normalizeContributorHandle(entry.name))}</strong>`;
+    return entry.url
+      ? `<a href="${escapeHtml(entry.url)}" target="_blank" rel="noopener">${label}</a>`
+      : label;
+  }).join(', ');
+
+  return `<div class="submitted-by">
+    Proposed by ${names}
+  </div>`;
+}
+
+// --- singularize last token only (lightweight) ---
+function singularizeToken(t){
+  const irr = { people:'person', men:'man', women:'woman', children:'child', feet:'foot', geese:'goose', mice:'mouse', teeth:'tooth' };
+  if (irr[t]) return irr[t];
+  if (/ies$/.test(t) && t.length>3) return t.replace(/ies$/,'y');        // bodies -> body
+  if (/(xes|zes|ches|shes|sses)$/.test(t)) return t.replace(/es$/,'');   // boxes -> box
+  if (/ves$/.test(t) && t.length>3) return t.replace(/ves$/,'f');        // leaves -> leaf (best-effort)
+  if (t.endsWith('s') && !/(ss|us)$/.test(t)) return t.slice(0,-1);      // cars -> car
+  return t;
+}
+
+// strip qualifiers like "(idle)", "(dump)"
+function stripParens(raw){
+  return String(raw).replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// normalized key for CLASSES: remove parentheses then singularize last word
+function normClassKey(raw){
+  let base = stripParens(raw);
+  let k = normKey(base);
+  if (!k) return '';
+  const parts = k.split(' ');
+  parts[parts.length-1] = singularizeToken(parts[parts.length-1]);
+  return parts.join(' ');
+}
+function prettyClassLabel(raw){
+  const parts = normClassKey(raw).split(' ');
+  return parts.map(prettyLabel).join(' ').trim();
+}
+
+// ---------- modality canonicalization (multi) ----------
+
+// Canonicalize a single free-text modality description into one label
+function canonicalizeModalityLabel(raw){
+  if (!raw) return 'Other';
+  const s = normKey(raw);
+  const has = re => re.test(s);
+
+  const hasSynthetic = has(/\bsynthetic\b|simulat(?:e|ed|ion)|render(?:ed|ing)?|\bcg\b|\bcgi\b|computer[ -]?generated|virtual|digital\s*twin|sim[-\s]?to[-\s]?real|sim2real|unreal|unity|blender|gazebo|airsim|carla|\bgta\b/);
+
+  const hasLidar   = has(/\blidar\b|li[\s-]?dar|\bvelodyne\b|\brplidar\b/);
+  const hasPC      = has(/point\s*cloud/);
+  const hasDepth   = has(/\bdepth\b|\brgb\s*-?\s*d\b|\brgbd\b|\bstereo\b|\bkinect\b/); // accepts "rgb-d" and "rgb d"
+  const hasThermal = has(/\bthermal\b|\binfrared\b|\b(ir)\b/);
+  const hasGPR     = has(/\bgpr\b|ground[-\s]?penetrating\s*radar|radargram|b[-\s]?scan|c[-\s]?scan/);
+
+  const hasMulti   = has(/\bmultispectral\b/);
+  const hasHyper   = has(/\bhyperspectral\b/);
+  const hasVideo   = has(/\bvideo\b|\bsequence\b|\bstream\b/);
+  const hasSat     = has(/\bsatellite\b|\blandsat\b|\bsentinel\b/);
+  const hasAerial  = has(/\baerial\b|\bdrone\b|\buav\b|\bauv\b/);
+  const hasGround  = has(/\bground\b|\bhandheld\b|\bphone\b|\bmobile\b|\bvehicle\b|\brover\b/);
+  const hasRGB     = has(/\brgb\b|\bimage\b|\bphoto\b/);
+  const hasBIM = has(/\b(ifc|bim|revit|rvt|navisworks|nwd|nwc|nwf|archicad|openbim|gbxml)\b/);
+  const hasDrawingCAD = has(/\b(cad|autocad|dwg|dxf|blueprint)\b|floor\s*plan|plan\s*view|construction\s*drawing|technical\s*drawing|shop\s*drawing|as[-\s]*built|\belevation\b|\bsection\b/i);
+
+
+  const isRasterCAD = hasDrawingCAD;
+  const isBIMIFC    = hasBIM && !hasDrawingCAD;
+
+  const hasText    = has(/\btext\b|\bdocument\b|\bpdf\b|\bcode\b|\bnlp\b|\btextual\b/);
+  const hasIMU = has(/\bimu\b|inertial\s+measurement\s+unit|accelerometer|gyroscope|magnetometer/);
+  const hasGeospatial = has(/\bgeospatial\b|\bgis\b|shapefile|geojson|geodatabase|geopackage|orthomosaic|orthophoto|dem\b|dsm\b|dtm\b|georeferenc(?:e|ed)|topograph(?:y|ic)|cartograph(?:y|ic)/);
+  const hasTabular = has(/\btabular\b|\btable\b|\bspreadsheet\b|\bcsv\b|\bxls\b|\bxlsx\b|\bparquet\b|\btsv\b|\brelational\b|\bdatabase\b|\bsql\b/);
+  const hasBuildingModel = has(/\bbuilding\s*model\b|\bbuilding\s*models\b/);
+  const hasLod2 = has(/\blod\s*2\b|\blod2\b/);
+
+
+
+  if (hasAerial && hasLidar && hasPC) return 'Aerial LiDAR Point Clouds';
+  if (hasLod2 && hasBuildingModel) return 'LoD2 Building Models';
+  if (hasLidar)   return 'LiDAR';
+  if (hasGPR)     return 'GPR Radargram';
+  if (hasIMU)       return 'IMU';
+  if (hasDepth)   return 'RGB-D';
+  if (hasThermal) return 'Thermal';
+  if (hasMulti)   return 'Multispectral';
+  if (hasHyper)   return 'Hyperspectral';
+  if (hasPC)      return '3D Point Cloud';
+  if (hasVideo)   return 'Video Clips';
+  if (hasSat)     return hasRGB ? 'Satellite RGB' : 'Satellite';
+  if (hasAerial)  return hasRGB ? 'Aerial RGB'    : 'Aerial';
+  if (hasGround)  return hasRGB ? 'Ground RGB'    : 'Ground';
+  if (isBIMIFC)   return 'BIM/IFC';
+  if (isRasterCAD) return 'Raster CAD';
+  if (hasSynthetic) return 'Synthetic';
+  if (hasTabular) return 'Tabular';
+  if (hasText)    return 'Text';
+  if (hasGeospatial) return 'Geospatial Data';
+  return 'Other';
+}
+
+// Split and canonicalize to an ARRAY of modalities.
+// Adds a separate "Synthetic" tag if the overall text implies it.
+function canonicalizeModalityLabels(raw){
+  if (raw == null) return ['Other'];
+
+  let parts = Array.isArray(raw) ? raw.slice() : String(raw).split(/[,/&+]| and /gi);
+  parts = parts.map(p => p && p.trim()).filter(Boolean);
+  if (!parts.length) parts = [String(raw)];
+
+  const labels = new Set();
+  const globalHasSynthetic = /\bsynthetic\b|simulat(?:e|ed|ion)|render(?:ed|ing)?|\bcg\b|\bcgi\b|computer[ -]?generated|virtual|digital\s*twin|sim[-\s]?to[-\s]?real|sim2real|unreal|unity|blender|gazebo|airsim|carla|\bgta\b/i.test(String(raw));
+
+  for (const p of parts){
+    labels.add(canonicalizeModalityLabel(p));
+  }
+  if (globalHasSynthetic) labels.add('Synthetic');
+
+  // Replace 'Other' if more meaningful labels present
+  if (labels.size > 1 && labels.has('Other')) labels.delete('Other');
+
+  return Array.from(labels);
+}
+
+function modalityDisplayLabels(raw){
+  if (raw == null) return [];
+  const parts = Array.isArray(raw) ? raw.slice() : String(raw).split(',');
+  return parts.map(part => String(part || '').trim()).filter(Boolean);
+}
+
+function datasetCountLabel(modalityVal){
+  const modalities = Array.isArray(modalityVal)
+    ? modalityVal.map(v => normKey(v))
+    : String(modalityVal || '').split(',').map(v => normKey(v));
+
+  if (!modalities.length) return 'Samples';
+
+  const has = pattern => modalities.some(v => pattern.test(v));
+
+  if (has(/point\s*cloud|lidar|laser\s*scan|3d\s*scan/)) return 'Point Clouds';
+  if (has(/video|clip/)) return 'Videos';
+  if (has(/document|text|pdf|report|specification|contract/)) return 'Documents';
+  if (has(/audio|speech|sound/)) return 'Audio Files';
+  if (has(/bim|ifc|cad|mesh|graph/)) return 'Models';
+  if (has(/timeseries|time\s*series|sensor|tabular|table|csv|database|sql/)) return 'Records';
+  if (has(/image|rgb|thermal|satellite|aerial|depth/)) return 'Images';
+
+  return 'Samples';
+}
+
+function datasetCountSummary(ds){
+  const raw = ds?.num_images;
+  if (raw == null || raw === '') return '—';
+
+  const text = String(raw).trim();
+  if (/[a-zA-Z]/.test(text)) return text;
+
+  return `${formatInt(raw)} ${datasetCountLabel(ds?.data_modalities?.length ? ds.data_modalities : ds?.data_modality).toLowerCase()}`;
+}
+
+// licenses
+function formatLicenseLabel(raw){
+  if (raw == null) return '';
+  let s = String(raw).trim();
+  s = s.replace(/\bapache\s*[- ]?\s*2\.?0\b/i, 'Apache-2.0');
+  s = s.replace(/\bcc\s*0\b/i, 'CC0');
+  s = s.replace(/\bcc\b/gi,'CC').replace(/\bby\b/gi,'BY').replace(/\bsa\b/gi,'SA').replace(/\bnc\b/gi,'NC').replace(/\bnd\b/gi,'ND');
+  return s;
+}
+
+// ---------- canonicalize datasets (tasks/classes/modalities) ----------
+function buildCanonMap(values, keyFn){
+  const map = new Map();
+  for (const v of values){
+    const k = keyFn(v);
+    if (!k) continue;
+    const cand = keyFn === normClassKey ? prettyClassLabel(v) : prettyLabel(v);
+    const prev = map.get(k);
+    if (!prev || cand.length < prev.length) map.set(k, cand);
+  }
+  return map;
+}
+
+function canonicalizeAllDatasets(){
+  const allTasks = [], allClasses = [];
+  Object.values(ALL).forEach(ds=>{
+    if (Array.isArray(ds.potential_tasks)) allTasks.push(...ds.potential_tasks);
+    if (Array.isArray(ds.classes)) allClasses.push(...ds.classes);
+  });
+
+  const TASK_CANON  = buildCanonMap(allTasks,  normKey);
+  const CLASS_CANON = buildCanonMap(allClasses, normClassKey);
+
+  Object.values(ALL).forEach(ds=>{
+    // Tasks
+    if (Array.isArray(ds.potential_tasks)){
+      const set = new Set(ds.potential_tasks.map(t => TASK_CANON.get(normKey(t)) || prettyLabel(t)));
+      ds.potential_tasks = Array.from(set).sort((a,b)=>a.localeCompare(b));
+    }
+
+    // Classes
+    if (Array.isArray(ds.classes)){
+      const set = new Set(ds.classes.map(c => CLASS_CANON.get(normClassKey(c)) || prettyClassLabel(c)));
+      ds.classes = Array.from(set).sort((a,b)=>a.localeCompare(b));
+      ds.num_classes = ds.classes.length;
+    }
+
+    // Modalities
+    const rawModality = ds.data_modality ?? ds.data_modalities ?? '';
+    const arr = canonicalizeModalityLabels(rawModality);
+    const displayArr = modalityDisplayLabels(rawModality);
+    ds.data_modalities = arr;                // array of pretty labels
+    ds.data_modality_display = displayArr.join(', ');
+    ds._mod_keys = arr.map(m => normKey(m)); // normalized keys for filtering
+    // Back-compat display string if referenced elsewhere
+    ds.data_modality = arr.join(', ');
+  });
+}
+
+// ---------- facet builders ----------
+function makeCheck(id,label,value,count){
+  const countBadge = (typeof count==='number' && id!=='class') ? ` <span class="text-muted">${count}</span>` : '';
+  return `<label class="form-check small d-flex align-items-center gap-2">
+    <input class="form-check-input" type="checkbox" data-group="${id}" value="${value}">
+    <span class="form-check-label flex-grow-1">${label}${countBadge}</span>
+  </label>`;
+}
+function ensureToggleButton(containerId, btnId, facetKey, collapsedText, expandedText, renderFn){
+  let btn = document.getElementById(btnId);
+  if(!btn){
+    btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = btnId;
+    btn.className = 'btn btn-link p-0 facet-toggle';
+    const container = document.getElementById(containerId);
+    if (container) container.insertAdjacentElement('afterend', btn);
+  }
+  btn.textContent = showAll[facetKey] ? expandedText : collapsedText;
+  btn.onclick = ()=>{ showAll[facetKey] = !showAll[facetKey]; renderFn(); };
+}
+
+function collectFacets(){
+  MODALITIES = new Map(); TASKS = new Map(); LICENSES = new Map(); CLASSES = new Map();
+
+  Object.values(ALL).forEach(ds=>{
+    // MODALITIES: add every modality label
+    if (Array.isArray(ds.data_modalities)){
+      ds.data_modalities.forEach(m=>{
+        const k = normKey(m);
+        if (!MODALITIES.has(k)) MODALITIES.set(k, m);
+      });
+    } else if (ds.data_modality){ // fallback single string
+      const k = normKey(ds.data_modality);
+      if (!MODALITIES.has(k)) MODALITIES.set(k, ds.data_modality);
+    }
+
+    if (Array.isArray(ds.potential_tasks)){
+      ds.potential_tasks.forEach(t=> TASKS.set(normKey(t), prettyLabel(t)));
+    }
+    if (ds.license){
+      const raw = String(ds.license).trim();
+      if (raw && !LICENSES.has(raw)) LICENSES.set(raw, formatLicenseLabel(raw));
+    }
+    if (Array.isArray(ds.classes)){
+      ds.classes.forEach(c=>{
+        const k = normClassKey(c);
+        const lab = prettyClassLabel(c);
+        const prev = CLASSES.get(k);
+        CLASSES.set(k, { label: lab, count: prev ? prev.count + 1 : 1 });
+      });
+    }
+  });
+
+  renderFacetLists();
+  bindFacetSearch();
+}
+
+// ---------- facet renderers ----------
+function renderFacetLists(){
+  renderModalityList(); renderTaskList(); renderLicenseList(); renderClassList();
+  if (!facetsBound){
+    ['filter-modality','filter-task','filter-license','filter-classes'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.addEventListener('change', applyFilters);
+    });
+    facetsBound = true;
+  }
+}
+function filterByQuery(items,q){ if(!q) return items; const ql=q.toLowerCase(); return items.filter(x=>x.label.toLowerCase().includes(ql)); }
+
+function renderModalityList(){
+  const id='filter-modality', btn='toggleModality';
+  let items = Array.from(MODALITIES.entries()).map(([k,label])=>({label, value:k})).sort((a,b)=>a.label.localeCompare(b.label));
+  const limited = showAll.modalities ? items : items.slice(0,CLASS_LIMIT);
+  const html = limited.map(m=>makeCheck('modality',m.label,m.value)).join('') || '<div class="text-muted small">No modalities</div>';
+  const node = document.getElementById(id); if (node) node.innerHTML = html;
+  ensureToggleButton(id,btn,'modalities','Show all','Show less',renderModalityList);
+}
+function renderTaskList(){
+  const id='filter-task', btn='toggleTasks';
+  const q = document.getElementById('taskSearch')?.value || '';
+  let items = Array.from(TASKS.entries()).map(([k,label])=>({label,value:k}));
+  items = filterByQuery(items,q).sort((a,b)=>a.label.localeCompare(b.label));
+  const limited = (!showAll.tasks && !q) ? items.slice(0,CLASS_LIMIT) : items;
+  const node = document.getElementById(id);
+  if (node) node.innerHTML = limited.map(it=>makeCheck('task',it.label,it.value)).join('') || '<div class="text-muted small">No tasks</div>';
+  ensureToggleButton(id,btn,'tasks','Show all','Show less',renderTaskList);
+}
+function renderLicenseList(){
+  const id='filter-license', btn='toggleLicenses';
+  const q = document.getElementById('licenseSearch')?.value || '';
+  let items = Array.from(LICENSES.entries()).map(([raw,label])=>({label,value:raw})).sort((a,b)=>a.label.localeCompare(b.label));
+  items = filterByQuery(items,q);
+  const limited = (!showAll.licenses && !q) ? items.slice(0,CLASS_LIMIT) : items;
+  const node = document.getElementById(id);
+  if (node) node.innerHTML = limited.map(it=>makeCheck('license',it.label,it.value)).join('') || '<div class="text-muted small">No licenses</div>';
+  ensureToggleButton(id,btn,'licenses','Show all','Show less',renderLicenseList);
+}
+function renderClassList(){
+  const id='filter-classes', btn='toggleClasses';
+  const q = (document.getElementById('classSearch')?.value || '').toLowerCase();
+
+  let entries = Array.from(CLASSES.entries()).map(([k,obj])=>({key:k,label:obj.label,count:obj.count}));
+
+  const selected = new Set(Array.from(document.querySelectorAll('input[data-group="class"]:checked')).map(el=>el.value));
+
+  entries.sort((a,b)=>{
+    const aSel = selected.has(a.key), bSel = selected.has(b.key);
+    if (aSel!==bSel) return aSel?-1:1;
+    if (b.count!==a.count) return b.count-a.count;
+    return a.label.localeCompare(b.label);
+  });
+
+  if (q) entries = entries.filter(it => it.label.toLowerCase().includes(q));
+
+  const limited = (!showAll.classes && !q) ? entries.slice(0,CLASS_LIMIT) : entries;
+
+  const html = limited.map(it=>{
+    let display = it.label.replace(/\s+\(?\d+\)?$/,'');
+    return makeCheck('class', display.trim(), it.key);
+  }).join('');
+
+  const node = document.getElementById(id); if (node) node.innerHTML = html || '<div class="text-muted small">No classes</div>';
+  ensureToggleButton(id,btn,'classes','Show all classes','Show less',renderClassList);
+}
+
+// ---------- search boxes ----------
+function bindFacetSearch(){
+  ['taskSearch','licenseSearch','classSearch'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.addEventListener('input', ()=>{
+      if(id==='taskSearch') renderTaskList();
+      if(id==='licenseSearch') renderLicenseList();
+      if(id==='classSearch') renderClassList();
+    });
+  });
+}
+
+function splitParam(value){
+  return String(value || '').split(',').map(v=>v.trim()).filter(Boolean);
+}
+function setCheckedValues(group, values){
+  const wanted = new Set(values);
+  document.querySelectorAll(`input[data-group="${group}"]`).forEach(input=>{
+    input.checked = wanted.has(input.value);
+  });
+}
+function syncUrlState(){
+  if (syncingUrlState) return;
+  const f = readFilters();
+  const sort = document.getElementById('sortBy')?.value || 'added-desc';
+  const params = new URLSearchParams();
+  if (f.q) params.set('q', f.q);
+  if (sort !== 'added-desc') params.set('sort', sort);
+  if (f.yMin !== parseInt(document.getElementById('yearRangeMin')?.min || f.yMin, 10)) params.set('yearMin', String(f.yMin));
+  if (f.yMax !== parseInt(document.getElementById('yearRangeMax')?.max || f.yMax, 10)) params.set('yearMax', String(f.yMax));
+  if (f.mods.length) params.set('modalities', f.mods.join(','));
+  if (f.tasks.length) params.set('tasks', f.tasks.join(','));
+  if (f.licenses.length) params.set('licenses', f.licenses.join(','));
+  if (f.classes.length) params.set('classes', f.classes.join(','));
+  const query = params.toString();
+  history.replaceState(null, '', query ? `${location.pathname}?${query}` : location.pathname);
+}
+function restoreStateFromUrl(){
+  syncingUrlState = true;
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q') || '';
+  const qEl = document.getElementById('q');
+  const qDockEl = document.getElementById('qDock');
+  if (qEl) qEl.value = q;
+  if (qDockEl) qDockEl.value = q;
+
+  const sort = params.get('sort');
+  const sortEl = document.getElementById('sortBy');
+  if (sort && sortEl) sortEl.value = sort;
+
+  const yrMinEl = document.getElementById('yearRangeMin');
+  const yrMaxEl = document.getElementById('yearRangeMax');
+  if (yrMinEl && params.get('yearMin')) yrMinEl.value = params.get('yearMin');
+  if (yrMaxEl && params.get('yearMax')) yrMaxEl.value = params.get('yearMax');
+  if (yrMinEl && yrMaxEl){
+    if (+yrMinEl.value > +yrMaxEl.value) yrMaxEl.value = yrMinEl.value;
+    const minValEl = document.getElementById('yearRangeMinVal');
+    const maxValEl = document.getElementById('yearRangeMaxVal');
+    if (minValEl) minValEl.textContent = yrMinEl.value;
+    if (maxValEl) maxValEl.textContent = yrMaxEl.value;
+  }
+
+  setCheckedValues('modality', splitParam(params.get('modalities')));
+  setCheckedValues('task', splitParam(params.get('tasks')));
+  setCheckedValues('license', splitParam(params.get('licenses')));
+  setCheckedValues('class', splitParam(params.get('classes')));
+  syncingUrlState = false;
+}
+
+// ---------- filtering & render ----------
+function readFilters(){
+  const q = document.getElementById('q')?.value.trim() || '';
+  const yMin = parseInt(document.getElementById('yearRangeMin')?.value||'-999999',10);
+  const yMax = parseInt(document.getElementById('yearRangeMax')?.value||'999999',10);
+  const mods = Array.from(document.querySelectorAll('input[data-group="modality"]:checked')).map(el=>el.value);
+  const tasks = Array.from(document.querySelectorAll('input[data-group="task"]:checked')).map(el=>el.value);
+  const licenses = Array.from(document.querySelectorAll('input[data-group="license"]:checked')).map(el=>el.value);
+  const classes = Array.from(document.querySelectorAll('input[data-group="class"]:checked')).map(el=>el.value);
+  return { q, yMin, yMax, mods, tasks, licenses, classes };
+}
+
+function applyFilters(){
+  const f = readFilters();
+  const qNeedle = f.q.toLowerCase();
+  const minEl=document.getElementById('yearRangeMinVal'), maxEl=document.getElementById('yearRangeMaxVal');
+  if(minEl) minEl.textContent=f.yMin; if(maxEl) maxEl.textContent=f.yMax;
+
+  LIST = Object.values(ALL).filter(ds=>{
+    const dsName = (ds.name||'');
+    const dsTaskKeys = Array.isArray(ds.potential_tasks)? ds.potential_tasks.map(normKey):[];
+    const dsLicenseRaw = (ds.license||'').trim();
+    const dsClassKeys = Array.isArray(ds.classes)? ds.classes.map(normClassKey):[];
+    const dsModKeys = Array.isArray(ds._mod_keys) ? ds._mod_keys : (ds.data_modality ? [normKey(ds.data_modality)] : []);
+
+    if (qNeedle){
+	  
+	  const clsStr = dsClassKeys.join(' ');
+	  const tskStr = dsTaskKeys.join(' ');
+	  const licStr = dsLicenseRaw.toLowerCase();
+
+	  
+	  const authorsStr =
+		Array.isArray(ds.authors) ? ds.authors.join(' ')
+		: (typeof ds.authors === 'string' ? ds.authors : '');
+
+	  // NEW: common paper-title fields (safe if missing)
+	  const paperTitle = (ds.paper_title || ds.title || '');
+
+	  // Single haystack (lowercased once)
+	  const hay = [
+		dsName,
+		authorsStr,
+		paperTitle,
+		licStr,
+		clsStr,
+		tskStr
+	  ].join(' ').toLowerCase();
+
+	  if (!hay.includes(qNeedle)) return false;
+	}
+
+    if (ds.year && (ds.year < f.yMin || ds.year > f.yMax)) return false;
+
+    // MODALITIES: require any overlap
+    if (f.mods.length){
+      const hit = dsModKeys.some(k => f.mods.includes(k));
+      if (!hit) return false;
+    }
+
+    if (f.tasks.length && !dsTaskKeys.some(t=>f.tasks.includes(t))) return false;
+    if (f.licenses.length && (!dsLicenseRaw || !f.licenses.includes(dsLicenseRaw))) return false;
+    if (f.classes.length && !f.classes.every(c=>dsClassKeys.includes(c))) return false;
+
+    return true;
+  });
+
+  sortAndRender();
+  syncUrlState();
+}
+
+function sortAndRender(){
+  const sel = document.getElementById('sortBy')?.value || 'year-desc';
+  const [field,dir] = sel.split('-'); const desc = dir==='desc';
+  const key = {
+    name: d=>(d.name||'').toLowerCase(),
+    year: d=> d.year ?? -Infinity,
+    images: d=> d.num_images ?? -Infinity,
+    classes: d=> d.num_classes ?? -Infinity,
+	added: d=> d.added_ts ?? -Infinity
+  }[field] || (d=> d.year ?? -Infinity);
+  LIST.sort((a,b)=> (key(a)<key(b)?(desc?1:-1):(key(a)>key(b)?(desc?-1:1):0)));
+  renderGrid();
+  syncUrlState();
+}
+
+function renderGrid(){
+  const grid=document.getElementById('datasetGrid'), count=document.getElementById('resultCount');
+  if (count) count.textContent = LIST.length;
+  if (grid) grid.innerHTML = LIST.map(ds=>cardHTML(ds)).join('');
+}
+
+// ---------- card UI (uniform thumbnails) ----------
+function cardHTML(ds){
+  const id   = ds.id || ds.name;
+  const slug = encodeURIComponent(id);
+  const img  = ds.image_url || 'assets/img/placeholder/placeholder.png';
+  const detailHref = `datasets/detail.html?id=${slug}`;
+  const displayTitle = formatDatasetTitle(ds.name);
+
+  const submittedByHTML = contributorOverlayHTML(ds);
+
+  return `<div class="col-md-6 col-xl-4">
+    <div class="card dataset-card clickable h-100 shadow-sm" tabindex="0" role="link" aria-label="View details for ${displayTitle}" data-detail-href="${detailHref}">
+      <div class="thumb">
+        <img src="${img}" alt="${displayTitle} preview" loading="lazy" decoding="async"
+             onerror="this.onerror=null;this.src='assets/img/placeholder/placeholder.png';">
+        ${submittedByHTML}
+      </div>
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start">
+          <h6 class="card-title me-2"><a class="text-decoration-none text-dark" href="${detailHref}">${displayTitle}</a></h6>
+          <span class="badge text-bg-light">${ds.year ?? '—'}</span>
+        </div>
+        <div class="small text-muted mb-1">
+          <span>${ds.data_modality_display || ds.data_modalities?.join(', ') || ds.data_modality || '—'}</span>
+        </div>
+        <div class="small text-muted mb-2">
+          ${datasetCountSummary(ds)} · Classes <strong>${formatInt(ds.num_classes)}</strong>
+        </div>
+        <div class="mt-auto d-flex justify-content-between align-items-center">
+          <a class="btn btn-sm btn-primary" href="${detailHref}">View details</a>
+          ${ds.added_date ? `<span class="badge text-bg-light ms-auto fw-normal">Added ${ds.added_date}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+
+// Inject CSS so all thumbnails share the same size/crop
+function injectThumbStyles(){
+  if (document.getElementById('thumb-style')) return;
+  const css = `
+    .dataset-card.clickable{
+      cursor:pointer;
+      transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
+    }
+    .dataset-card.clickable:hover{
+      transform:translateY(-1px);
+      border-color:#d7e1eb;
+      box-shadow:0 10px 26px rgba(15,46,75,.09)!important;
+    }
+    .dataset-card.clickable:focus-visible{
+      outline:3px solid rgba(11,102,195,.18);
+      outline-offset:2px;
+    }
+    .dataset-card .thumb{
+      position: relative;
+      width:100%;
+      aspect-ratio: 16 / 9;
+      overflow:hidden;
+      background:#f3f4f6;
+      border-top-left-radius:.375rem;
+      border-top-right-radius:.375rem;
+    }
+    .dataset-card .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    /* Submitted-by overlay (neutral style) */
+    .dataset-card .thumb .submitted-by{
+      position:absolute;
+      right:8px;
+      bottom:8px;
+      background:rgba(255,255,255,.96);
+      border:1px solid #e0e6ef;
+      border-radius:10px;
+      padding:2px 8px;
+      font-size:.75rem;
+      line-height:1.25;
+      color:#1e2a36;
+      font-weight:500;
+      box-shadow:0 2px 6px rgba(0,0,0,.06);
+      max-width:90%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .dataset-card .thumb .submitted-by a{
+      color:#1e2a36;
+      text-decoration:none;
+    }
+    .dataset-card .thumb .submitted-by a:hover{
+      text-decoration:underline;
+      color:#0f2e4b; /* subtle brand ink on hover */
+    }
+  `;
+  const style = document.createElement('style');
+  style.id = 'thumb-style';
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
+
+
+// ---------- init ----------
+async function init(){
+  injectThumbStyles();
+  if (window.loadTaskVocabulary) await window.loadTaskVocabulary();
+
+  const raw = await fetchDatasets();
+  ALL = raw;
+  
+  Object.values(ALL).forEach(ds=>{
+  const added = ds.added_date || ds.added || null;
+  ds.added_date = added || null;
+  ds.added_ts = added ? Date.parse(added) : null;
+});
+
+
+  canonicalizeAllDatasets();
+
+  const years = Object.values(ALL).map(d=>d.year).filter(v=>typeof v==='number');
+  const minY = years.length ? Math.min(...years) : 2000;
+  const maxY = years.length ? Math.max(...years) : new Date().getFullYear();
+
+  const yrMinEl=document.getElementById('yearRangeMin'), yrMaxEl=document.getElementById('yearRangeMax');
+  if (yrMinEl && yrMaxEl){
+    yrMinEl.min=minY; yrMinEl.max=maxY; yrMinEl.value=minY;
+    yrMaxEl.min=minY; yrMaxEl.max=maxY; yrMaxEl.value=maxY;
+    (document.getElementById('yearRangeMinVal')||{}).textContent=minY;
+    (document.getElementById('yearRangeMaxVal')||{}).textContent=maxY;
+    yrMinEl.addEventListener('input',()=>{ if(+yrMinEl.value>+yrMaxEl.value) yrMaxEl.value=yrMinEl.value; applyFilters(); });
+    yrMaxEl.addEventListener('input',()=>{ if(+yrMaxEl.value<+yrMinEl.value) yrMinEl.value=yrMaxEl.value; applyFilters(); });
+  }
+
+  collectFacets();
+  restoreStateFromUrl();
+  document.getElementById('sortBy')?.addEventListener('change', sortAndRender);
+  document.getElementById('q')?.addEventListener('input', applyFilters);
+
+  LIST = Object.values(ALL);
+  applyFilters();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener('click', (e)=>{
+  const card = e.target.closest('.dataset-card.clickable');
+  if(!card) return;
+  if(e.target.closest('a, button, input, label, select, textarea, summary')) return;
+  const href = card.dataset.detailHref;
+  if(href) window.location.href = href;
+});
+
+document.addEventListener('keydown', (e)=>{
+  const card = e.target.closest('.dataset-card.clickable');
+  if(!card) return;
+  if(e.target.closest('a, button, input, label, select, textarea, summary')) return;
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  const href = card.dataset.detailHref;
+  if(href) window.location.href = href;
+});

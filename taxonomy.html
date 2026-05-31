@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstruction · Object Taxonomy</title>
+  <meta name="description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <link rel="canonical" href="https://www.openconstruction.org/taxonomy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+  <meta property="og:title" content="OpenConstruction · Object Taxonomy">
+  <meta property="og:description" content="Explore open AEC datasets, models, workflows, benchmarks, tools, schema, and educational resources on OpenConstruction.">
+  <meta property="og:url" content="https://www.openconstruction.org/taxonomy.html">
+  <meta property="og:image" content="https://www.openconstruction.org/assets/img/icon.png">
+
+  <!-- Bootstrap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/shared-site.css" rel="stylesheet">
+  <!-- D3 -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <style>
+    :root{
+      --oc-bg:#ffffff; --oc-text:#1e2a36; --oc-subtle:#4f5d6c; --oc-border:#e7edf3;
+      --oc-ink:#0f2e4b; --oc-accent:#f2a238; --oc-link:#0b66c3;
+      --oc-card:#ffffff; --oc-shadow:0 8px 24px rgba(15,46,75,.06);
+      --oc-radius:14px; --oc-muted:#f6f9fc; --oc-focus:#86b7fe;
+    }
+    .oc-container{ max-width:1180px; }
+    /* shared shell styles live in assets/css/shared-site.css */
+    .hl{ background:linear-gradient(180deg,transparent 60%,rgba(242,162,56,.25) 0); padding:0 .08em; font-weight:700; }
+
+    .oc-section{ margin-top:26px; }
+    .oc-kicker{ font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; color:var(--oc-subtle); }
+
+    .pane{
+      border:1px solid var(--oc-border);
+      border-radius:18px;
+      background: radial-gradient(1000px 600px at 20% 0%, rgba(11,102,195,.08), transparent 55%),
+                  radial-gradient(900px 540px at 90% 20%, rgba(242,162,56,.10), transparent 55%),
+                  linear-gradient(180deg, #ffffff, #fbfdff);
+      box-shadow: 0 12px 30px rgba(15,46,75,.08);
+      overflow:hidden;
+    }
+    .pane-head{
+      padding:12px 14px;
+      border-bottom:1px solid var(--oc-border);
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(6px);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .pane-title{ font-weight:700; color:var(--oc-ink); }
+    .pane-sub{ color:var(--oc-subtle); font-size:.92rem; margin-top:2px; }
+    .pane-body{ padding:14px; }
+
+    /* sticky toolbox + spacer (fix overlay bug) */
+    .sticky-tools{ position: sticky; top: 74px; z-index: 30; }
+    #toolboxSpacer{ height: 0px; }
+    @media (max-width: 991.98px){
+      .sticky-tools{ position: static; top:auto; }
+      #toolboxSpacer{ height: 0px !important; }
+    }
+
+    .toolbox{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+      border:1px solid var(--oc-border);
+      border-radius: 999px;
+      background: rgba(255,255,255,.90);
+      backdrop-filter: blur(7px);
+      box-shadow: 0 12px 26px rgba(15,46,75,.08);
+      padding:10px 12px;
+    }
+    .toolbox .left{ display:flex; gap:10px; align-items:center; flex:1 1 auto; min-width: 260px; }
+    .toolbox .right{ display:flex; gap:8px; align-items:center; flex:0 0 auto; flex-wrap:wrap; }
+    .toolbox input{
+      width: 100%;
+      border:0;
+      outline:none;
+      background: transparent;
+      padding: .2rem .2rem;
+      color: var(--oc-ink);
+      font-weight: 600;
+    }
+    .toolbox input::placeholder{ color: rgba(107,123,140,.85); font-weight: 600; }
+
+    .btn-mini{
+      border:1px solid rgba(15,46,75,.14);
+      background:#fff;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-weight: 850;
+      color: var(--oc-ink);
+      box-shadow: 0 10px 22px rgba(15,46,75,.06);
+      transition: transform .12s ease;
+      white-space: nowrap;
+    }
+    .btn-mini:hover{ transform: translateY(-1px); }
+
+    .legend{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      color: var(--oc-subtle);
+      font-size: .9rem;
+    }
+    .legend .dot{
+      width:10px; height:10px; border-radius:999px; display:inline-block;
+      background: var(--oc-accent);
+      box-shadow: 0 8px 18px rgba(242,162,56,.18);
+      margin-right:6px;
+    }
+    .legend code{ color: var(--oc-ink); font-weight: 700; }
+
+    /* Viz container (smaller) */
+    .viz-wrap{
+      height: 600px;
+      border-radius: 18px;
+      border:1px solid var(--oc-border);
+      overflow:hidden;
+      position: relative;
+      background: radial-gradient(780px 500px at 50% 50%, rgba(15,46,75,.06), transparent 60%);
+    }
+    @media (max-width: 991.98px){
+      .viz-wrap{ height: 520px; }
+    }
+
+    .viz-hud{
+      position:absolute; top:12px; left:12px; right:12px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      pointer-events:none;
+      z-index: 3;
+    }
+    .hud-pill{
+      pointer-events:auto;
+      border:1px solid var(--oc-border);
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(6px);
+      color: var(--oc-subtle);
+      font-weight: 750;
+      box-shadow: 0 12px 26px rgba(15,46,75,.08);
+      display:flex; align-items:center; gap:10px;
+      white-space: nowrap;
+    }
+    .hud-pill strong{ color: var(--oc-ink); }
+    .hud-pill .sep{ opacity:.45; }
+
+    /* Sunburst */
+    .arc{
+      stroke: rgba(255,255,255,.92);
+      stroke-width: 1.2px;
+      cursor: pointer;
+    }
+    .arc:hover{
+      stroke: rgba(15,46,75,.55);
+      stroke-width: 2px;
+    }
+
+    /* leaf labels */
+    .sb-label{
+      font-size: 12px;
+      font-weight: 850;
+      fill: rgba(15,46,75,.92);
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: rgba(255,255,255,.92);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    /* Tooltip */
+    .tip{
+      position:absolute;
+      pointer-events:none;
+      padding:10px 11px;
+      border:1px solid var(--oc-border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 16px 34px rgba(15,46,75,.12);
+      color: var(--oc-ink);
+      min-width: 220px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .12s ease, transform .12s ease;
+      z-index: 40;
+    }
+    .tip strong{ display:block; font-weight: 700; }
+    .tip .sub{ color: var(--oc-subtle); font-size: .92rem; margin-top:2px; }
+
+    /* Names panel */
+    .names-panel{
+      margin-top: 12px;
+      border:1px solid var(--oc-border);
+      border-radius: 16px;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 12px 26px rgba(15,46,75,.06);
+      overflow:hidden;
+    }
+    .names-head{
+      padding:10px 12px;
+      border-bottom:1px solid var(--oc-border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .names-title{
+      font-weight: 700;
+      color: var(--oc-ink);
+      display:flex; align-items:center; gap:10px;
+    }
+    .names-sub{ color: var(--oc-subtle); font-size:.9rem; }
+    .names-body{
+      padding: 10px 12px 12px;
+      max-height: 220px;
+      overflow:auto;
+    }
+    .name-grid{
+      column-count: 3;
+      column-gap: 16px;
+    }
+    @media (max-width: 991.98px){
+      .name-grid{ column-count: 2; }
+    }
+    @media (max-width: 575.98px){
+      .name-grid{ column-count: 1; }
+    }
+    .name-item{
+      break-inside: avoid;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      border:1px solid rgba(231,237,243,.9);
+      background: rgba(246,249,252,.72);
+      margin: 0 0 8px 0;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .name-item:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.92);
+    }
+    .name-item .nm{
+      font-weight: 700;
+      color: var(--oc-ink);
+      font-size: .92rem;
+    }
+    .name-item .meta{
+      color: var(--oc-subtle);
+      font-size: .85rem;
+      white-space: nowrap;
+    }
+
+    /* Inspector */
+    .muted-box{
+      background: rgba(246,249,252,.78);
+      border:1px solid var(--oc-border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      color: var(--oc-subtle);
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px 12px;
+      color: var(--oc-subtle);
+      font-size: .95rem;
+    }
+    .kv strong{ color: var(--oc-ink); }
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .chip{
+      border:1px solid var(--oc-border);
+      background: rgba(255,255,255,.92);
+      border-radius:999px;
+      padding:.35rem .65rem;
+      font-weight:850;
+      font-size:.86rem;
+      color: var(--oc-ink);
+      box-shadow: 0 10px 22px rgba(15,46,75,.06);
+    }
+    .chip a{ text-decoration:none; color: inherit; }
+
+    /* Permalink button */
+    .perm-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      width:100%;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 700;
+      border: 1px solid rgba(11,102,195,.22);
+      color: #0b66c3;
+      background: rgba(11,102,195,.06);
+      text-decoration:none;
+      box-shadow: 0 12px 26px rgba(15,46,75,.06);
+      transition: transform .12s ease, background .12s ease;
+    }
+    .perm-btn:hover{
+      transform: translateY(-1px);
+      background: rgba(11,102,195,.10);
+      color:#0b66c3;
+      text-decoration:none;
+    }
+
+    footer{ border-top:1px solid var(--oc-border); margin-top:44px; padding:18px 0; color:var(--oc-subtle); font-size:.95rem; }
+    :focus-visible{ outline:2px solid var(--oc-focus); outline-offset:2px; border-radius:6px; }
+
+    /* Inspector: ensure footer always visible + main scrolls */
+    .ins-wrap{
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      min-height: 640px;
+    }
+    .ins-main{
+      flex: 1 1 auto;
+      overflow:auto;
+      padding-right: 6px;
+    }
+    .ins-footer{
+      position: sticky;
+      bottom: 0;
+      margin-top: 14px;
+      padding-top: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.92) 26%, rgba(255,255,255,.98));
+    }
+    .pane.h-100 .pane-body{
+      height: calc(100% - 56px);
+    }
+
+	/* ---- Floating Suggestion Button ---- */
+    .issue-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      text-decoration: none;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .issue-btn:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg bg-white sticky-top oc-nav">
+    <div class="container oc-container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <img src="assets/img/icon.png" alt="OpenConstruction logo" class="oc-logo">
+        <span class="brand-wordmark">
+          <span class="oc-open">OpenConstruction</span>
+          <span class="oc-construction">Open Science</span>
+        </span>
+      </a>
+
+      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample"
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExample">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+          <li class="nav-item"><a class="nav-link plain" href="index.html">Home</a></li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link plain dropdown-toggle" href="#" id="ddCatalogs" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddCatalogs">
+              <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+              <li><a class="dropdown-item" href="models.html">Models</a></li>
+              <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+              <li><a class="dropdown-item" href="oer.html">OERs</a></li>
+            </ul>
+          </li>
+
+		  <li class="nav-item"><a class="nav-link plain active" href="taxonomy.html" data-route="dataset">Taxonomy</a></li>
+          <li class="nav-item"><a class="nav-link plain" href="benchmarks.html">Benchmarks</a></li>
+		  
+		          <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+		  	<li><a class="dropdown-item active" href="schema.html">Schema</a></li>
+            <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+            <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+            <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+          </ul>
+        </li>
+
+          <li class="nav-item"><a class="nav-link plain" href="contribute.html">Contribute</a></li>
+          <li class="nav-item"><a class="nav-link plain" href="contributors.html">Community</a></li>
+
+          <li class="nav-item">
+            <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener"
+               aria-label="OpenConstruction on GitHub" title="View on GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                   viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                         0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                         0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                         0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0
+                         1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+                         0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013
+                         8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+              </svg>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <button type="button" class="nav-link px-2 icon-only btn-subscribe-icon"
+                    data-bs-toggle="modal" data-bs-target="#subscribeModal"
+                    aria-label="Subscribe for updates" title="Subscribe">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                   viewBox="0 0 16 16" aria-hidden="true" class="icon-bell">
+                <path d="M8 16a2 2 0 0 0 1.985-1.75H6.015A2 2 0 0 0 8 16zm.5-14a.5.5 0 0
+                         0-1 0 7 7 0 0 0-5.468 6.37c-.084.58-.272 1.204-.653 1.856-.356.617-.879 1.104-1.379
+                         1.357V13h14v-1.417c-.5-.253-1.023-.74-1.379-1.357-.38-.652-.569-1.276-.653-1.856A7
+                         7 0 0 0 8.5 2z"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container oc-container content">
+      <h1>OpenConstruction Taxonomy</h1>
+      <p class="lead">
+        An <span class="hl">object taxonomy map</span> derived from aggregated dataset label spaces.
+      </p>
+    </div>
+  </header>
+
+  <main class="container oc-container">
+    <!-- Tools -->
+    <section class="oc-section sticky-tools">
+      <div class="toolbox" id="toolbox">
+        <div class="left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+               viewBox="0 0 16 16" aria-hidden="true" style="opacity:.75;">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+          </svg>
+          <input id="q" type="search" placeholder="Search objects (e.g., worker, crane, crack, rebar, hard hat)">
+        </div>
+        <div class="right">
+          <button class="btn-mini" id="btnReset" type="button">Reset View</button>
+          <button class="btn-mini" id="btnExport" type="button">Export CSV</button>
+          <button class="btn-mini" id="btnExportUnmapped" type="button" title="Download unmapped labels for taxonomy curation">Export unmapped</button>
+        </div>
+      </div>
+    </section>
+    <div id="toolboxSpacer"></div>
+
+    <div class="legend mt-2">
+      <span><span class="dot"></span>Click to inspect · Double-click to zoom.</span>
+      <span>·</span>
+      <span>Hover for tooltip</span>
+    </div>
+
+    <!-- Main -->
+    <section class="oc-section">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="pane">
+            <div class="pane-head">
+              <div>
+                <div class="pane-title">Taxonomy map</div>
+                <div class="pane-sub" id="subtitle">Loading…</div>
+              </div>
+              <div class="hud-pill">
+                <span><strong id="statDS">—</strong> datasets</span><span class="sep">·</span>
+                <span><strong id="statCanon">—</strong> canonical classes</span>
+              </div>
+            </div>
+            <div class="pane-body">
+              <div class="viz-wrap" id="viz">
+                <div class="viz-hud">
+                  <div class="hud-pill" id="hudLeft">Tip: click an arc</div>
+                  <div class="hud-pill" id="hudRight">Zoom: <strong id="zoomLbl">Root</strong></div>
+                </div>
+                <div class="tip" id="tip"></div>
+              </div>
+
+              <!-- Names panel (this is the ONLY category listing now) -->
+              <div class="names-panel" aria-label="Names in current view">
+                <div class="names-head">
+                  <div>
+                    <div class="names-title">Names in current view</div>
+                    <div class="names-sub" id="namesSub">—</div>
+                  </div>
+                  <div class="text-muted small">Click a name to inspect</div>
+                </div>
+                <div class="names-body">
+                  <div id="nameList" class="name-grid"></div>
+                </div>
+              </div>
+
+              <div class="text-muted small mt-2">
+                Alias + category rules are loaded from <code>data/object_taxonomy_config.json</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="pane h-100">
+            <div class="pane-head">
+              <div>
+                <div class="pane-title">Inspector</div>
+                <div class="pane-sub">Canonical term + evidence</div>
+              </div>
+            </div>
+            <div class="pane-body ins-wrap">
+              <div class="ins-main">
+                <div class="muted-box" id="insDef">
+                  Select any arc to see canonical key, merged aliases, and dataset evidence.
+                </div>
+
+                <hr class="my-3">
+
+                <div class="kv">
+                  <div><strong>Canonical key</strong></div><div id="insKey">—</div>
+                  <div><strong>Display label</strong></div><div id="insLabel">—</div>
+                  <div><strong>Category</strong></div><div id="insCat">—</div>
+                  <div><strong>Coverage</strong></div><div id="insCov">—</div>
+                </div>
+
+                <div class="mt-3">
+                  <div class="text-muted small"><strong>Aliases merged</strong></div>
+                  <div class="chips" id="insAliases"></div>
+                </div>
+
+                <div class="mt-3">
+                  <div class="text-muted small"><strong>Example datasets</strong></div>
+                  <div class="chips" id="insDS"></div>
+                </div>
+              </div>
+
+              <div class="ins-footer">
+                <a class="perm-btn" id="insPermalink" href="object_class.html" aria-label="Open permalink for this canonical class">
+                  Open permalink
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M6.354 5.5H2.5A1.5 1.5 0 0 0 1 7v6a1.5 1.5 0 0 0 1.5 1.5h6A1.5 1.5 0 0 0 10 13.5V9.646a.5.5 0 0 0-1 0V13.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V7a.5.5 0 0 1 .5-.5h3.854a.5.5 0 0 0 0-1z"/>
+                    <path d="M11.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0V2.707l-6.146 6.147a.5.5 0 1 0 .708.708L12.707 3.414H14.5a.5.5 0 0 0 0-1h-3z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-4 mt-3 oc-site-footer">
+      <div class="container oc-container small text-muted text-center">
+        <div><img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;"> © <span id="yearNow"></span> OpenConstruction Open Science Initiative</div>
+        <div class="mt-1">
+          <small>
+            Licensed under Apache 2.0.
+            Images and thumbnails are © their respective creators unless otherwise noted.
+          </small>
+        </div>
+        <div class="mt-1">
+          <small>
+            <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+            <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+            <a href="contribute.html#data-policy" class="text-muted">Data Usage</a> ·
+            <a href="contribute.html#citation" class="text-muted">Citation</a>
+          </small>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <a href="https://github.com/ruoxinx/open-construction/issues/new?template=suggestion.yml"
+     class="issue-btn" target="_blank" rel="noopener">
+    Issue or Suggestion?
+  </a>
+
+  <!-- Subscribe modal -->
+  <div class="modal fade" id="subscribeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content p-3 rounded-3 shadow">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="m-0 fw-semibold">Subscribe</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="https://github.us5.list-manage.com/subscribe/post?u=12fa0b9a59e8110ba3a89fc76&amp;id=696e3eb0b3&amp;f_id=006fbeedf0"
+              method="post" target="_blank" novalidate>
+          <label for="sub-email" class="form-label small text-muted mb-1">Email</label>
+          <input type="email" id="sub-email" name="EMAIL" class="form-control mb-2" placeholder="you@university.edu" required>
+          <button type="submit" class="btn btn-primary w-100 mt-2">Subscribe</button>
+          <div style="position:absolute; left:-5000px" aria-hidden="true">
+            <input type="text" name="b_12fa0b9a59e8110ba3a89fc76_696e3eb0b3" tabindex="-1" value="">
+          </div>
+          <p class="small text-muted mt-2 mb-0">We’ll email only when new datasets or models are added. Unsubscribe anytime.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    function syncToolboxSpacer(){
+      const tb = document.getElementById('toolbox');
+      const sp = document.getElementById('toolboxSpacer');
+      if(!tb || !sp) return;
+      const isSticky = window.matchMedia('(min-width: 992px)').matches;
+      sp.style.height = isSticky ? (tb.getBoundingClientRect().height + 12) + 'px' : '0px';
+    }
+    window.addEventListener('resize', syncToolboxSpacer);
+    window.addEventListener('load', syncToolboxSpacer);
+
+    const esc = (s) => String(s ?? '')
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;').replaceAll("'","&#39;");
+
+    const normArray = (v) => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+    const normStr = (v) => (v == null ? '' : String(v).trim());
+
+    function canonKey(s){
+      return normStr(s).toLowerCase()
+        .replace(/[_/]+/g,' ')
+        .replace(/-+/g,' ')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
+    function singularize(key){
+      const t = canonKey(key);
+      if(t.endsWith('ies') && t.length > 4) return t.slice(0,-3) + 'y';
+      if(t.endsWith('s') && !t.endsWith('ss') && t.length > 3) return t.slice(0,-1);
+      return t;
+    }
+    function niceLabel(key){
+      const raw = normStr(key);
+      if(!raw) return '';
+      if(/[A-Z]/.test(raw) && raw.length <= 16) return raw;
+      return raw.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    async function loadJSON(path){
+      const res = await fetch(path, { cache:'no-store' });
+      if(!res.ok) throw new Error(`Cannot load ${path}`);
+      return await res.json();
+    }
+
+    async function loadDatasets(){
+      const raw = await loadJSON('data/datasets.json');
+      return (Array.isArray(raw) ? raw : Object.values(raw || {})).filter(Boolean);
+    }
+
+    let CFG = null;
+    let TERM_ALIASES = new Map();
+    // Two-level taxonomy rules compiled from CFG.taxonomy.
+    // Each entry: { l1: "MEP Systems", l2: "Electrical", re: /.../i }
+    let TAXONOMY_RULES = [];
+    let LABEL_RULES = { min_arc_px_root: 70, min_arc_px_zoom: 22 };
+
+    let EXCLUSIONS = { min_label_len: 2, terms: new Set(), patterns: [] };
+
+
+    function compileConfig(cfg){
+      CFG = cfg || {};
+
+      // Canonicalize alias keys/values so lookups match canonKey() normalization
+      TERM_ALIASES = new Map();
+      for(const [k,v] of Object.entries(CFG.aliases || {})){
+        const kk = canonKey(k);
+        const vv = canonKey(v);
+        if(kk && vv) TERM_ALIASES.set(kk, vv);
+      }
+
+      // Compile two-level taxonomy rules (preferred)
+      TAXONOMY_RULES = [];
+      for(const l1 of (CFG.taxonomy || [])){
+        const l1id = l1?.id;
+        for(const l2 of (l1?.children || [])){
+          const l2id = l2?.id;
+          const pat0 = l2?.pattern;
+          const pat = (typeof pat0 === 'string') ? pat0.replace(/\\\\/g,'\\') : pat0;
+          if(!l1id || !l2id || !pat) continue;
+          try{
+            TAXONOMY_RULES.push({ l1: l1id, l2: l2id, re: new RegExp(pat, 'i') });
+          } catch(e){ /* ignore invalid regex */ }
+        }
+      }
+
+      // Back-compat: if an older config provides CFG.categories (single-level), compile to L1-only rules.
+      if(!TAXONOMY_RULES.length && Array.isArray(CFG.categories)){
+        for(const c of CFG.categories){
+          if(!c?.id || !c?.pattern) continue;
+          const p0 = c.pattern;
+          const p = (typeof p0 === 'string') ? p0.replace(/\\\\/g,'\\') : p0;
+          try{
+            TAXONOMY_RULES.push({ l1: c.id, l2: null, re: new RegExp(p, 'i') });
+          } catch(e){ /* ignore */ }
+        }
+      }
+
+      LABEL_RULES = Object.assign(LABEL_RULES, (CFG.label_rules || {}));
+
+      // Exclusions (objects to remove from taxonomy)
+      const ex = (CFG.exclusions || {});
+      EXCLUSIONS.min_label_len = Number(ex.min_label_len ?? EXCLUSIONS.min_label_len ?? 2);
+      EXCLUSIONS.terms = new Set((ex.remove_terms || []).map(x => canonKey(x)).filter(Boolean));
+      EXCLUSIONS.patterns = (ex.remove_patterns || []).map(p => {
+        try { return new RegExp(p, 'i'); } catch(e){ return null; }
+      }).filter(Boolean);
+    }
+
+    function shouldExcludeLabel(rawLabel){
+      const raw = normStr(rawLabel);
+      const key = canonKey(raw);
+      if(!key) return true;
+      if(key.length < EXCLUSIONS.min_label_len) return true;
+      if(EXCLUSIONS.terms && EXCLUSIONS.terms.has(key)) return true;
+      for(const re of (EXCLUSIONS.patterns || [])){
+        if(re.test(raw) || re.test(key)) return true;
+      }
+      return false;
+    }
+
+    function applyAliasMerge(raw){
+      const k = canonKey(raw);
+      const v = TERM_ALIASES.get(k);
+      return v ? canonKey(v) : k;
+    }
+
+    // Closed-world mapping: return {l1, l2} if matched; otherwise null.
+    function inferCategory2(canon){
+      const s = canonKey(canon);
+      for(const r of TAXONOMY_RULES){
+        if(r.re.test(s)) return { l1: r.l1, l2: r.l2 };
+      }
+      return null;
+    }
+
+    function buildIndex(datasets){
+      const idx = new Map();
+      const stats = { total_labels: 0, kept: 0, excluded: 0, unmatched: 0, unmatched_map: new Map() };
+
+      for(const ds of datasets){
+        const dsId = ds.id || ds.name || '(unknown)';
+        for(const raw of normArray(ds.classes)){
+          stats.total_labels += 1;
+
+          const rawNorm = normStr(raw);
+          if(shouldExcludeLabel(rawNorm)) { stats.excluded += 1; continue; }
+
+          const merged = applyAliasMerge(rawNorm);
+          const canon = singularize(merged);
+          if(!canon) { stats.excluded += 1; continue; }
+
+          const cat = inferCategory2(canon);
+          // Closed-world: if we cannot map, do NOT create an "Other" bucket. Exclude + flag.
+          if(!cat){
+            stats.unmatched += 1;
+            const k = canonKey(rawNorm);
+            if(k){
+              if(!stats.unmatched_map.has(k)) stats.unmatched_map.set(k, { raw: rawNorm, count: 0, ds: new Set() });
+              const u = stats.unmatched_map.get(k);
+              u.count += 1;
+              u.ds.add(dsId);
+            }
+            continue;
+          }
+
+          if(!idx.has(canon)){
+            idx.set(canon, {
+              canon,
+              label: niceLabel(canon),
+              l1: cat.l1,
+              l2: cat.l2,
+              category: cat.l2 ? `${cat.l1} → ${cat.l2}` : cat.l1,
+              rawSet: new Set(),
+              dsSet: new Set(),
+              mentions: 0
+            });
+          }
+          const rec = idx.get(canon);
+          // Keep first mapping; if later rules disagree, prefer existing (deterministic).
+          rec.rawSet.add(rawNorm);
+          rec.dsSet.add(dsId);
+          rec.mentions += 1;
+          stats.kept += 1;
+        }
+      }
+      return { idx, stats };
+    }
+
+    function buildHierarchy(idx){
+      // Root -> L1 -> L2 -> leaf (canonical)
+      const root = { name:'Objects', id:'root', children:[] };
+
+      // Group by L1 then L2. If a record has no L2 (shouldn't happen in the two-level config),
+      // attach it directly under L1 without inventing a catch-all.
+      const byL1 = new Map();
+      for(const rec of idx.values()){
+        const l1 = rec.l1;
+        const l2 = rec.l2 || null;
+        if(!byL1.has(l1)) byL1.set(l1, new Map());
+        const byL2 = byL1.get(l1);
+        const key = l2 ?? '__direct__';
+        if(!byL2.has(key)) byL2.set(key, []);
+        byL2.get(key).push(rec);
+      }
+
+      // Stable ordering: follow config taxonomy order if available
+      const l1Order = (CFG.taxonomy || []).map(x=>x.id).filter(Boolean);
+      const l1Names = Array.from(byL1.keys()).sort((a,b)=>{
+        const ia = l1Order.indexOf(a), ib = l1Order.indexOf(b);
+        if(ia !== -1 || ib !== -1) return (ia === -1 ? 1 : ia) - (ib === -1 ? 1 : ib);
+        return a.localeCompare(b);
+      });
+
+      for(const l1 of l1Names){
+        const byL2 = byL1.get(l1);
+        const l2Order = ((CFG.taxonomy || []).find(x=>x.id===l1)?.children || []).map(x=>x.id).filter(Boolean);
+        const l2Names = Array.from(byL2.keys())
+          .filter(k => k !== '__direct__')
+          .sort((a,b)=>{
+            const ia = l2Order.indexOf(a), ib = l2Order.indexOf(b);
+            if(ia !== -1 || ib !== -1) return (ia === -1 ? 1 : ia) - (ib === -1 ? 1 : ib);
+            return a.localeCompare(b);
+          });
+
+        const l1Ds = new Set();
+        let l1Mentions = 0;
+        const l1Node = { name: l1, id: 'l1:' + l1, coverage: 0, mentions: 0, datasets: [], children: [] };
+
+        // First: direct leaves under L1 (rare; only for back-compat configs)
+        if(byL2.has('__direct__')){
+          const directItems = byL2.get('__direct__').sort((a,b)=>{
+            const da=a.dsSet.size, db=b.dsSet.size;
+            if(db!==da) return db-da;
+            return (a.label||a.canon).localeCompare(b.label||b.canon);
+          });
+          for(const r of directItems){
+            for(const id of r.dsSet) l1Ds.add(id);
+            l1Mentions += (r.mentions || 0);
+          }
+          // Attach direct leaves under L1
+          l1Node.children.push(...directItems.map(r => ({
+            name: r.label || r.canon,
+            id: 'obj:' + r.canon,
+            canon: r.canon,
+            label: r.label || r.canon,
+            l1: r.l1,
+            l2: r.l2,
+            category: r.category,
+            coverage: r.dsSet.size,
+            mentions: r.mentions,
+            aliases: Array.from(r.rawSet),
+            datasets: Array.from(r.dsSet)
+          })));
+        }
+
+        // Then: standard L2 groups
+        for(const l2 of l2Names){
+          const items = byL2.get(l2).sort((a,b)=>{
+            const da=a.dsSet.size, db=b.dsSet.size;
+            if(db!==da) return db-da;
+            return (a.label||a.canon).localeCompare(b.label||b.canon);
+          });
+
+          const l2Ds = new Set();
+          let l2Mentions = 0;
+          for(const r of items){
+            for(const id of r.dsSet) { l2Ds.add(id); l1Ds.add(id); }
+            l2Mentions += (r.mentions || 0);
+          }
+          l1Mentions += l2Mentions;
+
+          l1Node.children.push({
+            name: l2,
+            id: 'l2:' + l1 + '>' + l2,
+            l1,
+            l2,
+            coverage: l2Ds.size,
+            mentions: l2Mentions,
+            datasets: Array.from(l2Ds),
+            children: items.map(r => ({
+              name: r.label || r.canon,
+              id: 'obj:' + r.canon,
+              canon: r.canon,
+              label: r.label || r.canon,
+              l1: r.l1,
+              l2: r.l2,
+              category: r.category,
+              coverage: r.dsSet.size,
+              mentions: r.mentions,
+              aliases: Array.from(r.rawSet),
+              datasets: Array.from(r.dsSet)
+            }))
+          });
+        }
+
+        l1Node.coverage = l1Ds.size;
+        l1Node.mentions = l1Mentions;
+        l1Node.datasets = Array.from(l1Ds);
+        root.children.push(l1Node);
+      }
+
+      return root;
+    }
+
+    function resetInspector(){
+      document.getElementById('insDef').textContent =
+        'Select any arc to see canonical key, merged aliases, and dataset evidence.';
+      document.getElementById('insKey').textContent = '—';
+      document.getElementById('insLabel').textContent = '—';
+      document.getElementById('insCat').textContent = '—';
+      document.getElementById('insCov').textContent = '—';
+      document.getElementById('insAliases').innerHTML = '';
+      document.getElementById('insDS').innerHTML = '';
+      document.getElementById('insPermalink').setAttribute('href', 'object_class.html');
+    }
+
+    function setInspectorCategory(catData){
+      const cat = catData?.name || catData || 'Category';
+      const cov = catData?.coverage ?? null;
+      const ds = (catData?.datasets || []).slice(0, 24);
+
+      document.getElementById('insDef').innerHTML =
+        `<strong style="color:var(--oc-ink)">Category</strong>
+         <div class="mt-1">Browse objects under <span class="hl">${esc(cat)}</span>.</div>`;
+
+      document.getElementById('insKey').textContent = '—';
+      document.getElementById('insLabel').textContent = cat;
+      document.getElementById('insCat').textContent = cat;
+      document.getElementById('insCov').textContent = (cov == null) ? '—' : `${cov} datasets`;
+      document.getElementById('insAliases').innerHTML = '';
+      const toDatasetDetail = (id) => `datasets/detail.html?id=${encodeURIComponent(id)}`;
+      document.getElementById('insDS').innerHTML =
+        ds.length ? ds.map(id => `<span class="chip"><a href="${toDatasetDetail(id)}" title="Open dataset details">${esc(id)}</a></span>`).join('')
+                  : `<span class="text-muted small">—</span>`;
+      document.getElementById('insPermalink').setAttribute('href', 'object_taxonomy.html');
+    }
+
+    function setInspectorLeaf(data){
+      const aliases = (data.aliases || []).slice().sort((a,b)=>a.localeCompare(b));
+      const ds = (data.datasets || []).slice(0, 24);
+
+      document.getElementById('insDef').innerHTML =
+        `<strong style="color:var(--oc-ink)">Canonical class definition</strong>
+         <div class="mt-1">
+           A dataset label mapped to canonical class <span class="hl">${esc(data.label || data.canon)}</span>.
+         </div>`;
+
+      document.getElementById('insKey').textContent = data.canon || '—';
+      document.getElementById('insLabel').textContent = data.label || data.canon || '—';
+      document.getElementById('insCat').textContent = data.category || '—';
+      document.getElementById('insCov').textContent = `${data.coverage ?? 0} datasets · ${data.mentions ?? 0} mentions`;
+
+      document.getElementById('insAliases').innerHTML =
+        aliases.length ? aliases.slice(0, 18).map(a => `<span class="chip">${esc(a)}</span>`).join('')
+                      : `<span class="text-muted small">—</span>`;
+
+      const toDatasetDetail = (id) => `datasets/detail.html?id=${encodeURIComponent(id)}`;
+      document.getElementById('insDS').innerHTML =
+        ds.length ? ds.map(id => `<span class="chip"><a href="${toDatasetDetail(id)}" title="Open dataset details">${esc(id)}</a></span>`).join('')
+                  : `<span class="text-muted small">—</span>`;
+
+      const href = `object_class.html?key=${encodeURIComponent(data.canon)}&label=${encodeURIComponent(data.label || data.canon)}`;
+      document.getElementById('insPermalink').setAttribute('href', href);
+    }
+
+    function setNamesPanelForNode(focus){
+      const nameList = document.getElementById('nameList');
+      const namesSub = document.getElementById('namesSub');
+      nameList.innerHTML = '';
+
+      if(!focus) { namesSub.textContent = '—'; return; }
+
+      if(focus.depth === 0){
+        const cats = (focus.children || []).slice()
+          .sort((a,b)=> (b.data.coverage||0) - (a.data.coverage||0));
+
+        namesSub.textContent = `Root · ${cats.length} categories`;
+
+        cats.forEach(c => {
+          const leafCount = (c.leaves ? c.leaves().length : (c.children||[]).length);
+          const cov = c.data.coverage ?? 0;
+          const el = document.createElement('div');
+          el.className = 'name-item';
+          el.innerHTML = `<div class="nm">${esc(c.data.name)}</div><div class="meta">${cov} ds · ${leafCount} nodes</div>`;
+          el.addEventListener('click', () => {
+            RUNTIME.sb.zoomTo(c);
+            setInspectorCategory(c.data);
+            document.getElementById('hudLeft').textContent = `Category: ${c.data.name}`;
+          });
+          nameList.appendChild(el);
+        });
+        return;
+      }
+
+      const leaves = (focus.leaves ? focus.leaves() : []).slice()
+        .sort((a,b)=>{
+          const ca = a.data.coverage ?? 0;
+          const cb = b.data.coverage ?? 0;
+          if(cb !== ca) return cb - ca;
+          return (a.data.label || a.data.canon || a.data.name).localeCompare(b.data.label || b.data.canon || b.data.name);
+        });
+
+      const catName = focus.data?.name || 'Category';
+      namesSub.textContent = `${catName} · ${leaves.length} nodes`;
+
+      leaves.forEach(n => {
+        const label = n.data.label || n.data.canon || n.data.name;
+        const cov = n.data.coverage ?? 0;
+        const el = document.createElement('div');
+        el.className = 'name-item';
+        el.innerHTML = `<div class="nm">${esc(label)}</div><div class="meta">${cov} ds</div>`;
+        el.addEventListener('click', () => {
+          setInspectorLeaf(n.data);
+          document.getElementById('hudLeft').innerHTML = `Selected: <strong>${esc(label)}</strong>`;
+        });
+        nameList.appendChild(el);
+      });
+    }
+
+    function downloadText(filename, text){
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    }
+    function toCSV(rows){
+      const escCSV = (v) => {
+        const s = String(v ?? '');
+        if(/[,"\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
+        return s;
+      };
+      return rows.map(r => r.map(escCSV).join(',')).join('\n');
+    }
+
+    function renderSunburst(rootData, onFocusChange){
+      const container = document.getElementById('viz');
+      container.querySelector('svg')?.remove();
+
+      const tip = document.getElementById('tip');
+
+      const W = container.clientWidth;
+      const H = container.clientHeight;
+
+      // smaller sunburst
+      const R = Math.min(W, H) / 2 - 90;
+
+      const svg = d3.select(container).append('svg')
+        .attr('width', W)
+        .attr('height', H);
+
+      const g = svg.append('g')
+        .attr('transform', `translate(${W/2},${H/2})`);
+
+      const root = d3.hierarchy(rootData)
+        .sum(d => (d.canon ? (1 + Math.log1p(d.coverage || 0)) : 0))
+        .sort((a,b) => b.value - a.value);
+
+      const partition = d3.partition().size([2 * Math.PI, R]);
+      partition(root);
+
+      const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .innerRadius(d => d.y0)
+        .outerRadius(d => Math.max(d.y0 + 8, d.y1 - 1));
+
+      const PALETTE = [
+        '#1f4e79', '#2c6e49', '#6b4e71', '#7a5c3a', '#1f6f8b',
+        '#5f6c37', '#7b3f3f', '#3f5a7a', '#2b2d42'
+      ];
+
+      const catNodes = (root.children || []);
+      const catNames = catNodes.map(c => c.data.name);
+      const catIndex = new Map(catNames.map((n,i)=>[n,i]));
+
+      function baseCatColor(topName){
+        const i = catIndex.get(topName) ?? 0;
+        return PALETTE[i % PALETTE.length];
+      }
+      function alphaForDepth(depth){
+        if(depth === 1) return 0.55;
+        if(depth === 2) return 0.35;
+        return 0.25;
+      }
+      function toRGBA(hex, a){
+        const h = hex.replace('#','').trim();
+        const r = parseInt(h.slice(0,2),16);
+        const g = parseInt(h.slice(2,4),16);
+        const b = parseInt(h.slice(4,6),16);
+        return `rgba(${r},${g},${b},${a})`;
+      }
+      function fillFor(d){
+        if(d.depth === 0) return 'rgba(15,46,75,0.06)';
+        const top = d.ancestors().find(a => a.depth === 1);
+        const hex = baseCatColor(top ? top.data.name : (catNames[0] || ''));
+        return toRGBA(hex, alphaForDepth(d.depth));
+      }
+
+      const paths = g.append('g')
+        .selectAll('path')
+        .data(root.descendants().filter(d => d.depth))
+        .join('path')
+        .attr('class','arc')
+        .attr('d', arc)
+        .attr('fill', d => fillFor(d));
+
+      const labelLayer = g.append('g');
+
+      function labelThresholdForFocus(focus){
+        if(!focus || focus.depth === 0) return (LABEL_RULES.min_arc_px_root ?? 70);
+        return (LABEL_RULES.min_arc_px_zoom ?? 22);
+      }
+
+      function drawLeafLabels(focus){
+        labelLayer.selectAll('*').remove();
+        const thr = labelThresholdForFocus(focus);
+
+        const leaves = root.descendants().filter(d => d.depth >= 2 && !d.children);
+
+        const candidates = leaves.map(d => {
+          const dd = d.current || d;
+          const a = (dd.x0 + dd.x1) / 2;
+          const r = (dd.y0 + dd.y1) / 2;
+          const arcLen = (dd.x1 - dd.x0) * r;
+          return { d, dd, a, r, arcLen };
+        })
+        .filter(x => x.arcLen >= thr)
+        .sort((x,y) => x.a - y.a);
+
+        const minAngle = (!focus || focus.depth === 0) ? 0.12 : 0.06;
+        let lastAngle = -Infinity;
+        const kept = [];
+        for(const x of candidates){
+          if(x.a - lastAngle >= minAngle){
+            kept.push(x);
+            lastAngle = x.a;
+          }
+        }
+
+        labelLayer.selectAll('text')
+          .data(kept, x => x.d.data.id || x.d.data.canon || x.d.data.name)
+          .join('text')
+          .attr('class','sb-label')
+          .attr('text-anchor','middle')
+          .attr('dy','0.32em')
+          .attr('transform', x => {
+            const rot = (x.a * 180 / Math.PI) - 90;
+            const flip = rot > 90 ? 180 : 0;
+            return `rotate(${rot}) translate(${x.r},0) rotate(${flip})`;
+          })
+          .text(x => x.d.data.name);
+      }
+
+      let focus = root;
+
+      function zoomTo(p){
+        focus = p;
+        document.getElementById('zoomLbl').textContent = p.depth === 0 ? 'Root' : p.data.name;
+
+        const t = g.transition().duration(520);
+
+        root.each(d => {
+          d.target = {
+            x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+            x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+            y0: Math.max(0, d.y0 - p.y0),
+            y1: Math.max(0, d.y1 - p.y0)
+          };
+        });
+
+        paths.transition(t)
+          .attrTween('d', d => {
+            const i = d3.interpolate(d.current || d, d.target);
+            return tt => {
+              d.current = i(tt);
+              return arc(d.current);
+            };
+          });
+
+        t.on('end', () => {
+          drawLeafLabels(focus);
+          if(typeof onFocusChange === 'function') onFocusChange(focus);
+        });
+      }
+
+      function showTip(ev, d){
+        const name = d.data.name;
+        const top = d.ancestors().find(a => a.depth === 1);
+        const cat = top ? top.data.name : (d.data.category || '—');
+
+        let dsCount = 0;
+        if(d.depth === 1){
+          dsCount = d.data.coverage ?? (d.data.datasets ? d.data.datasets.length : 0);
+        }else if(d.data && typeof d.data.coverage === 'number'){
+          dsCount = d.data.coverage;
+        }else{
+          dsCount = 0;
+        }
+
+        const isLeaf = !d.children;
+        tip.innerHTML = `
+          <strong>${esc(name)}</strong>
+          <div class="sub">${esc(cat)} · ${dsCount} dataset(s)</div>
+          <div class="sub">${isLeaf ? 'Click to inspect · Double-click to zoom context' : 'Click to browse · Double-click to zoom'}</div>
+        `;
+        tip.style.left = (ev.offsetX + 14) + 'px';
+        tip.style.top  = (ev.offsetY + 14) + 'px';
+        tip.style.opacity = 1;
+        tip.style.transform = 'translateY(0px)';
+      }
+      function hideTip(){
+        tip.style.opacity = 0;
+        tip.style.transform = 'translateY(6px)';
+      }
+
+      paths
+        .on('mousemove', function(ev, d){ showTip(ev, d); })
+        .on('mouseleave', hideTip)
+        .on('click', (ev, d) => {
+          ev.stopPropagation();
+
+          if(d.depth === 1){
+            document.getElementById('hudLeft').textContent = `Category: ${d.data.name}`;
+            setInspectorCategory(d.data);
+          }else if(!d.children){
+            document.getElementById('hudLeft').innerHTML = `Selected: <strong>${esc(d.data.label || d.data.canon || d.data.name)}</strong>`;
+            setInspectorLeaf(d.data);
+          }else{
+            setInspectorCategory(d.data);
+          }
+        })
+        .on('dblclick', (ev, d) => {
+          ev.stopPropagation();
+          zoomTo(d);
+        });
+
+      svg.on('click', () => {
+        document.getElementById('hudLeft').textContent = 'Tip: click an arc';
+        resetInspector();
+        zoomTo(root);
+      });
+
+      root.each(d => d.current = d);
+
+      drawLeafLabels(root);
+      if(typeof onFocusChange === 'function') onFocusChange(root);
+
+      return { zoomTo, root };
+    }
+
+    function buildCanonToNodeIndex(sbRoot){
+      const map = new Map();
+      sbRoot.descendants().forEach(d => {
+        if(d.data && d.data.canon) map.set(d.data.canon, d);
+      });
+      return map;
+    }
+
+    let RUNTIME = { idx:null, sb:null, canonIndex:null };
+
+    async function init(){
+      syncToolboxSpacer();
+
+      const cfg = await loadJSON('data/object_taxonomy_config.json');
+      compileConfig(cfg);
+
+      document.getElementById('subtitle').textContent = 'Building canonical index from datasets.json…';
+
+      const datasets = await loadDatasets();
+      document.getElementById('statDS').textContent = String(datasets.length);
+
+      const built = buildIndex(datasets);
+      const idx = built.idx;
+      const stats = built.stats;
+      RUNTIME.idx = idx;
+      RUNTIME.stats = stats;
+
+      document.getElementById('statCanon').textContent = String(idx.size);
+
+      const rootData = buildHierarchy(idx);
+      const l1Count = (rootData.children || []).length;
+      const l2Count = (rootData.children || []).reduce((acc, n) => {
+        const kids = (n.children || []);
+        // count only true L2 groups (depth-2 nodes without canon)
+        return acc + kids.filter(x => !x.canon && (x.children || []).length).length;
+      }, 0);
+      const parts = [
+        `Derived from ${datasets.length} datasets`,
+        `${idx.size} canonical classes`,
+        `${l1Count} disciplines`,
+        `${l2Count} subclasses`
+      ];
+      if(stats.unmatched){
+        parts.push(`${stats.unmatched} unmapped (excluded)`);
+      }
+      document.getElementById('subtitle').textContent = parts.join(' · ');
+
+      const sb = renderSunburst(rootData, (focus) => setNamesPanelForNode(focus));
+      RUNTIME.sb = sb;
+      RUNTIME.canonIndex = buildCanonToNodeIndex(sb.root);
+
+      const input = document.getElementById('q');
+      input.addEventListener('keydown', (e) => {
+        if(e.key !== 'Enter') return;
+        const needle = canonKey(input.value || '');
+        if(!needle) return;
+
+        const direct = singularize(applyAliasMerge(needle));
+        const node = RUNTIME.canonIndex.get(direct);
+
+        if(node){
+          const parent = node.parent || sb.root;
+          sb.zoomTo(parent);
+          setTimeout(() => {
+            if(!node.children){
+              setInspectorLeaf(node.data);
+              document.getElementById('hudLeft').innerHTML = `Selected: <strong>${esc(node.data.label || node.data.canon)}</strong>`;
+            } else {
+              setInspectorCategory(node.data);
+              document.getElementById('hudLeft').textContent = `Category: ${node.data.name}`;
+            }
+          }, 540);
+          return;
+        }
+
+        let best = null;
+        for(const rec of idx.values()){
+          const hay = (rec.canon + ' ' + Array.from(rec.rawSet).join(' ')).toLowerCase();
+          if(hay.includes(needle)){
+            if(!best) best = rec;
+            else if(rec.dsSet.size > best.dsSet.size) best = rec;
+          }
+        }
+        if(best){
+          const n = RUNTIME.canonIndex.get(best.canon);
+          if(n){
+            sb.zoomTo(n.parent || sb.root);
+            setTimeout(() => {
+              setInspectorLeaf(n.data);
+              document.getElementById('hudLeft').innerHTML = `Selected: <strong>${esc(n.data.label || n.data.canon)}</strong>`;
+            }, 540);
+          }
+        }
+      });
+
+      document.getElementById('btnReset').addEventListener('click', () => location.reload());
+      document.getElementById('btnExport').addEventListener('click', () => {
+        const rows = [['canonical_key','display_label','level1','level2','category','coverage_datasets','mentions','aliases_merged']];
+        for(const rec of Array.from(idx.values()).sort((a,b)=>b.dsSet.size-a.dsSet.size)){
+          rows.push([
+            rec.canon,
+            rec.label,
+            rec.l1 || '',
+            rec.l2 || '',
+            rec.category,
+            rec.dsSet.size,
+            rec.mentions,
+            Array.from(rec.rawSet).slice(0, 30).join(' | ')
+          ]);
+        }
+        downloadText('openconstruction_object_taxonomy.csv', toCSV(rows));
+      });
+
+      document.getElementById('btnExportUnmapped').addEventListener('click', () => {
+        const um = Array.from((RUNTIME.stats?.unmatched_map || new Map()).values())
+          .sort((a,b)=> (b.count||0) - (a.count||0));
+        const rows = [['raw_label','count','example_datasets']];
+        for(const r of um){
+          rows.push([r.raw, r.count || 0, Array.from(r.ds || []).slice(0, 25).join(' | ')]);
+        }
+        downloadText('openconstruction_unmapped_labels.csv', toCSV(rows));
+      });
+
+      resetInspector();
+    }
+
+    init().catch(err => {
+      console.warn('[object taxonomy] init error:', err);
+      document.getElementById('subtitle').textContent = 'Could not load taxonomy. Ensure data/datasets.json and data/object_taxonomy_config.json exist.';
+      document.getElementById('viz').innerHTML = `<div class="p-4 text-muted">Could not load visualization.</div>`;
+    });
+  </script>
+</body>
+</html>
