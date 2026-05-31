@@ -150,16 +150,57 @@
       addUser(q); input.value = ''; answer(q);
     }
 
-    fab.addEventListener('click', function () {
-      panel.classList.add('open'); fab.style.display = 'none'; greet(); input.focus();
+    function openChat(prefill) {
+      panel.classList.add('open'); fab.style.display = 'none'; greet();
+      if (prefill) input.value = prefill;
+      input.focus();
       if (window.OCAssistant) window.OCAssistant.getIndex(); // warm cache
-    });
-    panel.querySelector('.x').addEventListener('click', function () {
-      panel.classList.remove('open'); fab.style.display = 'grid';
-    });
+    }
+    function closeChat() { panel.classList.remove('open'); fab.style.display = 'grid'; }
+
+    fab.addEventListener('click', function () { openChat(); });
+    panel.querySelector('.x').addEventListener('click', closeChat);
     form.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
     log.addEventListener('click', function (e) {
       var c = e.target.closest('.ocbot-chip'); if (c) send(c.dataset.q);
     });
+
+    // Expose so per-page search bars can hand off to the assistant.
+    window.OCChat = { open: openChat, close: closeChat, ask: function (q) { openChat(q); } };
+
+    // --- "✨ Ask the assistant" buttons next to each page's keyword search ---
+    // The per-page search keeps filtering that page's list; this button bridges
+    // to the cross-catalog assistant (chatbox), pre-filling whatever was typed.
+    var sparkCss = document.createElement('style');
+    sparkCss.textContent =
+      '.ocbot-ask-btn{display:inline-flex;align-items:center;gap:.3rem;border:1px solid #e7edf3;background:#fff;' +
+      'color:#0f2e4b;font-weight:700;font-size:.8rem;border-radius:999px;padding:.32rem .7rem;cursor:pointer;white-space:nowrap;}' +
+      '.ocbot-ask-btn:hover{border-color:#f2a238;background:#fffaf2;}' +
+      '.navbar-search .ocbot-ask-btn{margin-left:.4rem;padding:.28rem .6rem;font-size:.76rem;}';
+    document.head.appendChild(sparkCss);
+
+    function makeBtn(compact) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ocbot-ask-btn';
+      b.title = 'Ask the assistant (searches the whole catalog)';
+      b.innerHTML = '✨' + (compact ? '' : ' <span>Ask the assistant</span>');
+      return b;
+    }
+    function attach(inputEl, compact) {
+      if (!inputEl || inputEl.dataset.ocbotAttached) return;
+      inputEl.dataset.ocbotAttached = '1';
+      var btn = makeBtn(compact);
+      btn.addEventListener('click', function () {
+        var v = (inputEl.value || '').trim();
+        v ? window.OCChat.ask(v) : window.OCChat.open();
+      });
+      inputEl.insertAdjacentElement('afterend', btn);
+    }
+    // Big page search inputs (not the home hero, which is already the assistant).
+    ['q', 'skillSearch', 'globalSearch'].forEach(function (idv) { attach(document.getElementById(idv), false); });
+    var sd = document.getElementById('searchDock');
+    if (sd) attach(sd.querySelector('input'), false);
+    // Navbar docked search (compact).
+    attach(document.getElementById('qDock'), true);
   });
 })();
