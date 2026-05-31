@@ -380,6 +380,7 @@
             <li><a class="dropdown-item" href="models.html">Models</a></li>
             <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
 			<li><a class="dropdown-item" href="oer.html">OERs</a></li>
+			<li><a class="dropdown-item" href="skills.html">Skills</a></li>
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link plain" href="benchmarks.html" data-route="models">Benchmarks</a></li>
@@ -440,6 +441,79 @@
 </header>
 
 <main class="container oc-container">
+
+  <!-- ===== Q1: No-Git guided contributor wizard ===== -->
+  <style>
+    #no-git-wizard .wiz-card{ border:1px solid var(--oc-border,#e7edf3); border-radius:14px; background:#fff; box-shadow:0 8px 24px rgba(15,46,75,.06); overflow:hidden; }
+    #no-git-wizard .wiz-head{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; padding:1rem 1.2rem; border-bottom:1px solid var(--oc-border,#e7edf3); background:linear-gradient(180deg,#fbfdff,#fff); }
+    #no-git-wizard .wiz-steps{ display:flex; gap:.4rem; align-items:center; font-size:.78rem; color:#4f5d6c; flex-wrap:wrap; }
+    #no-git-wizard .wiz-step{ padding:.2rem .55rem; border-radius:999px; background:#f6f9fc; border:1px solid #e7edf3; font-weight:600; }
+    #no-git-wizard .wiz-step.active{ background:#0f2e4b; color:#fff; border-color:#0f2e4b; }
+    #no-git-wizard .wiz-body{ padding:1.2rem; }
+    #no-git-wizard .type-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:.6rem; }
+    #no-git-wizard .type-pick{ border:1px solid #e7edf3; border-radius:10px; padding:.8rem; text-align:left; background:#fff; cursor:pointer; font-weight:600; color:#0f2e4b; }
+    #no-git-wizard .type-pick:hover, #no-git-wizard .type-pick.sel{ border-color:#f2a238; background:#fffaf2; }
+    #no-git-wizard .type-pick small{ display:block; font-weight:400; color:#4f5d6c; margin-top:.2rem; }
+    #no-git-wizard pre.json-preview{ background:#0f2e4b; color:#e9f1f8; padding:1rem; border-radius:10px; font-size:.82rem; max-height:340px; overflow:auto; }
+    #no-git-wizard .gh-pill{ display:inline-flex; align-items:center; gap:.4rem; font-size:.8rem; color:#1f6f54; font-weight:700; }
+  </style>
+  <section class="oc-section" id="no-git-wizard">
+    <div class="oc-kicker mb-2">No Git Required</div>
+    <div class="wiz-card">
+      <div class="wiz-head">
+        <div>
+          <h3 class="oc-card-title mb-1">Contribute without touching GitHub</h3>
+          <p class="mb-0 small text-muted" style="max-width:60ch">Answer a few guided questions. We standardize the metadata to the OpenConstruction schema and open the Pull Request for you — you stay credited, GitHub stays the source of truth.</p>
+        </div>
+        <div class="text-end">
+          <button id="ghSignin" class="btn btn-dark btn-sm">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align:-2px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+            Sign in with GitHub
+          </button>
+          <div id="ghStatus" class="gh-pill mt-1" hidden>✓ Signed in as <span id="ghUser">you</span></div>
+        </div>
+      </div>
+      <div class="wiz-body">
+        <div class="wiz-steps mb-3">
+          <span class="wiz-step active" data-step="1">1 · Type</span><span>→</span>
+          <span class="wiz-step" data-step="2">2 · Details</span><span>→</span>
+          <span class="wiz-step" data-step="3">3 · Review &amp; submit</span>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="wiz-pane" data-pane="1">
+          <p class="small text-muted mb-2">What would you like to contribute?</p>
+          <div class="type-grid">
+            <button class="type-pick" data-type="dataset">Dataset<small>Images, point clouds, BIM/IFC, sensor logs…</small></button>
+            <button class="type-pick" data-type="model">Model<small>A pretrained model for an AEC task</small></button>
+            <button class="type-pick" data-type="oer">OER<small>A course, tutorial, or textbook</small></button>
+            <button class="type-pick" data-type="skill">Skill<small>A SKILL.md package for an AI assistant</small></button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="wiz-pane" data-pane="2" hidden>
+          <form id="wizForm" class="row g-3"></form>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" data-go="1">← Back</button>
+            <button class="btn btn-primary btn-sm" id="toReview">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="wiz-pane" data-pane="3" hidden>
+          <p class="small text-muted mb-2">This is the exact JSON that will be added to the catalog and opened as a Pull Request:</p>
+          <pre class="json-preview" id="jsonPreview">{}</pre>
+          <div id="validateMsg" class="small mb-2"></div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" data-go="2">← Back</button>
+            <button class="btn btn-success btn-sm" id="openPR">Open Pull Request</button>
+          </div>
+          <div id="prResult" class="alert alert-success mt-3 small" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Ways to help -->
   <section class="oc-section">
@@ -642,6 +716,7 @@
     });
   })();
 </script>
+<script src="assets/js/contribute-wizard.js"></script>
 
 </body>
 </html>

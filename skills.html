@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+  SPDX-License-Identifier: Apache-2.0
+  Q4 — AEC Agent / Skill catalog (SKILL.md packages for AI assistants).
+-->
+<html lang="en">
+<head>
+	<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="shortcut icon" href="/favicon.ico">
+	<meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstruction · Skills</title>
+  <meta name="description" content="A catalog of AEC skills — packaged SKILL.md knowledge that teaches an AI assistant a concrete construction task. For professionals who use AI but do not build models.">
+  <link rel="canonical" href="https://www.openconstruction.org/skills.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+  <meta property="og:title" content="OpenConstruction · Skills">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/shared-site.css" rel="stylesheet">
+
+  <style>
+    .skill-card{ border:1px solid var(--oc-border,#e7edf3); border-radius:14px; background:#fff; padding:1rem 1.1rem; transition:box-shadow .15s ease, transform .15s ease; }
+    .skill-card:hover{ box-shadow:0 8px 24px rgba(15,46,75,.08); transform:translateY(-1px); }
+    .skill-title{ font-weight:700; color:#0f2e4b; margin:0; }
+    .skill-desc{ color:#4f5d6c; font-size:.92rem; margin:.35rem 0 .6rem; }
+    .skill-chips{ display:flex; flex-wrap:wrap; gap:.3rem; }
+    .skill-chip{ font-size:.72rem; font-weight:600; padding:.1rem .5rem; border-radius:999px; background:#f6f9fc; color:#123c62; border:1px solid #e7edf3; }
+    .skill-chip.dom{ background:#eef6f2; color:#1f6f54; border-color:#cfe7dd; }
+    .skill-meta{ display:flex; flex-wrap:wrap; gap:.4rem 1rem; align-items:center; color:#4f5d6c; font-size:.8rem; margin-top:.6rem; }
+    .skill-badge-eval{ color:#1f6f54; font-weight:700; }
+    .skill-actions{ display:flex; gap:.5rem; margin-top:.7rem; flex-wrap:wrap; }
+    .facet-list .form-check{ font-size:.85rem; }
+    .skills-hero-note{ max-width:62ch; }
+    code.copyblk{ display:block; background:#0f2e4b; color:#e9f1f8; padding:.6rem .8rem; border-radius:8px; font-size:.82rem; overflow:auto; }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top oc-nav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" height="44" width="44" class="oc-logo">
+    <span class="brand-wordmark">
+      <span class="oc-open">OpenConstruction</span>
+      <span class="oc-construction">Open Science</span>
+    </span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+        <li class="nav-item"><a class="nav-link plain" href="index.html" data-route="index">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle active" href="#" id="ddLibraries" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddLibraries">
+            <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+            <li><a class="dropdown-item" href="models.html">Models</a></li>
+            <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+            <li><a class="dropdown-item" href="oer.html">OERs</a></li>
+            <li><a class="dropdown-item active" href="skills.html">Skills</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="benchmarks.html">Benchmarks</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+            <li><a class="dropdown-item" href="schema.html">Schema</a></li>
+            <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+            <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+            <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="contribute.html">Contribute</a></li>
+        <li class="nav-item"><a class="nav-link plain" href="contributors.html">Community</a></li>
+        <li class="nav-item">
+          <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener" aria-label="GitHub" title="View on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container content">
+    <h1 class="display-6 fw-bold">AEC Skill Catalog</h1>
+    <p class="lead skills-hero-note mx-auto">
+      Packaged <span style="background:linear-gradient(180deg,transparent 60%,rgba(242,162,56,.25) 0);padding:0 .06em;font-weight:700">SKILL.md</span>
+      knowledge that teaches an AI assistant a concrete construction task — for the many
+      professionals who <em>use</em> AI but do not build models.
+    </p>
+    <div class="mt-3" style="max-width:560px;margin:0 auto;">
+      <input id="skillSearch" type="text" class="form-control form-control-lg" placeholder="Search skills — e.g. takeoff, code lookup, safety, scheduling …" aria-label="Search skills">
+    </div>
+  </div>
+</header>
+
+<main class="container my-4">
+  <div class="row g-3">
+    <!-- Filters -->
+    <aside class="col-lg-3">
+      <div class="card shadow-sm filters">
+        <div class="card-header"><strong>Filters</strong></div>
+        <div class="card-body small">
+          <div class="mb-3"><label class="form-label fw-semibold">Domain</label><div id="filter-domain" class="facet-list vstack gap-1"></div></div>
+          <div class="mb-3"><label class="form-label fw-semibold">Project phase</label><div id="filter-phase" class="facet-list vstack gap-1"></div></div>
+          <div class="mb-3"><label class="form-label fw-semibold">Discipline</label><div id="filter-discipline" class="facet-list vstack gap-1"></div></div>
+          <div class="mb-3"><label class="form-label fw-semibold">Software</label><div id="filter-software" class="facet-list vstack gap-1"></div></div>
+          <div class="mb-3"><label class="form-label fw-semibold">AI target</label><div id="filter-ai_target" class="facet-list vstack gap-1"></div></div>
+          <button id="clearFilters" class="btn btn-sm btn-outline-secondary w-100">Clear filters</button>
+        </div>
+      </div>
+      <div class="card shadow-sm mt-3">
+        <div class="card-body small text-muted">
+          <strong class="d-block mb-1" style="color:#0f2e4b">What is a skill?</strong>
+          A skill is a small markdown package (instructions + examples) that an AI agent
+          loads on demand. Unlike a model, you don't train it; unlike an MCP server, it
+          ships knowledge, not a live API. Install it into Claude and the assistant knows
+          how to do the task.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Results -->
+    <section class="col-lg-9">
+      <div class="toolbar mb-2 d-flex justify-content-between align-items-center">
+        <div><span id="resultCount" class="fw-semibold">0</span> skills</div>
+        <div class="d-flex align-items-center gap-2">
+          <label for="sortBy" class="form-label mb-0 small text-muted">Sort by</label>
+          <select id="sortBy" class="form-select form-select-sm w-auto">
+            <option value="popular">Most installed</option>
+            <option value="name-asc">Name A–Z</option>
+          </select>
+        </div>
+      </div>
+      <div id="skillGrid" class="row row-cols-1 row-cols-md-2 g-3" aria-live="polite"></div>
+      <div id="emptyState" class="empty d-none mt-4 text-muted">No skills match your filters.</div>
+      <div id="errorState" class="empty mt-3 d-none text-danger">Failed to load skills. Check <code>data/skills.json</code>.</div>
+    </section>
+  </div>
+</main>
+
+<footer class="py-4 mt-3 oc-site-footer">
+  <div class="container oc-container small text-muted text-center">
+    <div><img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;"> © <span id="yearNow"></span> OpenConstruction Open Science Initiative</div>
+    <div class="mt-1"><small>Licensed under Apache 2.0.</small></div>
+    <div class="mt-1"><small>
+      <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+      <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+      <a href="contribute.html#citation" class="text-muted">Citation</a>
+    </small></div>
+  </div>
+</footer>
+
+<!-- Install modal -->
+<div class="modal fade" id="installModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content p-1">
+      <div class="modal-header">
+        <h5 class="modal-title" id="installTitle">Install skill</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="installBody"><!-- filled by JS --></div>
+    </div>
+  </div>
+</div>
+
+<a href="https://github.com/ruoxinx/open-construction/issues/new" class="issue-btn" target="_blank" rel="noopener">Propose a skill</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/skills.js"></script>
+</body>
+</html>

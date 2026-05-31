@@ -152,6 +152,7 @@
 .oc-rec-type.is-model{ background:#123c62; }
 .oc-rec-type.is-workflow{ background:#8a5418; }
 .oc-rec-type.is-oer{ background:#5b3a8a; }
+.oc-rec-type.is-skill{ background:#0f2e4b; }
 .oc-rec-title{ font-weight:700; color:var(--oc-brand-ink); line-height:1.3; }
 .oc-rec-title:hover{ text-decoration:underline; }
 /* citation line — the key deliverable: grounded, cite-able */

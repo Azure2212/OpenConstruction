@@ -92,7 +92,8 @@
     dataset: ['dataset', 'datasets', 'data', 'benchmark', 'images', 'annotated', 'labeled', 'corpus'],
     model: ['model', 'models', 'pretrained', 'pre-trained', 'network', 'detector', 'cnn', 'transformer', 'weights', 'checkpoint', 'architecture'],
     oer: ['course', 'courses', 'tutorial', 'tutorials', 'learn', 'learning', 'teaching', 'education', 'educational', 'lecture', 'textbook', 'class', 'curriculum', 'student', 'syllabus'],
-    workflow: ['workflow', 'workflows', 'use case', 'usecase', 'deployment', 'case study', 'real world', 'in practice', 'company', 'companies', 'adoption', 'industry']
+    workflow: ['workflow', 'workflows', 'use case', 'usecase', 'deployment', 'case study', 'real world', 'in practice', 'company', 'companies', 'adoption', 'industry'],
+    skill: ['skill', 'skills', 'agent', 'assistant', 'claude', 'prompt', 'automate', 'automation', 'takeoff', 'draft', 'helper']
   };
 
   function expand(tokens) {
@@ -230,6 +231,25 @@
       });
     });
 
+    // skills.json -> { skills: [...] }  (Q4 catalog)
+    arr(d.skills && d.skills.skills).forEach(sk => {
+      const domain = arr(sk.domain), disc = arr(sk.discipline), sw = arr(sk.software);
+      items.push({
+        type: 'skill',
+        id: sk.id,
+        title: sk.name || sk.id || 'Untitled skill',
+        href: 'skills.html#' + encodeURIComponent(sk.id || ''),
+        year: null,
+        license: sk.license, domain: domain, software: sw,
+        installs: sk.install_count, aiTarget: arr(sk.ai_target),
+        tasks: domain,
+        tokens: bag([
+          [sk.name, 3], [sk.description, 1.4], [domain.join(' '), 2.2], [disc.join(' '), 1.4],
+          [sw.join(' '), 1.4], [arr(sk.phase).join(' '), 1], [sk.id, 1.5]
+        ])
+      });
+    });
+
     items.forEach(it => {
       // recency: 0 (old) .. 1 (recent), small influence
       it.recency = it.year ? Math.max(0, Math.min(1, (it.year - 2010) / (nowYear - 2010))) : 0.3;
@@ -311,6 +331,14 @@
       if (meta.length) line += (line ? ' · ' : '') + meta.join(' · ');
       return line;
     }
+    if (item.type === 'skill') {
+      const meta = [];
+      if (item.domain && item.domain.length) meta.push(esc(item.domain.join(', ')));
+      if (item.aiTarget && item.aiTarget.length) meta.push('for ' + esc(item.aiTarget.join('/')));
+      if (item.license) meta.push(esc(item.license));
+      if (item.installs) meta.push('⬇ ' + item.installs.toLocaleString());
+      return meta.join(' · ');
+    }
     // oer
     if (item.provider) bits.push(esc(item.provider));
     if (item.year) bits.push('(' + item.year + ')');
@@ -320,8 +348,8 @@
     return line;
   }
 
-  const TYPE_LABEL = { dataset: 'Dataset', model: 'Model', workflow: 'Workflow', oer: 'Education' };
-  const GROUP_ORDER = ['dataset', 'model', 'workflow', 'oer'];
+  const TYPE_LABEL = { dataset: 'Dataset', model: 'Model', workflow: 'Workflow', oer: 'Education', skill: 'Skill' };
+  const GROUP_ORDER = ['dataset', 'model', 'workflow', 'oer', 'skill'];
 
   // -------------------------------------------------------------------- render
   function renderAnswer(panel, query, retrieved) {
@@ -417,7 +445,7 @@
     const examples = document.createElement('div');
     examples.className = 'oc-ask-examples oc-ask-submit';
     ['crack detection dataset', 'point cloud segmentation model', 'PPE / hardhat safety detection',
-     'construction management course', 'BIM in real-world deployments'].forEach(q => {
+     'construction management course', 'IFC quantity takeoff skill'].forEach(q => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'oc-ask-example'; b.textContent = q;
       examples.appendChild(b);
@@ -438,11 +466,11 @@
     function ensureIndex() {
       if (!indexPromise) {
         indexPromise = (async () => {
-          const [datasets, models, usecases, oers] = await Promise.all([
+          const [datasets, models, usecases, oers, skills] = await Promise.all([
             loadJson('datasets.json'), loadJson('models.json'),
-            loadJson('use-cases.json'), loadJson('oer.json')
+            loadJson('use-cases.json'), loadJson('oer.json'), loadJson('skills.json')
           ]);
-          return buildIndex({ datasets, models, usecases, oers });
+          return buildIndex({ datasets, models, usecases, oers, skills });
         })();
       }
       return indexPromise;

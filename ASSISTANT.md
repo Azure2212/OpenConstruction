@@ -1,70 +1,49 @@
-# OpenConstruction Assistant — what was added & why
+# OpenConstruction — how this build addresses the four questions
 
-This is the **real OpenConstruction site** (cloned from `ruoxinx/open-construction`,
-`site/`) with one addition: an **assistant-style layer on top of the existing
-hero search bar**. It directly follows the PI's feedback:
+This is the **real OpenConstruction site** (`ruoxinx/open-construction`, `site/`) extended
+in place — same look, same `data/*.json`, same GitHub-as-source-of-truth model — with
+demos that answer all four of the PI's open questions. Everything is **client-side and
+static**, so it stays cheap to host and easy to maintain (the PI's sustainability point).
 
-> *"extend the current OpenConstruction interface, especially the search bar, with
-> chatbot-style or assistant-style functionality … focus first on a lightweight,
-> sustainable prototype that extends the existing platform rather than building a
-> completely separate system … connect the chatbot/search prototype to the existing
-> catalog JSON files and test whether it can return accurate, citation-based resource
-> recommendations."*
+| Q | Question | What was added | Files |
+|---|---|---|---|
+| **Q1** | Usability / contributor portal | A **no-Git guided wizard** on `contribute.html`: pick type → guided form → live JSON preview → schema validation → "Open Pull Request" (via a GitHub App, demo). Plus a "Sign in with GitHub" affordance. | `assets/js/contribute-wizard.js` |
+| **Q2** | AI / MCP assistant search | An **"Ask the assistant"** mode added to the existing hero search bar. Natural-language → grounded, **citation-based** recommendations across all catalogs. Cross-recommends bundles (e.g. a skill + its related dataset/model). | `assets/js/assistant.js`, `assets/css/assistant.css` |
+| **Q3** | Closing the last mile | A **"Work with this resource"** action bar on dataset/model detail pages: *Open in Colab* starter notebook, in-browser **IFC / point-cloud preview**, and one-click **Cite** (BibTeX). No data hosting required. | `assets/js/lastmile.js` |
+| **Q4** | AEC skill catalog | A new **Skills catalog** (`skills.html`) of `SKILL.md` packages, filterable by domain × phase × discipline × software × AI target, with an install UX (Claude / CLI / manual). Wired into the assistant search too. | `skills.html`, `assets/js/skills.js`, `data/skills.json` |
 
-## What changed (minimal, non-invasive)
+Only **2 lines** were added to `index.html` (the assistant CSS + JS); `contribute.html`
+and the two detail pages each got **1 script tag**; a **Skills** link was added to the
+shared nav. Nothing else in the original site was modified.
 
-| File | Change |
-|---|---|
-| `assets/js/assistant.js` | **New.** The assistant: loads the same catalog JSON, builds a weighted index, ranks results, renders grounded cards with citations. |
-| `assets/css/assistant.css` | **New.** Styling using the site's existing CSS variables (`--oc-*`) so it looks native, not like a separate platform. |
-| `index.html` | **2 lines added** — one `<link>` for the CSS, one `<script>` for the JS. The assistant injects a `Search | Ask` toggle into the existing search bar at runtime. |
-| `data/*.json` | The real catalog JSON (datasets, models, use-cases, oer, …). |
+## Why this is the sustainable answer (the PI's main concern)
 
-Nothing else in the site was modified. Toggle to **Search** = the original instant
-keyword dropdown, untouched. Toggle to **Ask the assistant** = natural-language query →
-ranked, cited recommendations.
+The assistant's retrieval runs **100% in the browser** — no server, no database, no LLM
+API call, so **$0 marginal cost per query** at any traffic level. Because every answer is
+copied from a real catalog field (title, authors, year, DOI, license), it **cannot
+hallucinate a citation**; when nothing matches it says so.
 
-## Why this is the *sustainable* answer (the PI's main concern)
+### Chatbot cost: light / moderate / heavy
 
-Retrieval runs **100% in the browser**. For each query there is:
-
-- **No server call** — the catalog JSON is already static and CDN-cached.
-- **No database** — no Supabase/Postgres hit.
-- **No LLM API call** — so **$0 marginal cost per query**, at any traffic level.
-
-Because every word in an answer is copied from a real catalog field (title, authors,
-year, DOI, license), the assistant **cannot hallucinate a citation**. When nothing
-matches, it says so instead of padding with irrelevant cards.
-
-### Cost under light / moderate / heavy usage
-
-| Usage | Queries/mo | This (client-side) | If we added a hosted LLM chatbot instead |
+| Usage | Queries/mo | This build (client-side) | If we hosted an LLM chatbot instead |
 |---|---|---|---|
 | Light | ~1k | **$0** | ~$5–30/mo |
 | Moderate | ~20k | **$0** | ~$100–600/mo |
-| Heavy | ~200k+ | **$0** (scales free on Pages/CDN) | ~$1k–6k/mo, the single most variable line |
+| Heavy | ~200k+ | **$0** (scales free on CDN) | ~$1k–6k/mo — the most variable line |
 
-The only thing that scales is static-file bandwidth, which the existing host already
-serves for free.
-
-### Optional upgrade path (kept cheap)
-
-If conversational phrasing is wanted later, the *same retrieval* feeds an LLM — and
-cost stays controllable via: **prompt caching** (ontology/schema are near-constant),
-**rate limits** per IP/session, **smaller/open models** for the rewrite step, and
-**bring-your-own-key via MCP** (the user's own Claude does the talking — $0 to us).
-That's what the footer's *"Connect your own Claude via MCP →"* link points at
-(`mcp.html`), so the free client-side baseline and the BYO-key path coexist.
+If conversational phrasing is wanted later, the *same* retrieval can feed an LLM, kept
+cheap via **prompt caching**, **rate limits**, **smaller/open models**, and
+**bring-your-own-key through MCP** (the user's own Claude does the talking — $0 to us).
+That path is surfaced by the assistant footer's *"Connect your own Claude via MCP →"*.
 
 ## Run locally
 
 ```bash
 cd OpenConstruction
 python3 -m http.server 8000
-# open http://localhost:8000  → try the "Ask the assistant" toggle
+# Home → "Ask the assistant"   |   Skills (nav)   |   Contribute → no-Git wizard
+# Any dataset/model detail page → "Work with this resource"
 ```
 
-## Deploy
-
-Pure static files — deploy the contents of this folder to GitHub Pages / Netlify /
-the existing host. The assistant needs `data/*.json` to be served alongside (they are).
+Pure static files — deploy the folder as-is. The features only need `data/*.json` served
+alongside (they are).
