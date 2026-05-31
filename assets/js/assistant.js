@@ -446,23 +446,19 @@
     const form = document.getElementById('homeSearchForm');
     const input = document.getElementById('homeSearchInput');
     const hero = document.querySelector('.hero-search');
+    const scopeSelect = document.getElementById('homeSearchScope');
     if (!form || !input || !hero) return; // only on the home page
 
-    // --- inject mode toggle + ask button + examples + panel ---
-    const modes = document.createElement('div');
-    modes.className = 'oc-search-modes';
-    modes.innerHTML =
-      '<button type="button" class="oc-search-mode" data-mode="search" aria-pressed="true">Search</button>' +
-      '<button type="button" class="oc-search-mode" data-mode="ask" aria-pressed="false">' +
-        '<span class="oc-mode-spark">✨</span> Ask the assistant</button>';
-    hero.parentNode.insertBefore(modes, hero);
+    // The hero search bar IS the assistant now (one unified input): the user can
+    // type keywords OR a natural-language question; we extract terms and return
+    // grounded, cited results below. No separate "Search vs Ask" toggle, and the
+    // original instant keyword dropdown is suppressed (hidden via .oc-ask-mode).
+    document.body.classList.add('oc-ask-mode');
+    input.placeholder = 'Ask or search — e.g. “datasets for concrete crack detection”';
 
-    const askWrap = document.createElement('div');
-    askWrap.className = 'oc-ask-submit';
-    askWrap.innerHTML = '<button type="button" class="oc-ask-btn" id="ocAskBtn">Ask the catalog</button>';
-
+    // Example starter prompts (shown under the bar; hidden once results appear).
     const examples = document.createElement('div');
-    examples.className = 'oc-ask-examples oc-ask-submit';
+    examples.className = 'oc-ask-examples';
     ['crack detection dataset', 'point cloud segmentation model', 'PPE / hardhat safety detection',
      'construction management course', 'IFC quantity takeoff skill'].forEach(q => {
       const b = document.createElement('button');
@@ -475,53 +471,38 @@
     panel.id = 'ocAssistant';
     panel.hidden = true;
 
-    hero.appendChild(askWrap);
     hero.appendChild(examples);
     hero.parentNode.insertBefore(panel, hero.nextSibling);
 
-    // --- state + data (lazy, shared with the chatbox) ---
-    let askMode = false;
-    const ensureIndex = getIndex;
-
-    async function runAsk() {
+    function runAsk() {
       const q = input.value.trim();
-      if (!q) { panel.hidden = true; return; }
+      if (!q) { panel.hidden = true; examples.style.display = ''; return; }
+      examples.style.display = 'none';
       panel.hidden = false;
       panel.innerHTML = '<div class="oc-assistant-empty">Searching the catalog…</div>';
-      const index = await ensureIndex();
-      renderAnswer(panel, q, retrieve(index, q, 6));
-      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      getIndex().then(index => {
+        if (input.value.trim() !== q) return; // a newer keystroke superseded this
+        const res = retrieve(index, q, 30);
+        const scope = scopeSelect ? scopeSelect.value : 'all';
+        let results = (scope && scope !== 'all') ? res.results.filter(r => r.item.type === scope) : res.results;
+        renderAnswer(panel, q, { results: results.slice(0, 6), tokens: res.tokens });
+      });
     }
 
-    function setMode(mode) {
-      askMode = (mode === 'ask');
-      document.body.classList.toggle('oc-ask-mode', askMode);
-      modes.querySelectorAll('.oc-search-mode').forEach(btn =>
-        btn.setAttribute('aria-pressed', btn.dataset.mode === mode ? 'true' : 'false'));
-      input.placeholder = askMode
-        ? 'Describe what you need, e.g. "datasets for concrete crack detection" …'
-        : 'Search resources, authors, titles, or keywords ...';
-      if (askMode) { ensureIndex(); input.focus(); }
-      else { panel.hidden = true; }
-    }
-
-    modes.addEventListener('click', e => {
-      const btn = e.target.closest('.oc-search-mode');
-      if (btn) setMode(btn.dataset.mode);
-    });
-    document.getElementById('ocAskBtn').addEventListener('click', runAsk);
+    // Live as you type (debounced) + on submit/scope change. Warm the index on focus.
+    let t = null;
+    input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(runAsk, 220); });
+    input.addEventListener('focus', () => { getIndex(); });
+    if (scopeSelect) scopeSelect.addEventListener('change', runAsk);
     examples.addEventListener('click', e => {
       const b = e.target.closest('.oc-ask-example');
       if (!b) return;
-      if (!askMode) setMode('ask');
-      input.value = b.textContent;
-      runAsk();
+      input.value = b.textContent; runAsk(); input.focus();
     });
 
-    // Intercept Enter/submit while in Ask mode BEFORE the existing handler
-    // (capture phase) so the page does not navigate to the first keyword hit.
+    // Block the original handler's "navigate to first keyword hit" on submit.
     form.addEventListener('submit', e => {
-      if (askMode) { e.preventDefault(); e.stopImmediatePropagation(); runAsk(); }
+      e.preventDefault(); e.stopImmediatePropagation(); clearTimeout(t); runAsk();
     }, true);
   });
 })();
