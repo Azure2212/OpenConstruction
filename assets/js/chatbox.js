@@ -176,7 +176,15 @@
       '.ocbot-ask-btn{display:inline-flex;align-items:center;gap:.3rem;border:1px solid #e7edf3;background:#fff;' +
       'color:#0f2e4b;font-weight:700;font-size:.8rem;border-radius:999px;padding:.32rem .7rem;cursor:pointer;white-space:nowrap;}' +
       '.ocbot-ask-btn:hover{border-color:#f2a238;background:#fffaf2;}' +
-      '.navbar-search .ocbot-ask-btn{margin-left:.4rem;padding:.28rem .6rem;font-size:.76rem;}';
+      '.navbar-search .ocbot-ask-btn{margin-left:.4rem;padding:.28rem .6rem;font-size:.76rem;}' +
+      // our own in-box frame so the spark button sits INSIDE the search field
+      '.ocbot-searchbox{display:flex;align-items:center;gap:.35rem;border:1px solid #e7edf3;border-radius:999px;' +
+      'background:#fff;padding:.12rem .5rem;box-shadow:0 4px 14px rgba(15,46,75,.05);}' +
+      '.ocbot-searchbox:focus-within{border-color:#86b7fe;}' +
+      '.ocbot-searchbox > input,.ocbot-searchbox > input:focus{flex:1;min-width:0;border:0 !important;' +
+      'outline:0 !important;box-shadow:none !important;background:transparent !important;}' +
+      '.ocbot-searchbox .ocbot-ask-btn{flex:0 0 auto;border-color:#eef3f8;}' +
+      '.ocbot-searchbox.compact{border-radius:9px;padding:.04rem .35rem;}';
     document.head.appendChild(sparkCss);
 
     function makeBtn(compact) {
@@ -194,7 +202,23 @@
         var v = (inputEl.value || '').trim();
         v ? window.OCChat.ask(v) : window.OCChat.open();
       });
-      inputEl.insertAdjacentElement('afterend', btn);
+      var parent = inputEl.parentElement;
+      // If the input already lives inside a styled flex frame (e.g. the
+      // benchmarks search box, icon + input), just drop the button in as a
+      // sibling — it lands inside the frame and looks integrated.
+      var alreadyBoxed = parent && parent.children.length > 1 &&
+        /flex/.test((getComputedStyle(parent).display || ''));
+      if (alreadyBoxed) {
+        inputEl.insertAdjacentElement('afterend', btn);
+      } else {
+        // Otherwise wrap the input in our own pill frame so the button sits
+        // INSIDE the search field (matching the benchmarks look).
+        var box = document.createElement('span');
+        box.className = 'ocbot-searchbox' + (compact ? ' compact' : '');
+        parent.insertBefore(box, inputEl);
+        box.appendChild(inputEl);
+        box.appendChild(btn);
+      }
     }
     // Big page search inputs (not the home hero, which is already the assistant).
     ['q', 'skillSearch', 'globalSearch'].forEach(function (idv) { attach(document.getElementById(idv), false); });
