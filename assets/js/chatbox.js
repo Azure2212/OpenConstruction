@@ -92,6 +92,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.body.appendChild(fab);
     document.body.appendChild(panel);
+
+    // Some pages have a fixed "Suggest a …" button at bottom-right (.issue-btn)
+    // in the same spot as our chat FAB. Stack the FAB above it so neither hides
+    // the other; nudge the open panel up too so it clears the suggest button.
+    if (document.querySelector('.issue-btn')) {
+      fab.style.bottom = '88px';
+      panel.style.bottom = '88px';
+      panel.style.maxHeight = 'calc(100vh - 108px)';
+    }
     var log = panel.querySelector('#ocbotLog');
     var form = panel.querySelector('#ocbotForm');
     var input = panel.querySelector('#ocbotInput');
