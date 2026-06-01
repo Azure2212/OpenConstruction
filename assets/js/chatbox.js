@@ -75,14 +75,18 @@
 
   var panel = document.createElement('div');
   panel.className = 'ocbot-panel';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'false');
+  panel.setAttribute('aria-label', 'OpenConstruction assistant chat');
   panel.innerHTML =
-    '<div class="ocbot-head"><div class="av">OC</div>' +
+    '<div class="ocbot-head"><div class="av" aria-hidden="true">OC</div>' +
       '<div><div class="t">OpenConstruction Assistant</div><div class="s">Grounded in the live catalog</div></div>' +
-      '<button class="x" aria-label="Close">×</button></div>' +
-    '<div class="ocbot-log" id="ocbotLog"></div>' +
+      '<button class="x" type="button" aria-label="Close assistant">×</button></div>' +
+    '<div class="ocbot-log" id="ocbotLog" role="log" aria-live="polite" aria-atomic="false"></div>' +
     '<div class="ocbot-foot">' +
       '<form class="ocbot-form" id="ocbotForm">' +
-        '<input class="ocbot-input" id="ocbotInput" placeholder="Ask about datasets, models, skills…" autocomplete="off">' +
+        '<label class="visually-hidden" for="ocbotInput">Ask the assistant</label>' +
+        '<input class="ocbot-input" id="ocbotInput" placeholder="Ask about datasets, models, skills…" autocomplete="off" aria-label="Ask the assistant">' +
         '<button class="ocbot-send" type="submit">Send</button>' +
       '</form>' +
       '<div class="ocbot-note">Runs in your browser — no API cost. ' +
@@ -165,10 +169,12 @@
       input.focus();
       if (window.OCAssistant) window.OCAssistant.getIndex(); // warm cache
     }
-    function closeChat() { panel.classList.remove('open'); fab.style.display = 'grid'; }
+    function closeChat() { panel.classList.remove('open'); fab.style.display = 'grid'; fab.focus(); }
 
     fab.addEventListener('click', function () { openChat(); });
     panel.querySelector('.x').addEventListener('click', closeChat);
+    // Escape closes the panel (standard dialog behaviour).
+    panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChat(); });
     form.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
     log.addEventListener('click', function (e) {
       var c = e.target.closest('.ocbot-chip'); if (c) send(c.dataset.q);

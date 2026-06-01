@@ -60,8 +60,8 @@
     <span id="pillCount" class="vw-pill d-none"></span>
   </div>
 
-  <div id="stage">
-    <div id="dropHint">
+  <div id="stage" role="img" aria-label="3D viewport — rendered point cloud or BIM model" tabindex="0">
+    <div id="dropHint" aria-hidden="true">
       <div>
         <div style="font-size:2.2rem">🧱</div>
         <div class="mt-1" style="font-weight:600;color:#cfe0f0">Drop a point cloud or IFC file here</div>
@@ -69,7 +69,7 @@
       </div>
     </div>
   </div>
-  <div id="status" class="mt-2"></div>
+  <div id="status" class="mt-2" role="status" aria-live="polite"></div>
 
   <div class="alert alert-light border small mt-3" style="max-width:80ch">
     Runs entirely client-side with WebGL — <strong>$0 hosting</strong>, no data leaves the browser.
