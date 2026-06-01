@@ -220,8 +220,9 @@
         box.appendChild(btn);
       }
     }
-    // Big page search inputs (not the home hero, which is already the assistant).
-    ['q', 'skillSearch', 'globalSearch'].forEach(function (idv) { attach(document.getElementById(idv), false); });
+    // Page search inputs, incl. the home hero (the button opens the chatbox for
+    // a conversational session; typing in the hero still gives inline results).
+    ['homeSearchInput', 'q', 'skillSearch', 'globalSearch'].forEach(function (idv) { attach(document.getElementById(idv), false); });
     var sd = document.getElementById('searchDock');
     if (sd) attach(sd.querySelector('input'), false);
     // Navbar docked search (compact).
