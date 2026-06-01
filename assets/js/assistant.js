@@ -504,5 +504,12 @@
     form.addEventListener('submit', e => {
       e.preventDefault(); e.stopImmediatePropagation(); clearTimeout(t); runAsk();
     }, true);
+
+    // Deep link: index.html?q=... prefills the assistant and runs it (used by the
+    // skill detail page's "related resources" links and assistant fallback).
+    try {
+      const pq = new URLSearchParams(location.search).get('q');
+      if (pq) { input.value = pq; runAsk(); }
+    } catch (e) {}
   });
 })();

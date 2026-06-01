@@ -145,5 +145,18 @@
     box.innerHTML = '✓ <strong>Pull Request prepared.</strong> In production, an OpenConstruction GitHub App ' +
       'commits this JSON to a new branch and opens a PR (you are added as co-author), where CI validates the ' +
       'schema and a maintainer reviews it. <em>This demo stops here — no PR is actually created.</em>';
+
+    // Record the (demo) submission on the user's profile so the contributor portal
+    // shows their activity. Real PRs would be the source of truth in production.
+    if (window.OCAccount) {
+      var obj = collect();
+      if (!window.OCAccount.getUser()) window.OCAccount.signIn('aec-pro');
+      window.OCAccount.addContribution({
+        type: state.type,
+        title: obj.name || obj.title || '(untitled ' + state.type + ')',
+        status: 'PR prepared'
+      });
+      box.innerHTML += ' <a href="profile.html#contributions" class="alert-link">See it on your profile →</a>';
+    }
   });
 })();

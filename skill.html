@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+  SPDX-License-Identifier: Apache-2.0
+  Q4 — Single skill detail page. Reads ?id=<skill-id> and renders the SKILL.md.
+-->
+<html lang="en">
+<head>
+	<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="shortcut icon" href="/favicon.ico">
+	<meta name="theme-color" content="#0f2e4b">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstruction · Skill</title>
+  <meta name="description" content="An AEC skill — packaged SKILL.md knowledge that teaches an AI assistant a concrete construction task.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenConstruction.org">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/shared-site.css" rel="stylesheet">
+
+  <style>
+    .skill-chips{ display:flex; flex-wrap:wrap; gap:.35rem; }
+    .skill-chip{ font-size:.74rem; font-weight:600; padding:.12rem .55rem; border-radius:999px; background:#f6f9fc; color:#123c62; border:1px solid #e7edf3; }
+    .skill-chip.dom{ background:#eef6f2; color:#1f6f54; border-color:#cfe7dd; }
+    .sd-meta{ display:flex; flex-wrap:wrap; gap:.5rem 1.4rem; align-items:center; color:#4f5d6c; font-size:.85rem; }
+    .sd-meta strong{ color:#0f2e4b; }
+    .sd-badge-eval{ color:#1f6f54; font-weight:700; }
+    .sd-card{ border:1px solid var(--oc-border,#e7edf3); border-radius:14px; background:#fff; padding:1.1rem 1.2rem; }
+    .sd-card h2{ font-size:1.02rem; font-weight:700; color:#0f2e4b; margin:0 0 .6rem; }
+    .sd-mdview{ background:#0f2e4b; color:#e9f1f8; border-radius:12px; padding:1rem 1.1rem; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.83rem; line-height:1.55; overflow:auto; white-space:pre; }
+    .sd-io{ list-style:none; padding:0; margin:0; }
+    .sd-io li{ padding:.45rem 0; border-bottom:1px dashed #e7edf3; font-size:.9rem; color:#33475b; }
+    .sd-io li:last-child{ border-bottom:0; }
+    .sd-rel a{ display:inline-flex; align-items:center; gap:.35rem; font-size:.86rem; padding:.3rem .6rem; border:1px solid #e7edf3; border-radius:999px; text-decoration:none; color:#123c62; background:#f6f9fc; margin:.2rem .25rem .2rem 0; }
+    .sd-rel a:hover{ background:#eef6f2; }
+    code.copyblk{ display:block; background:#0f2e4b; color:#e9f1f8; padding:.6rem .8rem; border-radius:8px; font-size:.82rem; overflow:auto; margin-bottom:.5rem; }
+    .sd-eg{ border-left:3px solid #cfe7dd; padding:.5rem .8rem; background:#f8fbfa; border-radius:0 8px 8px 0; font-size:.88rem; }
+    .sd-eg .u{ color:#1f6f54; font-weight:700; }
+    .sd-eg .a{ color:#0f2e4b; }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top oc-nav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="assets/img/icon.png" alt="OpenConstruction logo" height="44" width="44" class="oc-logo">
+    <span class="brand-wordmark">
+      <span class="oc-open">OpenConstruction</span>
+      <span class="oc-construction">Open Science</span>
+    </span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+        <li class="nav-item"><a class="nav-link plain" href="index.html" data-route="index">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle active" href="#" id="ddLibraries" role="button" data-bs-toggle="dropdown" aria-expanded="false">Libraries</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddLibraries">
+            <li><a class="dropdown-item" href="dataset.html">Datasets</a></li>
+            <li><a class="dropdown-item" href="models.html">Models</a></li>
+            <li><a class="dropdown-item" href="deployments.html">Workflows</a></li>
+            <li><a class="dropdown-item" href="oer.html">OERs</a></li>
+            <li><a class="dropdown-item active" href="skills.html">Skills</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="benchmarks.html">Benchmarks</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link plain dropdown-toggle" href="#" id="ddResourcesMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Docs</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ddResourcesMenu">
+            <li><a class="dropdown-item" href="schema.html">Schema</a></li>
+            <li><a class="dropdown-item" href="tools.html">Tools</a></li>
+            <li><a class="dropdown-item" href="guides.html">Guides</a></li>
+            <li><a class="dropdown-item" href="mcp.html">API &amp; MCP</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link plain" href="contribute.html">Contribute</a></li>
+        <li class="nav-item"><a class="nav-link plain" href="contributors.html">Community</a></li>
+        <li class="nav-item">
+          <a class="nav-link px-2 icon-only" href="https://github.com/ruoxinx/open-construction" target="_blank" rel="noopener" aria-label="GitHub" title="View on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="skills.html">Skills</a></li>
+      <li class="breadcrumb-item active" id="bcName" aria-current="page">…</li>
+    </ol>
+  </nav>
+
+  <div id="skillRoot" aria-live="polite">
+    <div class="text-muted py-5 text-center">Loading skill…</div>
+  </div>
+
+  <div id="notFound" class="d-none alert alert-warning mt-3">
+    Skill not found. Browse the full <a href="skills.html">skill catalog</a>.
+  </div>
+</main>
+
+<footer class="py-4 mt-3 oc-site-footer">
+  <div class="container oc-container small text-muted text-center">
+    <div><img src="assets/img/icon.png" alt="OpenConstruction logo" width="24" height="24" style="vertical-align:-5px; margin-right:4px;"> © <span id="yearNow"></span> OpenConstruction Open Science Initiative</div>
+    <div class="mt-1"><small>Licensed under Apache 2.0.</small></div>
+    <div class="mt-1"><small>
+      <a href="contribute.html#terms" class="text-muted">Terms</a> ·
+      <a href="contribute.html#privacy" class="text-muted">Privacy</a> ·
+      <a href="contribute.html#citation" class="text-muted">Citation</a>
+    </small></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/account.js?v=1"></script>
+<script src="assets/js/skill-detail.js?v=2"></script>
+<script src="assets/js/assistant.js?v=3"></script>
+<script src="assets/js/chatbox.js?v=3"></script>
+</body>
+</html>

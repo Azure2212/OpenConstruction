@@ -63,7 +63,7 @@
       ? '<div class="skill-meta"><span>🔗 Linked: ' + esc(s.related_resources.slice(0, 2).join(', ')) + '</span></div>' : '';
     return '<div class="col"><div class="skill-card h-100">' +
       '<div class="skill-chips mb-2">' + domChips + '</div>' +
-      '<h3 class="skill-title h6">' + esc(s.name) + '</h3>' +
+      '<h3 class="skill-title h6"><a href="skill.html?id=' + encodeURIComponent(s.id) + '" class="stretched-link-skill">' + esc(s.name) + '</a></h3>' +
       '<p class="skill-desc">' + esc(s.description) + '</p>' +
       '<div class="skill-chips">' + sw + '</div>' +
       '<div class="skill-meta">' +
@@ -75,7 +75,7 @@
       '</div>' + rel +
       '<div class="skill-actions">' +
         '<button class="btn btn-sm btn-primary" data-install="' + esc(s.id) + '">Install</button>' +
-        '<button class="btn btn-sm btn-outline-secondary" data-install="' + esc(s.id) + '">View SKILL.md</button>' +
+        '<a class="btn btn-sm btn-outline-secondary" href="skill.html?id=' + encodeURIComponent(s.id) + '">View SKILL.md</a>' +
       '</div></div></div>';
   }
 

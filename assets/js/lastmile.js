@@ -75,6 +75,7 @@
         '<button class="oc-lm-btn primary" id="lmColab">▶ Open in Colab</button>' +
         '<button class="oc-lm-btn" id="lmPreview">👁 Preview in browser</button>' +
         '<button class="oc-lm-btn" id="lmCite">❝ Cite</button>' +
+        '<button class="oc-lm-btn" id="lmSave">🔖 Save</button>' +
       '</div>';
     return bar;
   }
@@ -92,12 +93,17 @@
         '<p class="small text-muted mt-2 mb-0">Demo: the published notebook would ship in the repo so the button opens it pre-filled.</p>');
     });
     bar.querySelector('#lmPreview').addEventListener('click', function () {
+      var viewerUrl = '../viewer.html?title=' + encodeURIComponent(name);
       modal('In-browser preview',
         '<div class="oc-lm-viewer">' +
         '<div><div style="font-size:2rem">🧱</div><strong>IFC / point-cloud viewer</strong>' +
-        '<div class="small mt-1" style="max-width:46ch">Renders BIM (web-ifc) and point clouds (Potree) right here — ' +
-        'something Hugging Face / Zenodo cannot do for AEC formats. Wired to the file once a viewable asset URL is present.</div></div>' +
-        '</div>');
+        '<div class="small mt-1" style="max-width:48ch">Renders BIM (IFC) and point clouds right here in the browser — ' +
+        'something Hugging Face / Zenodo cannot do for AEC formats. Open the viewer and load an ' +
+        '<code>.ifc</code> / <code>.xyz</code> file (yours or the one from this resource).</div></div>' +
+        '</div>' +
+        '<a class="btn btn-sm btn-primary mt-3" target="_blank" rel="noopener" href="' + viewerUrl + '">Open the viewer ↗</a>' +
+        '<p class="small text-muted mt-2 mb-0">The viewer runs fully client-side ($0 hosting). Once a resource ships a ' +
+        'viewable asset URL, this button loads it directly.</p>');
     });
     bar.querySelector('#lmCite').addEventListener('click', function () {
       var key = (id || name).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24) || 'openconstruction';
@@ -108,6 +114,23 @@
         '<code class="oc-code" id="bibBox">' + bib.replace(/</g, '&lt;') + '</code>' +
         '<button class="btn btn-sm btn-outline-secondary mt-2" onclick="navigator.clipboard.writeText(document.getElementById(\'bibBox\').innerText)">Copy</button>');
     });
+
+    var saveBtn = bar.querySelector('#lmSave');
+    if (saveBtn) {
+      var A = window.OCAccount;
+      var item = { id: TYPE + ':' + (id || name), type: TYPE, title: name, url: location.href };
+      var paint = function () {
+        var on = A && A.isBookmarked(item.id);
+        saveBtn.textContent = on ? '🔖 Saved' : '🔖 Save';
+        saveBtn.classList.toggle('primary', !!on);
+      };
+      paint();
+      saveBtn.addEventListener('click', function () {
+        if (!A) return;
+        if (!A.getUser()) { var h = window.prompt('Sign in (demo) to save bookmarks — handle:', 'aec-pro'); if (h === null) return; A.signIn(h); }
+        A.toggleBookmark(item); paint();
+      });
+    }
   }
 
   function inject() {
