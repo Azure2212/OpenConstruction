@@ -1,0 +1,44 @@
+{
+  "_comment": "Golden query set for the OpenConstruction assistant (Q2). Each case runs through the SAME client-side retrieval engine (window.OCAssistant.retrieve). 'expect' lists title substrings (case-insensitive); a case PASSES if any expected item appears within the top-k results. 'type' (optional) also checks the matched item's type. Negative cases set expect=[] and pass only when the assistant returns NO match (proves it does not hallucinate). Maintained by hand; update when the catalog changes.",
+  "k": 5,
+  "cases": [
+    { "q": "concrete crack detection dataset", "type": "dataset", "expect": ["concrete crack", "crack detection"] },
+    { "q": "continuity preserving crack detection", "type": "dataset", "expect": ["continuity-preserving crack", "topo"] },
+    { "q": "dataset for cracks in concrete dams", "type": "dataset", "expect": ["damcrack", "concrete dams"] },
+    { "q": "PPE detection dataset", "type": "dataset", "expect": ["personal protective equipment", "cppe", "color helmet and vest", "color hardhat"] },
+    { "q": "hardhat wearing detection", "expect": ["hardhat-wearing", "safetyhelmetwearing", "hardhats worn"] },
+    { "q": "color helmet and vest dataset", "type": "dataset", "expect": ["color helmet and vest", "chv"] },
+    { "q": "point cloud semantic segmentation", "expect": ["point cloud", "rohbau3d", "pc-urban", "underground garage"] },
+    { "q": "urban point cloud dataset", "type": "dataset", "expect": ["pc-urban", "urban point cloud"] },
+    { "q": "as-built BIM reconstruction from point cloud", "type": "dataset", "expect": ["bimnet", "as-built bim"] },
+    { "q": "IFC based BIM object detection", "type": "dataset", "expect": ["ifc", "aec objects", "ifcnet"] },
+    { "q": "BIM comprehension and reasoning benchmark", "expect": ["ifc-bench", "comprehension"] },
+    { "q": "rebar segmentation dataset", "type": "dataset", "expect": ["rebar", "reinforced concrete", "stirrup", "roi-1555"] },
+    { "q": "bridge component semantic segmentation", "expect": ["semanticbridge", "bridge"] },
+    { "q": "SLAM dataset for construction sites", "type": "dataset", "expect": ["slam", "conslam", "conpr"] },
+    { "q": "moving objects on construction sites", "type": "dataset", "expect": ["mocs", "moving objects"] },
+    { "q": "construction and demolition waste detection", "type": "dataset", "expect": ["codd", "demolition waste"] },
+    { "q": "floor plan recognition dataset", "type": "dataset", "expect": ["cubicasa", "floor plan", "floorplan"] },
+
+    { "q": "hardhat detection deep learning model", "type": "model", "expect": ["hardhats worn", "gdut", "deep learning"] },
+    { "q": "dust emission detection on construction sites", "type": "model", "expect": ["dust emissions"] },
+
+    { "q": "construction project management course", "type": "oer", "expect": ["construction project management", "construction management"] },
+    { "q": "BIM with Revit course", "type": "oer", "expect": ["revit", "building information modeling"] },
+    { "q": "robotics in construction planning", "expect": ["robotics in construction", "construction robotics"] },
+    { "q": "construction cost planning", "type": "oer", "expect": ["cost planning"] },
+
+    { "q": "AI chatbot for jobsite safety planning", "type": "workflow", "expect": ["chatbot", "safety planning"] },
+    { "q": "autonomous robot site inspection", "expect": ["boston dynamics", "site inspections", "autonomous"] },
+    { "q": "AI bridge condition assessment", "expect": ["bridge condition"] },
+
+    { "q": "IFC quantity takeoff skill", "type": "skill", "expect": ["quantity takeoff", "ifc-quantity"] },
+    { "q": "building code lookup assistant", "type": "skill", "expect": ["code", "compliance", "standards lookup"] },
+    { "q": "site photo PPE safety audit skill", "type": "skill", "expect": ["safety audit", "ppe", "site photo"] },
+    { "q": "scan to BIM QA QC", "type": "skill", "expect": ["scan-to-bim", "qa/qc", "qaqc"] },
+
+    { "q": "underwater basket weaving", "expect": [] },
+    { "q": "best pizza recipe in town", "expect": [] },
+    { "q": "medieval poetry critique", "expect": [] }
+  ]
+}
