@@ -45,6 +45,12 @@
     document.getElementById('pfAvatar').textContent = (u.handle[0] || '?').toUpperCase();
     document.getElementById('pfName').textContent = u.name || u.handle;
     document.getElementById('pfHandle').textContent = '@' + u.handle;
+    var meta = document.getElementById('pfMeta');
+    if (meta) {
+      var prov = (A.PROVIDERS && A.PROVIDERS[u.provider]) || { label: 'GitHub', icon: '🐙' };
+      meta.innerHTML = '<span class="text-muted">Signed in via ' + prov.icon + ' <strong>' + esc(prov.label) +
+        '</strong> · role <strong>' + esc(u.role || 'Contributor') + '</strong></span>';
+    }
 
     var badges = A.getBadges();
     document.getElementById('pfBadges').innerHTML = badges.length
@@ -70,10 +76,7 @@
     if (A) A.onChange(render);
 
     var si = document.getElementById('pfSignIn');
-    if (si) si.addEventListener('click', function () {
-      var h = window.prompt('Demo sign-in — enter a GitHub-style handle (no real auth):', 'aec-pro');
-      if (h !== null && A) A.signIn(h);
-    });
+    if (si) si.addEventListener('click', function () { if (A) A.openSignIn(); });
     var so = document.getElementById('pfSignOut');
     if (so) so.addEventListener('click', function () { if (A) A.signOut(); });
 

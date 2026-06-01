@@ -101,8 +101,8 @@
   <div id="signedOut" class="pf-card text-center d-none">
     <div class="pf-avatar mx-auto mb-3">?</div>
     <h2 class="mb-1" style="border:0">You're browsing as a guest</h2>
-    <p class="text-muted small mb-3">Sign in (demo) to bookmark resources and track contributions.</p>
-    <button id="pfSignIn" class="btn btn-primary">Sign in with GitHub <span class="small">(demo)</span></button>
+    <p class="text-muted small mb-3">Sign in (demo) with GitHub, ORCID, or email to bookmark resources and track contributions.</p>
+    <button id="pfSignIn" class="btn btn-primary">Sign in <span class="small">(demo)</span></button>
   </div>
 
   <!-- Signed-in state -->
@@ -113,9 +113,13 @@
         <div class="flex-grow-1">
           <div class="h5 mb-0" id="pfName" style="color:#0f2e4b">—</div>
           <div class="text-muted small" id="pfHandle">@—</div>
+          <div class="small mt-1" id="pfMeta"></div>
           <div class="mt-2 d-flex flex-wrap gap-2" id="pfBadges"></div>
         </div>
-        <button id="pfSignOut" class="btn btn-sm btn-outline-secondary align-self-start">Sign out</button>
+        <div class="d-flex flex-column gap-2 align-self-start">
+          <a id="pfAdmin" href="admin.html" class="btn btn-sm btn-outline-primary">User management</a>
+          <button id="pfSignOut" class="btn btn-sm btn-outline-secondary">Sign out</button>
+        </div>
       </div>
     </div>
 
@@ -145,8 +149,8 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/account.js?v=1"></script>
-<script src="assets/js/profile.js?v=1"></script>
+<script src="assets/js/account.js?v=2"></script>
+<script src="assets/js/profile.js?v=2"></script>
 <script src="assets/js/assistant.js?v=3"></script>
 <script src="assets/js/chatbox.js?v=3"></script>
 </body>
