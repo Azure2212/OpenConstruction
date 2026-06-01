@@ -61,7 +61,7 @@
     var ai = (s.ai_target || []).map(function (t) { return AI_LABEL[t] || t; }).join(', ');
     var rel = (s.related_resources && s.related_resources.length)
       ? '<div class="skill-meta"><span>🔗 Linked: ' + esc(s.related_resources.slice(0, 2).join(', ')) + '</span></div>' : '';
-    return '<div class="col"><div class="skill-card h-100">' +
+    return '<div class="col"><div class="skill-card h-100" data-skill="' + esc(s.id) + '" style="cursor:pointer">' +
       '<div class="skill-chips mb-2">' + domChips + '</div>' +
       '<h3 class="skill-title h6"><a href="skill.html?id=' + encodeURIComponent(s.id) + '" class="stretched-link-skill">' + esc(s.name) + '</a></h3>' +
       '<p class="skill-desc">' + esc(s.description) + '</p>' +
@@ -130,7 +130,11 @@
       render();
     });
     document.getElementById('skillGrid').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-install]'); if (b) showInstall(b.dataset.install);
+      var b = e.target.closest('[data-install]');
+      if (b) { showInstall(b.dataset.install); return; }
+      if (e.target.closest('a')) return; // let the title / "View SKILL.md" links navigate
+      var card = e.target.closest('[data-skill]');
+      if (card) location.href = 'skill.html?id=' + encodeURIComponent(card.dataset.skill);
     });
   }
 
