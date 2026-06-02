@@ -114,50 +114,68 @@
     const p = location.pathname || '';
     if (/\/datasets\/detail\.html$/.test(p)) return 'dataset';
     if (/\/models\/details\.html$/.test(p)) return 'model';
+    if (/\/workflows\/details\.html$/.test(p)) return 'workflow';
+    if (/\/oers\/details\.html$/.test(p)) return 'oer';
     return null;
   }
-  // current detail pages live one level deep (datasets/, models/) -> '../' to root
-  function fixHref(href) { return '../' + String(href || '').replace(/^\.?\//, ''); }
 
-  function linkHtml(entry, typeLabel) {
-    const it = entry.item;
-    return '<a class="related-link" href="' + esc(fixHref(it.href)) + '">' +
-      '<span class="related-link-type">' + esc(typeLabel) + '</span>' +
+  // All detail pages live one level deep -> build links by TYPE (not the index
+  // href, whose workflow/oer targets point elsewhere) so links land on the
+  // right detail page. workflow id == title (matches workflow-detail.js lookup).
+  var TYPE_LABEL = { dataset: 'Dataset', model: 'Model', workflow: 'Workflow', oer: 'OER', skill: 'Skill' };
+  function hrefFor(it) {
+    var enc = encodeURIComponent(it.id || it.title || '');
+    switch (it.type) {
+      case 'dataset':  return '../datasets/detail.html?id=' + enc;
+      case 'model':    return '../models/details.html?id=' + enc;
+      case 'workflow': return '../workflows/details.html?id=' + enc;
+      case 'oer':      return '../oers/details.html?id=' + enc;
+      case 'skill':    return '../skills.html#' + enc;
+      default:         return '../' + String(it.href || '').replace(/^\.?\//, '');
+    }
+  }
+
+  function linkHtml(entry) {
+    var it = entry.item;
+    return '<a class="related-link" href="' + esc(hrefFor(it)) + '">' +
+      '<span class="related-link-type">' + esc(TYPE_LABEL[it.type] || 'Resource') + '</span>' +
       '<span class="related-link-title">' + esc(it.title || it.id) + '</span>' +
       '<span class="related-link-meta">' + esc(entry.reason) + '</span>' +
       '</a>';
   }
 
-  function fillSubcard(card, entries, typeLabel, emptyMsg) {
-    const head = card.querySelector('.detail-subhead');
-    const headHtml = head ? head.outerHTML : '';
-    const body = entries.length
-      ? entries.map(e => linkHtml(e, typeLabel)).join('')
+  function fillSubcard(card, entries, emptyMsg) {
+    var head = card.querySelector('.detail-subhead');
+    var headHtml = head ? head.outerHTML : '';
+    var body = entries.length
+      ? entries.map(linkHtml).join('')
       : '<p class="text-muted small mb-0">' + emptyMsg + '</p>';
     card.innerHTML = headHtml + body;
   }
 
-  function applyRecommendations(rec) {
-    const section = document.getElementById('related-resources');
+  // Map each related sub-card (by its subhead label) to the matching rec group.
+  function applyRecommendations(rec, pageType) {
+    var section = document.getElementById('related-resources');
     if (!section || !rec) return false;
-    const cards = section.querySelectorAll('.detail-subcard');
-    let touched = false;
-    cards.forEach(card => {
-      const head = card.querySelector('.detail-subhead');
-      const label = head ? head.textContent.trim().toLowerCase() : '';
-      if (label === 'related models') {
-        fillSubcard(card, rec.models, 'Model', 'No related models were identified from the current catalog.');
-        touched = true;
-      } else if (label === 'related datasets') {
-        fillSubcard(card, rec.datasets, 'Dataset', 'No related datasets were identified from the current catalog.');
-        touched = true;
-      }
+    var cards = section.querySelectorAll('.detail-subcard');
+    var touched = false;
+    cards.forEach(function (card) {
+      var head = card.querySelector('.detail-subhead');
+      var label = head ? head.textContent.trim().toLowerCase() : '';
+      var entries = null, empty = '';
+      if (label === 'related models') { entries = rec.models; empty = 'No related models were identified from the current catalog.'; }
+      else if (label === 'related datasets') { entries = rec.datasets; empty = 'No related datasets were identified from the current catalog.'; }
+      else if (label === 'related workflows') { entries = rec.workflows; empty = 'No closely related workflows were found from the current catalog metadata.'; }
+      else if (label === 'related learning' || label === 'related oers' || label === 'related education') { entries = rec.oers; empty = 'No closely related OERs were found from the current catalog metadata.'; }
+      else if (!head && pageType === 'oer') { entries = rec.oers; empty = 'No closely related OERs were found from the current catalog metadata.'; }
+      if (entries) { fillSubcard(card, entries, empty); touched = true; }
     });
     return touched;
   }
 
   async function init() {
-    if (!detailPage()) return;
+    var pageType = detailPage();
+    if (!pageType) return;
     if (!window.OCAssistant || !window.OCAssistant.getIndex) return;
     const id = new URLSearchParams(location.search).get('id');
     if (!id) return;
@@ -169,7 +187,7 @@
     let tries = 0;
     const timer = setInterval(() => {
       tries++;
-      const done = applyRecommendations(rec);
+      const done = applyRecommendations(rec, pageType);
       if (done || tries > 40) clearInterval(timer); // ~10s max
     }, 250);
   }
