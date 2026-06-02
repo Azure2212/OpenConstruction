@@ -8,6 +8,7 @@ const siteRoot = path.resolve(__dirname, "..");
 
 const expectedTopLevelDirs = new Set([
   "assets",
+  "auth",
   "data",
   "datasets",
   "models",
@@ -17,6 +18,7 @@ const expectedTopLevelDirs = new Set([
 ]);
 
 const expectedTopLevelHtml = new Set([
+  "account.html",
   "index.html",
   "benchmarks.html",
   "benchmark_application.html",
@@ -27,6 +29,7 @@ const expectedTopLevelHtml = new Set([
   "dataset.html",
   "deployments.html",
   "guides.html",
+  "maintainer.html",
   "mcp.html",
   "models.html",
   "monthly-highlights.html",
@@ -37,9 +40,12 @@ const expectedTopLevelHtml = new Set([
   "schema.html",
   "taxonomy.html",
   "tools.html",
+  "verify.html",
 ]);
 
 const expectedNestedHtml = new Set([
+  "auth/callback.html",
+  "auth/sign-in.html",
   "datasets/detail.html",
   "models/details.html",
   "oers/details.html",
@@ -87,6 +93,18 @@ function listRelativeFiles(dir, ext) {
   return out.sort();
 }
 
+function navLabels(html) {
+  const nav = html.match(/<nav\b[^>]*\boc-nav\b[^>]*>[\s\S]*?<\/nav>/i)?.[0];
+  if (!nav) return null;
+  return [...nav.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/gi)]
+    .map((match) => match[1]
+      .replace(/<[^>]+>/g, "")
+      .replace(/&amp;/g, "&")
+      .replace(/\s+/g, " ")
+      .trim())
+    .filter(Boolean);
+}
+
 const topLevelEntries = fs.readdirSync(siteRoot, { withFileTypes: true });
 const topLevelDirs = new Set(topLevelEntries.filter((e) => e.isDirectory()).map((e) => e.name));
 const topLevelHtml = new Set(topLevelEntries.filter((e) => e.isFile() && e.name.endsWith(".html")).map((e) => e.name));
@@ -125,6 +143,15 @@ for (const file of nestedHtml) {
 
 for (const file of expectedDataFiles) {
   if (!dataFiles.has(file)) fail(`missing required data file: site/data/${file}`);
+}
+
+for (const file of [...topLevelHtml, ...nestedHtml]) {
+  const html = fs.readFileSync(path.join(siteRoot, file), "utf8");
+  const labels = navLabels(html);
+  if (!labels) continue;
+  for (const label of ["Home", "Libraries", "Docs", "Contribute", "Community"]) {
+    if (!labels.includes(label)) fail(`site/${file} nav missing ${label}`);
+  }
 }
 
 if (process.exitCode) {
