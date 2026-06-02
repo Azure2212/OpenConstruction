@@ -56,6 +56,7 @@
   }
 
   function card(s) {
+    var R = window.OCSkillRate;
     var domChips = (s.domain || []).map(function (d) { return '<span class="skill-chip dom">' + esc(d) + '</span>'; }).join('');
     var sw = (s.software || []).slice(0, 3).map(function (d) { return '<span class="skill-chip">' + esc(d) + '</span>'; }).join('');
     var ai = (s.ai_target || []).map(function (t) { return AI_LABEL[t] || t; }).join(', ');
@@ -66,14 +67,17 @@
       '<h3 class="skill-title h6"><a href="skill.html?id=' + encodeURIComponent(s.id) + '" class="stretched-link-skill">' + esc(s.name) + '</a></h3>' +
       '<p class="skill-desc">' + esc(s.description) + '</p>' +
       '<div class="skill-chips">' + sw + '</div>' +
+      '<div class="skill-chips mb-1">' + (R ? R.verifiedBadgeHtml(s) : '') + (R ? R.originBadgeHtml(s) : '') + '</div>' +
       '<div class="skill-meta">' +
         '<span>v' + esc(s.version) + '</span>' +
         '<span>' + esc(s.license) + '</span>' +
         '<span>🎯 ' + esc(ai) + '</span>' +
         '<span>⬇ ' + (s.install_count || 0).toLocaleString() + '</span>' +
         (s.has_eval ? '<span class="skill-badge-eval">✓ has eval</span>' : '') +
+        (R ? '<span>' + R.freshHtml(s) + '</span>' : '') +
       '</div>' + rel +
       '<div class="skill-actions">' +
+        (R ? R.starButtonHtml(s) : '') +
         '<button class="btn btn-sm btn-primary" data-install="' + esc(s.id) + '">Install</button>' +
         '<a class="btn btn-sm btn-outline-secondary" href="skill.html?id=' + encodeURIComponent(s.id) + '">View SKILL.md</a>' +
       '</div></div></div>';
@@ -81,7 +85,10 @@
 
   function render() {
     var list = SKILLS.filter(matches);
+    var R = window.OCSkillRate;
     if (state.sort === 'name-asc') list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    else if (state.sort === 'top-rated') list.sort(function (a, b) { return (R ? R.total(b) : 0) - (R ? R.total(a) : 0); });
+    else if (state.sort === 'verified') list.sort(function (a, b) { return (R ? R.trustScore(b) : 0) - (R ? R.trustScore(a) : 0); });
     else list.sort(function (a, b) { return (b.install_count || 0) - (a.install_count || 0); });
 
     document.getElementById('resultCount').textContent = list.length;
@@ -130,6 +137,19 @@
       render();
     });
     document.getElementById('skillGrid').addEventListener('click', function (e) {
+      var star = e.target.closest('[data-oc-star]');
+      if (star) {
+        e.preventDefault(); e.stopPropagation();
+        var R = window.OCSkillRate; if (!R) return;
+        var id = star.getAttribute('data-oc-star');
+        var now = R.toggle(id);
+        var sk = SKILLS.find(function (x) { return x.id === id; });
+        star.classList.toggle('on', now);
+        star.setAttribute('aria-pressed', now ? 'true' : 'false');
+        star.querySelector('.oc-star-ic').textContent = now ? '★' : '☆';
+        star.querySelector('.oc-star-count').textContent = R.total(sk);
+        return;
+      }
       var b = e.target.closest('[data-install]');
       if (b) { showInstall(b.dataset.install); return; }
       if (e.target.closest('a')) return; // let the title / "View SKILL.md" links navigate
@@ -142,6 +162,7 @@
     var data = await load('skills.json');
     if (!data || !Array.isArray(data.skills)) { document.getElementById('errorState').classList.remove('d-none'); return; }
     SKILLS = data.skills;
+    if (window.OCSkillRate) window.OCSkillRate.injectStyles();
     FACETS.forEach(buildFacet);
     bind();
     render();

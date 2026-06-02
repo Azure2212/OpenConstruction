@@ -68,6 +68,7 @@
   function render(s) {
     document.title = 'OpenConstruction · ' + s.name;
     var bc = document.getElementById('bcName'); if (bc) bc.textContent = s.name;
+    var R = window.OCSkillRate; if (R) R.injectStyles();
 
     var ai = (s.ai_target || []).map(function (t) { return AI_LABEL[t] || t; }).join(', ');
     var dom = (s.domain || []).map(function (d) { return chip(d, 'dom'); }).join('');
@@ -88,17 +89,22 @@
           '<h1 class="h3 fw-bold mb-1" style="color:#0f2e4b">' + esc(s.name) + '</h1>' +
           '<p class="text-muted mb-2" style="max-width:64ch">' + esc(s.description) + '</p>' +
           '<div class="sd-meta">' +
+            (R ? R.starButtonHtml(s) : '') +
+            (R ? R.verifiedBadgeHtml(s) : '') +
+            (R ? R.originBadgeHtml(s) : '') +
             '<span><strong>v' + esc(s.version) + '</strong></span>' +
             '<span>' + esc(s.license) + '</span>' +
             '<span>🎯 ' + esc(ai) + '</span>' +
             '<span>⬇ ' + (s.install_count || 0).toLocaleString() + ' installs</span>' +
             (s.has_eval ? '<span class="sd-badge-eval">✓ ships eval</span>' : '<span>' + (s.examples || 0) + ' example(s)</span>') +
+            (R ? '<span>' + R.freshHtml(s) + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<div class="d-flex flex-column gap-2">' +
           '<button id="installBtn" class="btn btn-primary">Install</button>' +
+          '<button id="dlBtn" class="btn btn-outline-secondary">⬇ Download SKILL.md</button>' +
           '<button id="askBtn" class="btn btn-outline-secondary">✨ Ask the assistant</button>' +
-          '<button id="bmBtn" class="btn btn-outline-secondary">🔖 Save</button>' +
+          (window.OCBookmark ? window.OCBookmark.buttonHtml({ type: 'skill', id: s.id, title: s.name, url: 'skill.html?id=' + encodeURIComponent(s.id), variant: 'text' }) : '') +
         '</div>' +
       '</div>' +
 
@@ -139,23 +145,28 @@
       else if (window.OCChat && window.OCChat.open) window.OCChat.open();
       else location.href = 'index.html?q=' + encodeURIComponent(s.name);
     });
-    var bm = document.getElementById('bmBtn');
-    if (bm) {
-      var A = window.OCAccount;
-      var item = { id: 'skill:' + s.id, type: 'skill', title: s.name, url: 'skill.html?id=' + encodeURIComponent(s.id) };
-      var paint = function () {
-        var on = A && A.isBookmarked(item.id);
-        bm.classList.toggle('btn-outline-secondary', !on);
-        bm.classList.toggle('btn-success', !!on);
-        bm.textContent = on ? '🔖 Saved' : '🔖 Save';
-      };
-      paint();
-      bm.addEventListener('click', function () {
-        if (!A) return;
-        if (!A.getUser()) { var h = window.prompt('Sign in (demo) to save bookmarks — handle:', 'aec-pro'); if (h === null) return; A.signIn(h); }
-        A.toggleBookmark(item); paint();
+    // Save uses the professor's real bookmark system (Supabase via auth.js); mount it.
+    if (window.OCBookmark && window.OCBookmark.mount) window.OCBookmark.mount(root);
+
+    var dl = document.getElementById('dlBtn');
+    if (dl) dl.addEventListener('click', function () {
+      var blob = new Blob([skillMd(s)], { type: 'text/markdown' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = s.id + '.SKILL.md';
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    });
+
+    root.querySelectorAll('[data-oc-star]').forEach(function (star) {
+      star.addEventListener('click', function () {
+        var R2 = window.OCSkillRate; if (!R2) return;
+        var now = R2.toggle(s.id);
+        star.classList.toggle('on', now);
+        star.setAttribute('aria-pressed', now ? 'true' : 'false');
+        star.querySelector('.oc-star-ic').textContent = now ? '★' : '☆';
+        star.querySelector('.oc-star-count').textContent = R2.total(s);
       });
-    }
+    });
     var inst = document.getElementById('installBtn');
     if (inst) inst.addEventListener('click', function () {
       document.querySelector('.sd-card h2').scrollIntoView({ behavior: 'smooth' });

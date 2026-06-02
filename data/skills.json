@@ -6,15 +6,40 @@
       "name": "IFC Quantity Takeoff",
       "description": "Extract quantities (volume, area, count) from an IFC model and produce a structured takeoff table for cost estimation.",
       "version": "1.0.0",
-      "domain": ["Estimating", "BIM/CAD"],
-      "phase": ["Preconstruction"],
-      "discipline": ["Architectural", "Structural"],
-      "software": ["Revit", "ArchiCAD", "IFC-native"],
-      "audience": ["Practitioner"],
-      "ai_target": ["claude-skill", "mcp"],
+      "domain": [
+        "Estimating",
+        "BIM/CAD"
+      ],
+      "phase": [
+        "Preconstruction"
+      ],
+      "discipline": [
+        "Architectural",
+        "Structural"
+      ],
+      "software": [
+        "Revit",
+        "ArchiCAD",
+        "IFC-native"
+      ],
+      "audience": [
+        "Practitioner"
+      ],
+      "ai_target": [
+        "claude-skill",
+        "mcp"
+      ],
       "license": "Apache-2.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
-      "related_resources": ["IFC-Bench v2", "SpaRSE-BIM"],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
+      "related_resources": [
+        "IFC-Bench v2",
+        "SpaRSE-BIM"
+      ],
       "examples": 2,
       "has_eval": true,
       "install_count": 312,
@@ -22,26 +47,58 @@
         "You have an IFC export and need a quantity table without opening authoring software.",
         "Early cost estimating where speed matters more than a certified takeoff."
       ],
-      "inputs": ["An IFC file (IFC2x3 or IFC4) or a link to one", "Optional: which element classes to count"],
-      "outputs": ["A structured table: element class, count, area, volume", "Notes on elements skipped or ambiguous"],
+      "inputs": [
+        "An IFC file (IFC2x3 or IFC4) or a link to one",
+        "Optional: which element classes to count"
+      ],
+      "outputs": [
+        "A structured table: element class, count, area, volume",
+        "Notes on elements skipped or ambiguous"
+      ],
       "example_io": {
         "in": "Take off concrete volume and formwork area from this structural IFC.",
         "out": "IfcBeam ×42 (18.6 m³), IfcColumn ×28 (11.2 m³), IfcSlab ×6 (94.0 m³); formwork area 612 m² — 3 elements skipped (no geometry)."
-      }
+      },
+      "verified": true,
+      "stars_seed": 47,
+      "origin": "official",
+      "last_reviewed": "2026-05-18"
     },
     {
       "id": "code-compliance-lookup",
       "name": "Building Code & Standards Lookup",
       "description": "Answer code questions (IBC, ASCE 7, ACI) with section-level citations so an engineer can verify the source instead of trusting a paraphrase.",
       "version": "0.4.2",
-      "domain": ["Code & Standards", "Safety/Inspection"],
-      "phase": ["Design", "Preconstruction"],
-      "discipline": ["Structural", "Architectural", "MEP"],
-      "software": ["CAD-agnostic"],
-      "audience": ["Practitioner", "Specialist"],
-      "ai_target": ["claude-skill"],
+      "domain": [
+        "Code & Standards",
+        "Safety/Inspection"
+      ],
+      "phase": [
+        "Design",
+        "Preconstruction"
+      ],
+      "discipline": [
+        "Structural",
+        "Architectural",
+        "MEP"
+      ],
+      "software": [
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner",
+        "Specialist"
+      ],
+      "ai_target": [
+        "claude-skill"
+      ],
       "license": "CC BY 4.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
       "related_resources": [],
       "examples": 3,
       "has_eval": true,
@@ -50,26 +107,54 @@
         "An engineer needs the governing code clause and wants to verify the source, not trust a paraphrase.",
         "Drafting a design narrative that must cite IBC / ASCE 7 / ACI sections."
       ],
-      "inputs": ["A natural-language code question", "Optional: jurisdiction / code edition"],
-      "outputs": ["A direct answer with the exact section number quoted", "A 'verify here' pointer so the human checks the primary source"],
+      "inputs": [
+        "A natural-language code question",
+        "Optional: jurisdiction / code edition"
+      ],
+      "outputs": [
+        "A direct answer with the exact section number quoted",
+        "A 'verify here' pointer so the human checks the primary source"
+      ],
       "example_io": {
         "in": "What is the minimum roof live load for an ordinary flat roof under ASCE 7?",
         "out": "ASCE 7-22 §4.8.2: minimum roof live load Lr = 20 psf, reducible per §4.8.2 down to 12 psf based on tributary area and slope. Verify against your adopted edition."
-      }
+      },
+      "verified": true,
+      "stars_seed": 88,
+      "origin": "official",
+      "last_reviewed": "2026-05-22"
     },
     {
       "id": "material-spec-drafting",
       "name": "Material Spec Drafting (CSI MasterFormat)",
       "description": "Draft a Division-03/04 material specification section in CSI MasterFormat from a short product description, with placeholders flagged for review.",
       "version": "1.1.0",
-      "domain": ["Materials", "Design"],
-      "phase": ["Design"],
-      "discipline": ["Architectural"],
-      "software": ["CAD-agnostic"],
-      "audience": ["Practitioner"],
-      "ai_target": ["claude-skill"],
+      "domain": [
+        "Materials",
+        "Design"
+      ],
+      "phase": [
+        "Design"
+      ],
+      "discipline": [
+        "Architectural"
+      ],
+      "software": [
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner"
+      ],
+      "ai_target": [
+        "claude-skill"
+      ],
       "license": "Apache-2.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
       "related_resources": [],
       "examples": 2,
       "has_eval": false,
@@ -78,27 +163,59 @@
         "You need a first-draft spec section in CSI MasterFormat from a short product note.",
         "Standardizing material specs across a project for later editor review."
       ],
-      "inputs": ["A short product / material description", "Optional: target MasterFormat division"],
-      "outputs": ["A Part 1/2/3 spec section draft", "Placeholders flagged [REVIEW] where project data is missing"],
+      "inputs": [
+        "A short product / material description",
+        "Optional: target MasterFormat division"
+      ],
+      "outputs": [
+        "A Part 1/2/3 spec section draft",
+        "Placeholders flagged [REVIEW] where project data is missing"
+      ],
       "example_io": {
         "in": "Draft a spec for cast-in-place structural concrete, 4000 psi, normal weight.",
         "out": "03 30 00 Cast-in-Place Concrete — Part 2 Products: f'c = 4000 psi @ 28 days, [REVIEW slump], normal-weight aggregate per ASTM C33 …"
-      }
+      },
+      "verified": false,
+      "stars_seed": 12,
+      "origin": "community",
+      "last_reviewed": "2026-04-30"
     },
     {
       "id": "site-photo-safety-audit",
       "name": "Site Photo Safety Audit (PPE)",
       "description": "Review a construction site photo and report missing PPE (hardhat, vest, harness) with an OSHA-aligned checklist and confidence notes.",
       "version": "0.9.0",
-      "domain": ["Safety/Inspection"],
-      "phase": ["Construction"],
-      "discipline": ["Civil", "Architectural"],
-      "software": ["CAD-agnostic"],
-      "audience": ["Practitioner"],
-      "ai_target": ["claude-skill", "mcp"],
+      "domain": [
+        "Safety/Inspection"
+      ],
+      "phase": [
+        "Construction"
+      ],
+      "discipline": [
+        "Civil",
+        "Architectural"
+      ],
+      "software": [
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner"
+      ],
+      "ai_target": [
+        "claude-skill",
+        "mcp"
+      ],
       "license": "Apache-2.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
-      "related_resources": ["CHV: Color Helmet and Vest Dataset", "OSHA-driven Safety Dataset"],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
+      "related_resources": [
+        "CHV: Color Helmet and Vest Dataset",
+        "OSHA-driven Safety Dataset"
+      ],
       "examples": 4,
       "has_eval": true,
       "install_count": 421,
@@ -106,26 +223,54 @@
         "A safety lead wants a quick PPE check on daily site photos.",
         "Triaging a backlog of progress photos for obvious hazards before a walk-through."
       ],
-      "inputs": ["One or more site photos", "Optional: which PPE items are required on this site"],
-      "outputs": ["Per-person PPE checklist (hardhat / vest / harness)", "Confidence notes and a 'needs human review' flag for low-confidence calls"],
+      "inputs": [
+        "One or more site photos",
+        "Optional: which PPE items are required on this site"
+      ],
+      "outputs": [
+        "Per-person PPE checklist (hardhat / vest / harness)",
+        "Confidence notes and a 'needs human review' flag for low-confidence calls"
+      ],
       "example_io": {
         "in": "Check this photo of two workers near an excavation for missing PPE.",
         "out": "Worker A: hardhat ✓, hi-vis ✓, harness n/a. Worker B: hardhat ✗ (likely missing), hi-vis ✓. Low confidence on B — verify; near open edge, consider fall-protection review."
-      }
+      },
+      "verified": true,
+      "stars_seed": 63,
+      "origin": "official",
+      "last_reviewed": "2026-05-20"
     },
     {
       "id": "schedule-lps-analysis",
       "name": "Schedule Analysis (Last Planner System)",
       "description": "Analyze a weekly work plan against Last Planner System principles, compute PPC (Percent Plan Complete), and surface root causes of variance.",
       "version": "1.0.1",
-      "domain": ["Project Management"],
-      "phase": ["Construction"],
-      "discipline": ["Civil"],
-      "software": ["CAD-agnostic"],
-      "audience": ["Practitioner", "Specialist"],
-      "ai_target": ["claude-skill"],
+      "domain": [
+        "Project Management"
+      ],
+      "phase": [
+        "Construction"
+      ],
+      "discipline": [
+        "Civil"
+      ],
+      "software": [
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner",
+        "Specialist"
+      ],
+      "ai_target": [
+        "claude-skill"
+      ],
       "license": "CC BY 4.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
       "related_resources": [],
       "examples": 2,
       "has_eval": false,
@@ -134,27 +279,61 @@
         "A superintendent wants PPC computed and variance reasons categorized from a weekly plan.",
         "Coaching a team on Last Planner System discipline using their own data."
       ],
-      "inputs": ["A weekly work plan (committed vs completed tasks)", "Optional: reasons logged for incomplete tasks"],
-      "outputs": ["PPC (Percent Plan Complete) for the week", "Root-cause breakdown of variances (prerequisites, resources, weather, design)"],
+      "inputs": [
+        "A weekly work plan (committed vs completed tasks)",
+        "Optional: reasons logged for incomplete tasks"
+      ],
+      "outputs": [
+        "PPC (Percent Plan Complete) for the week",
+        "Root-cause breakdown of variances (prerequisites, resources, weather, design)"
+      ],
       "example_io": {
         "in": "Here are 12 committed tasks; 9 done. Compute PPC and group the misses.",
         "out": "PPC = 75% (9/12). Misses: 2× missing prerequisite work, 1× material late. Recommend tightening make-ready look-ahead for prerequisites."
-      }
+      },
+      "verified": false,
+      "stars_seed": 9,
+      "origin": "community",
+      "last_reviewed": "2026-03-15"
     },
     {
       "id": "scan-to-bim-qaqc",
       "name": "Scan-to-BIM QA/QC Helper",
       "description": "Compare an as-built point cloud against a design BIM and report deviations beyond tolerance, grouped by building element.",
       "version": "0.3.0",
-      "domain": ["BIM/CAD", "Geo/Survey"],
-      "phase": ["Construction", "O&M"],
-      "discipline": ["Structural", "MEP"],
-      "software": ["Revit", "IFC-native"],
-      "audience": ["Specialist"],
-      "ai_target": ["claude-skill", "mcp"],
+      "domain": [
+        "BIM/CAD",
+        "Geo/Survey"
+      ],
+      "phase": [
+        "Construction",
+        "O&M"
+      ],
+      "discipline": [
+        "Structural",
+        "MEP"
+      ],
+      "software": [
+        "Revit",
+        "IFC-native"
+      ],
+      "audience": [
+        "Specialist"
+      ],
+      "ai_target": [
+        "claude-skill",
+        "mcp"
+      ],
       "license": "Apache-2.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
-      "related_resources": ["SemanticBridge: 3D Bridge Component Semantic Segmentation"],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
+      "related_resources": [
+        "SemanticBridge: 3D Bridge Component Semantic Segmentation"
+      ],
       "examples": 1,
       "has_eval": true,
       "install_count": 134,
@@ -162,26 +341,58 @@
         "You have an as-built point cloud and a design BIM and need a deviation report.",
         "QA/QC before handover, to flag elements out of tolerance by trade."
       ],
-      "inputs": ["A registered point cloud (E57/LAS) or link", "The design BIM/IFC", "A tolerance threshold (e.g. ±15 mm)"],
-      "outputs": ["Deviation report grouped by building element", "Elements exceeding tolerance, with magnitude and direction"],
+      "inputs": [
+        "A registered point cloud (E57/LAS) or link",
+        "The design BIM/IFC",
+        "A tolerance threshold (e.g. ±15 mm)"
+      ],
+      "outputs": [
+        "Deviation report grouped by building element",
+        "Elements exceeding tolerance, with magnitude and direction"
+      ],
       "example_io": {
         "in": "Compare this as-built scan to the design model at ±15 mm tolerance.",
         "out": "Walls: 3 panels +22 mm (out of tol). Slabs: within tol. MEP risers: 1 segment offset 40 mm — flag for RFI. Overall 92% of elements within tolerance."
-      }
+      },
+      "verified": true,
+      "stars_seed": 21,
+      "origin": "community",
+      "last_reviewed": "2026-05-02"
     },
     {
       "id": "energy-model-brief",
       "name": "Energy Model Brief Generator",
       "description": "Turn a project brief into a starting EnergyPlus/IDF parameter set and a checklist of assumptions for a building energy analysis.",
       "version": "0.2.0",
-      "domain": ["Sustainability", "Design"],
-      "phase": ["Conceptual", "Design"],
-      "discipline": ["MEP", "Architectural"],
-      "software": ["IFC-native", "CAD-agnostic"],
-      "audience": ["Practitioner"],
-      "ai_target": ["claude-skill"],
+      "domain": [
+        "Sustainability",
+        "Design"
+      ],
+      "phase": [
+        "Conceptual",
+        "Design"
+      ],
+      "discipline": [
+        "MEP",
+        "Architectural"
+      ],
+      "software": [
+        "IFC-native",
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner"
+      ],
+      "ai_target": [
+        "claude-skill"
+      ],
       "license": "Apache-2.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
       "related_resources": [],
       "examples": 1,
       "has_eval": false,
@@ -190,26 +401,56 @@
         "You want a starting EnergyPlus parameter set from a conceptual project brief.",
         "Listing the assumptions an energy model will rest on, for early review."
       ],
-      "inputs": ["A project brief (use, location, area, envelope notes)", "Optional: target standard (ASHRAE 90.1, local code)"],
-      "outputs": ["A starter IDF parameter set (zones, loads, schedules)", "A checklist of assumptions flagged for an engineer to confirm"],
+      "inputs": [
+        "A project brief (use, location, area, envelope notes)",
+        "Optional: target standard (ASHRAE 90.1, local code)"
+      ],
+      "outputs": [
+        "A starter IDF parameter set (zones, loads, schedules)",
+        "A checklist of assumptions flagged for an engineer to confirm"
+      ],
       "example_io": {
         "in": "Mid-size office, 3 floors, temperate climate — give me a starting energy model brief.",
         "out": "3 thermal zones/floor, LPD 8 W/m² [confirm], occupancy 0.05 ppl/m², ASHRAE office schedule, U-wall 0.35 [confirm climate zone]. 6 assumptions flagged."
-      }
+      },
+      "verified": false,
+      "stars_seed": 7,
+      "origin": "community",
+      "last_reviewed": "2026-02-28"
     },
     {
       "id": "rfi-submittal-drafter",
       "name": "RFI & Submittal Drafter",
       "description": "Draft a clear RFI or submittal-review response from field notes, with references to the relevant drawing/spec section and a suggested disposition.",
       "version": "1.0.0",
-      "domain": ["Project Management", "Code & Standards"],
-      "phase": ["Construction"],
-      "discipline": ["Architectural", "Structural", "MEP"],
-      "software": ["CAD-agnostic"],
-      "audience": ["Practitioner"],
-      "ai_target": ["claude-skill"],
+      "domain": [
+        "Project Management",
+        "Code & Standards"
+      ],
+      "phase": [
+        "Construction"
+      ],
+      "discipline": [
+        "Architectural",
+        "Structural",
+        "MEP"
+      ],
+      "software": [
+        "CAD-agnostic"
+      ],
+      "audience": [
+        "Practitioner"
+      ],
+      "ai_target": [
+        "claude-skill"
+      ],
       "license": "CC BY 4.0",
-      "authors": [{ "name": "OpenConstruction Lab", "affiliation": "OpenConstruction" }],
+      "authors": [
+        {
+          "name": "OpenConstruction Lab",
+          "affiliation": "OpenConstruction"
+        }
+      ],
       "related_resources": [],
       "examples": 3,
       "has_eval": false,
@@ -218,12 +459,22 @@
         "Field notes need to become a clear RFI or submittal-review response fast.",
         "Keeping RFIs consistent with references to the relevant drawing/spec section."
       ],
-      "inputs": ["Field notes or a question", "Optional: drawing/spec references at hand"],
-      "outputs": ["A drafted RFI or submittal response", "Suggested disposition and the spec/drawing section to cite"],
+      "inputs": [
+        "Field notes or a question",
+        "Optional: drawing/spec references at hand"
+      ],
+      "outputs": [
+        "A drafted RFI or submittal response",
+        "Suggested disposition and the spec/drawing section to cite"
+      ],
       "example_io": {
         "in": "Beam pocket on grid C-4 doesn't match the column. Draft an RFI.",
         "out": "RFI: 'Conflict at grid C-4 — beam pocket elevation per S-301 detail 4 conflicts with column per S-201. Please confirm governing detail.' Ref: S-301/4, S-201. Suggested disposition: clarify, no cost impact pending response."
-      }
+      },
+      "verified": false,
+      "stars_seed": 28,
+      "origin": "community",
+      "last_reviewed": "2026-04-12"
     }
   ]
 }
