@@ -4082,5 +4082,101 @@
   "added_date": "2026-05-22",
   "contributor": "Qian-Bing Zhang",
   "contributor_url": "https://www.monash.edu/engineering/qianbingzhang"
+},
+"VizArQA": {
+  "name": "VizArQA: A Foundation for Visual Question Answering in Architectural Simulation",
+  "authors": "Manasi Dushyant Mehta, Jessica Ezemba, Conrad Tucker, Christopher McComb",
+  "doi": "https://doi.org/10.1115/1.4071865",
+  "year": 2026,
+  "data_modality": "Image, Text",
+  "num_images": "121",
+  "annotation_types": [
+    "binary and multiple-choice questions and answers"
+  ],
+  "num_classes": 5,
+  "classes": [
+    "radiation roses",
+    "wind roses", 
+    "illuminance diagrams", 
+    "solar insolation", 
+    "Computational Fluid Dynamics plots"
+  ],
+  "potential_tasks": [
+    "Visual Question Answering",
+    "Architectural Simulation"
+  ],
+  "paper": "VizArQA: A Foundation for Visual Question Answering in Architectural Simulation",
+  "license": "CC BY-NC 4.0",
+  "access": "https://huggingface.co/datasets/cmudrc/VizArQA",
+  "id": "VizArQA",
+  "image_url": "assets/img/datasets/VizArQA.png",
+  "added_date": "2026-06-01",
+  "contributor": "Design Research Collective",
+  "contributor_url": "https://cmudrc.github.io/"
+},
+"RDD2022": {
+  "name": "RDD2022: A multi-national Road Damage Dataset",
+  "authors": "Deeksha Arya, Hiroya Maeda, Sanjay Kumar Ghosh, Durga Toshniwal, Yoshihide Sekimoto",
+  "doi": "https://doi.org/10.1002/gdj3.260",
+  "year": 2024,
+  "data_modality": "Ground RGB, Aerial RGB",
+  "num_images": "47,420",
+  "annotation_types": [
+    "Bounding boxes"
+  ],
+  "num_classes": 4,
+  "classes": [
+    "longitudinal crack", 
+    "transverse crack", 
+    "alligator crack", 
+    "pothole"
+  ],
+  "potential_tasks": [
+    "Object detection",
+    "Road damage detection"
+  ],
+  "resolution": "512 × 512，600 × 600，720 × 720，3650 × 2044",
+  "geographical_location": "Japan, India, the Czech Republic, Norway, United States, China",
+  "paper": "RDD2022: A multi-national image dataset for automatic road damage detection",
+  "license": "CC BY 4.0",
+  "access": "https://doi.org/10.6084/m9.figshare.21431547",
+  "id": "RDD2022",
+  "image_url": "assets/img/datasets/RDD2022.png",
+  "added_date": "2026-06-01",
+  "contributor": "Deeksha Arya",
+  "contributor_url": "https://scholar.google.com/citations?user=mG6TBOgAAAAJ&hl=en",
+  "note": "Important Note on US Data: The images for the United States subset were collected from Google Street View and are subject to Google's copyright terms. Users may utilize this data for non-commercial purposes only, and must preserve all original Google annotations and attributions within the images. Creator: Deeksha Arya, Hiroya Maeda, Yoshihide Sekimoto, Hiroshi Omata, Sanjay Kumar Ghosh, Durga Toshniwal, Madhavendra Sharma, Van Vung Pham, Jingtao Zhong, Muneer Al-Hammadi, Mamoona Birkhez Shami, Du Nguyen, Hanglin Cheng, Jing Zhang, Alex Klein-Paste, Helge Mork, Frank Lindseth, Toshikazu Seto, Alexander Mraz, Takehiro Kashiyama."
+},
+"CISOL": {
+  "name": "CISOL: Construction Industry Steel Ordering List (CISOL) Dataset",
+  "authors": "David Tschirschwitz, Volker Rodehorst",
+  "doi": "https://doi.org/10.1109/WACV61041.2025.00739",
+  "year": 2025,
+  "data_modality": "Document image",
+  "num_images": "3,288 (844 annotated)",
+  "annotation_types": [
+    "Bounding boxes"
+  ],
+  "num_classes": 5,
+  "classes": [
+    "Table", 
+    "Cell", 
+    "Header", 
+    "Row",
+    "Column"
+  ],
+  "potential_tasks": [
+    "Table Structure Recognition",
+    "Table Detection"
+  ],
+  "geographical_location": "Germany",
+  "paper": "CISOL: An Open and Extensible Dataset for Table Structure Recognition in the Construction Industry",
+  "license": "CC BY 4.0",
+  "access": "https://doi.org/10.5281/zenodo.10829550",
+  "id": "CISOL",
+  "image_url": "assets/img/datasets/CISOL.png",
+  "added_date": "2026-06-01",
+  "contributor": "David Tschirschwitz",
+  "contributor_url": "https://scholar.google.com/citations?user=4GzIFQ8AAAAJ&hl=en"
 }
 }

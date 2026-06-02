@@ -1326,5 +1326,77 @@
     "affiliation": "Monash University (Australia)",
     "image": "https://engit.monash.edu/profiles/wp-content/uploads/2017/10/Qianbing-Zhang-1.jpg",
   "type": "person"
+  },
+                                  {
+    "id": "Design Research Collective",
+    "name": "Design Research Collective",
+    "role": "Dataset Contributor",
+    "link_url": "https://cmudrc.github.io/",
+    "affiliation": "Carnegie Mellon University (U.S)",
+    "image": "https://cmudrc.github.io/assets/DRC-Horizontal-Full.jpg",
+  "type": "org"
+  },
+                                    {
+    "id": "Christopher McComb",
+    "name": "Christopher McComb",
+    "role": "Dataset Contributor",
+    "link_url": "https://engineering.cmu.edu/directory/bios/mccomb-christopher.html",
+    "affiliation": "Carnegie Mellon University (U.S)",
+    "image": "https://engineering.cmu.edu/_files/images/directory/ccm.png",
+  "type": "person"
+  },
+                                      {
+    "id": "Manasi Dushyant Mehta",
+    "name": "Manasi Dushyant Mehta",
+    "role": "Dataset Contributor",
+    "link_url": "https://www.linkedin.com/in/manasi-mehta2202/",
+    "affiliation": "Carnegie Mellon University (U.S)",
+    "image": "assets/img/contributors/Manasi.png",
+  "type": "person"
+  },
+                                        {
+    "id": "Jessica Ezemba",
+    "name": "Jessica Ezemba",
+    "role": "Dataset Contributor",
+    "link_url": "https://scholar.google.com/citations?user=RNnvpBwAAAAJ&hl=en",
+    "affiliation": "Carnegie Mellon University (U.S)",
+    "image": "https://scholar.googleusercontent.com/citations?view_op=view_photo&user=RNnvpBwAAAAJ&citpid=1",
+  "type": "person"
+  },
+                                          {
+    "id": "Conrad Tucker",
+    "name": "Conrad Tucker",
+    "role": "Dataset Contributor",
+    "link_url": "https://engineering.cmu.edu/directory/bios/tucker-conrad.html",
+    "affiliation": "Carnegie Mellon University (U.S)",
+    "image": "https://engineering.cmu.edu/_files/images/directory/conradt.png",
+  "type": "person"
+  },
+                                          {
+    "id": "Deeksha Arya",
+    "name": "Deeksha Arya",
+    "role": "Dataset Contributor",
+    "link_url": "https://scholar.google.com/citations?user=mG6TBOgAAAAJ&hl=en",
+    "affiliation": "The University of Tokyo (Japan)",
+    "image": "https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=mG6TBOgAAAAJ&citpid=15",
+  "type": "person"
+  },
+                                            {
+    "id": "Yoshihide Sekimoto",
+    "name": "Yoshihide Sekimoto",
+    "role": "Dataset Contributor",
+    "link_url": "https://sekilab.iis.u-tokyo.ac.jp/human-centered-urban-informatics",
+    "affiliation": "The University of Tokyo (Japan)",
+    "image": "https://scholar.googleusercontent.com/citations?view_op=view_photo&user=6AmOZ94AAAAJ&citpid=1",
+  "type": "person"
+  },
+                                              {
+    "id": "Hiroya Maeda",
+    "name": "Hiroya Maeda",
+    "role": "Dataset Contributor",
+    "link_url": "https://sekilab.iis.u-tokyo.ac.jp/human-centered-urban-informatics",
+    "affiliation": "UrbanX Technologies, Inc. (Japan)",
+    "image": "assets/img/contributors/Hiroya Maeda.png",
+  "type": "person"
   }
 ]

@@ -85,5 +85,7 @@
   { "name": "Leibniz University Hannover", "logo": "assets/img/institutions/Leibniz University Hannover.png" },
   { "name": "Cornell University", "logo": "assets/img/institutions/Cornell University.png" },
   { "name": "The University of Texas at Austin", "logo": "assets/img/institutions/The University of Texas at Austin.png" },
-  { "name": "Monash University", "logo": "assets/img/institutions/Monash University.png" }
+  { "name": "Monash University", "logo": "assets/img/institutions/Monash University.png" },
+  { "name": "The University of Tokyo", "logo": "assets/img/institutions/The University of Tokyo.png" },
+  { "name": "UrbanX", "logo": "assets/img/institutions/UrbanX.png" }
 ]
