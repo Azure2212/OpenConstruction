@@ -17,7 +17,7 @@ const M = {
   licenseCorrectness: res.licenseCorrectness, abstentionCorrectness: res.abstentionCorrectness,
   hallucinationRate: res.hallucinationRate
 };
-console.log('=== OFFICIAL v1 BASELINE (golden v1.1, engine abd3376) ===');
+console.log('=== OFFICIAL v2 BASELINE (golden v1.2 exact+descendant, engine 02664f5) ===');
 console.log('k =', res.k, '| cases =', res.cases, '| counts =', JSON.stringify(res.counts));
 console.log(JSON.stringify(M, null, 2));
 
@@ -41,11 +41,12 @@ console.log(`  fitness-acc on NEGATIVES (expected unfit): ${exUnfit.filter(p=>p.
 if (process.argv.includes('--write')) {
   const out = {
     _meta: {
-      title: 'OpenConstruction Data Agent — official v1 reference baseline',
+      title: 'OpenConstruction Data Agent — official v2 reference baseline',
       owner: 'OC_DATA_1', generated: new Date().toISOString().slice(0, 10),
-      engine_commit: 'abd3376', golden_set: 'data-agent-goldenset.json (v1.1, hard negatives)',
+      engine_commit: '02664f5', golden_set: 'data-agent-goldenset.json (v1.2, exact+descendant)',
       taxonomy: 'agent-taxonomy.json', method: 'Node/CI, no fetch, no LLM-judge; scored on C4-selected',
-      note: 'Reference rule-based agent. fitnessAccuracy reflects a SEMANTICS GAP on related-task near-misses: the engine taskIdMatch counts `related` tasks as fit, while the v1.1 GT counts related-only datasets as unfit. This is a measured divergence, not a bug to mask. See golden-set-audit-G1.3.md + baseline writeup.'
+      gt_rule: 'fit(d,t) <=> d declares t OR a descendant of t; related-only NOT fit. One rule for discovery/fitness/abstain (engine taskIdMatch == GT).',
+      note: 'v2 blessed baseline after the round-4 reconcile (drop `related`; golden v1.2; photovoltaic dropped). fitnessAccuracy=1.0 = the reference rule-based agent now matches the GT exactly under exact+descendant. Supersedes the v1 (0.75) numbers, which measured the pre-reconcile related-clause gap.'
     },
     metrics: M, counts: res.counts, k: res.k, cases: res.cases,
     fitness_breakdown: { positives: { correct: exFit.filter(p=>p.ok).length, total: exFit.length, acc: +accFit.toFixed(3) },

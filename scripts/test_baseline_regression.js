@@ -6,15 +6,13 @@ const ROOT = path.join(__dirname, '..'), DATA = path.join(ROOT, 'data');
 const rd = f => JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8'));
 const API = require(path.join(ROOT, 'assets/js/data-agent.js'));
 
-// ---- baseline lock ----
-// PENDING_REBASELINE: golden set is now v1.2 (exact+descendant GT, OC round-4) but the engine
-// `related`-clause fix is NOT yet landed. Structural invariants are locked to v1.2 NOW
-// (deterministic, engine-independent); the 6 METRIC locks are SUSPENDED until the engine fix
-// lands and OC_DATA_1 re-baselines + re-blesses (next turn). When re-blessing: set
-// PENDING_REBASELINE=false and fill metrics from run_baseline.js --write.
-const PENDING_REBASELINE = true;
+// ---- blessed v2 baseline (golden v1.2 exact+descendant, engine 02664f5) ----
+// Reconcile of OC round-4 is committed: fit = exact+descendant, related-only NOT fit; GT == engine.
+// To re-bless after an INTENTIONAL change: re-run run_baseline.js --write, review, update LOCK.
+const PENDING_REBASELINE = false;
 const LOCK = {
-  metrics: { /* re-bless after engine related-fix */ },
+  metrics: { precisionAtK: 0.993, ndcgAtK: 0.996, fitnessAccuracy: 1,
+             licenseCorrectness: 1, abstentionCorrectness: 0.96, hallucinationRate: 0 },
   structure: { cases: 144, k: 5, taxonomy_commercial_ok: 78, modality_buckets: 15,
                fitness_total: 44, fitness_positives: 22, fitness_negatives: 22 }
 };
