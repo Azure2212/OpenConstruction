@@ -115,15 +115,14 @@
     while (cur && guard++ < 12) { const n = _idToNode.get(cur); if (!n || !n.broader) break; out.push(n.broader); cur = n.broader; }
     return out;
   }
-  function relatedOf(id) { const n = _idToNode.get(id); return n ? n.related : []; }
-  // need matches a dataset task when equal, when the dataset is a SPECIALIZATION of the need
-  // (need is an ancestor of dsId), or when they are explicitly related. (Recovers the
-  // segmentation false negatives, e.g. need "semantic segmentation" vs dataset "3D semantic segmentation".)
+  // FIT semantics — FROZEN OC decision 2026-06-20 (gate G1.4/G1.5 convergence; see scope_decisions.md):
+  // a dataset's declared task FITS a need task t IFF it is t (exact) or a DESCENDANT of t — i.e. t lies
+  // on the dataset task's transitive `broader_task_id` chain. `related` links are NOT fit (associative
+  // ≠ is-a). This puts discovery, fitness and abstain on ONE identical rule.
   function taskIdMatch(needId, dsId) {
     if (!needId || !dsId) return false;
-    if (needId === dsId) return true;
-    if (ancestors(dsId).includes(needId)) return true;
-    if (relatedOf(needId).includes(dsId) || relatedOf(dsId).includes(needId)) return true;
+    if (needId === dsId) return true;                  // exact
+    if (ancestors(dsId).includes(needId)) return true; // dsId is a (transitive) descendant of needId
     return false;
   }
   function datasetSupportsTask(rec, needIds) {

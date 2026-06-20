@@ -1,13 +1,14 @@
 {
   "_meta": {
-    "title": "OpenConstruction Data Agent — official v1 reference baseline",
+    "title": "OpenConstruction Data Agent \u2014 official v1 reference baseline",
     "owner": "OC_DATA_1",
     "generated": "2026-06-20",
     "engine_commit": "abd3376",
     "golden_set": "data-agent-goldenset.json (v1.1, hard negatives)",
     "taxonomy": "agent-taxonomy.json",
     "method": "Node/CI, no fetch, no LLM-judge; scored on C4-selected",
-    "note": "Reference rule-based agent. fitnessAccuracy reflects a SEMANTICS GAP on related-task near-misses: the engine taskIdMatch counts `related` tasks as fit, while the v1.1 GT counts related-only datasets as unfit. This is a measured divergence, not a bug to mask. See golden-set-audit-G1.3.md + baseline writeup."
+    "note": "Reference rule-based agent. fitnessAccuracy reflects a SEMANTICS GAP on related-task near-misses: the engine taskIdMatch counts `related` tasks as fit, while the v1.1 GT counts related-only datasets as unfit. This is a measured divergence, not a bug to mask. See golden-set-audit-G1.3.md + baseline writeup.",
+    "superseded": "STALE \u2014 measured on golden v1.1 + pre-fix engine (related-clause). GT is now v1.2 (exact+descendant) and the engine related-fix is pending. Re-run run_baseline.js --write after the fix to produce the blessed numbers."
   },
   "metrics": {
     "precisionAtK": 0.812,

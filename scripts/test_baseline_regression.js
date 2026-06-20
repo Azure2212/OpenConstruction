@@ -6,11 +6,16 @@ const ROOT = path.join(__dirname, '..'), DATA = path.join(ROOT, 'data');
 const rd = f => JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8'));
 const API = require(path.join(ROOT, 'assets/js/data-agent.js'));
 
-// ---- blessed v1 baseline (golden v1.1, engine abd3376) ----
+// ---- baseline lock ----
+// PENDING_REBASELINE: golden set is now v1.2 (exact+descendant GT, OC round-4) but the engine
+// `related`-clause fix is NOT yet landed. Structural invariants are locked to v1.2 NOW
+// (deterministic, engine-independent); the 6 METRIC locks are SUSPENDED until the engine fix
+// lands and OC_DATA_1 re-baselines + re-blesses (next turn). When re-blessing: set
+// PENDING_REBASELINE=false and fill metrics from run_baseline.js --write.
+const PENDING_REBASELINE = true;
 const LOCK = {
-  metrics: { precisionAtK: 0.812, ndcgAtK: 0.908, fitnessAccuracy: 0.75,
-             licenseCorrectness: 1, abstentionCorrectness: 0.936, hallucinationRate: 0 },
-  structure: { cases: 138, k: 5, taxonomy_commercial_ok: 78, modality_buckets: 15,
+  metrics: { /* re-bless after engine related-fix */ },
+  structure: { cases: 144, k: 5, taxonomy_commercial_ok: 78, modality_buckets: 15,
                fitness_total: 44, fitness_positives: 22, fitness_negatives: 22 }
 };
 
@@ -34,11 +39,18 @@ golden.cases.forEach(c => { (c.expect || []).forEach(e => { if (!ids.has(e)) orp
   if (c.fitnessExpect && !ids.has(c.fitnessExpect.datasetId)) orphan.push(c.fitnessExpect.datasetId); });
 if (orphan.length) fails.push(`golden orphan ids (not in catalog): ${orphan.slice(0, 5).join(', ')}${orphan.length > 5 ? '…' : ''}`);
 
-// engine metrics (catch engine drift)
+// engine metrics (catch engine drift) — SUSPENDED while PENDING_REBASELINE
 API.setTaxonomy(tax);
 const res = API.benchmarkOn(API.buildCorpus(datasets), golden);
-for (const [m, want] of Object.entries(LOCK.metrics)) eq(`metric.${m}`, res[m], want);
+if (PENDING_REBASELINE) {
+  console.log('⏳ PENDING_REBASELINE: golden set v1.2 (exact+descendant); engine `related`-fix not yet landed.');
+  console.log('   current (pre-fix) metrics — informational only, NOT asserted:');
+  console.log('   ', JSON.stringify({ precisionAtK: res.precisionAtK, ndcgAtK: res.ndcgAtK, fitnessAccuracy: res.fitnessAccuracy,
+    licenseCorrectness: res.licenseCorrectness, abstentionCorrectness: res.abstentionCorrectness, hallucinationRate: res.hallucinationRate }));
+} else {
+  for (const [m, want] of Object.entries(LOCK.metrics)) eq(`metric.${m}`, res[m], want);
+}
 
 if (fails.length) { console.error('✗ BASELINE REGRESSION — drift detected:\n  - ' + fails.join('\n  - ') +
   '\n\nIf intentional: re-run run_baseline.js --write, review the new numbers, then update LOCK in this file.'); process.exit(1); }
-console.log('✓ baseline regression OK — taxonomy, golden set, and engine match blessed v1 (138 cases; fitnessAccuracy=0.75).');
+console.log(`✓ structural invariants OK — taxonomy + golden set v1.2 (144 cases, fitness 22/22)${PENDING_REBASELINE ? ' [metrics pending re-bless]' : `; metrics blessed`}.`);

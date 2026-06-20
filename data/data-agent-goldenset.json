@@ -2,14 +2,14 @@
  "_meta": {
   "title": "OpenConstruction Data Agent — benchmark golden set",
   "owner": "OC_DATA_1",
-  "status": "v1 — deterministic, dataset-ID based, no LLM-judge",
+  "status": "v1.2 — GT rule = EXACT + DESCENDANT (related-only NOT fit), uniform across families (OC reconcile round-4)",
   "consumes": [
    "data/datasets.json",
    "data/agent-taxonomy.json"
   ],
   "generator": "workingGroup/specialists/OC_DATA_1/outputs/gen_goldenset.py",
   "expect_semantics": "cases[].expect lists canonical dataset IDs (NOT title substrings). Discovery PASSES if expected IDs appear in top-k. abstain=true => engine must return none-fit. fitnessExpect={datasetId,verdict} scores C3 against the owner's deterministic verdict.",
-  "ground_truth_rule": "task ∈ task_canon(potential_tasks); modality ∈ modality_buckets(data_modality); license commercial_ok per license_rights — all from data/agent-taxonomy.json.",
+  "ground_truth_rule": "fit(d,t) <=> d declares t OR a descendant of t in task-vocabulary hierarchy. related-only = unfit. Identical to engine taskIdMatch after the `related` clause is dropped.",
   "families": {
    "discovery": 60,
    "fitness": 44,
@@ -19,9 +19,11 @@
   "audit": {
    "by": "OC_DATA_1",
    "date": "2026-06-20",
-   "action": "G1.3 manual audit vs datasets.json",
-   "fixed": "regenerated 22 fitness-unfit negatives: diversified (was 21/22 MINC-2500) + near-miss hard negatives; each verified subtree-disjoint=genuinely unfit",
-   "label_errors_found": 0
+   "change": "exact+descendant reconciliation",
+   "discovery": "expanded to include descendant-declarers",
+   "abstain_dropped": 1,
+   "fitness_verdict_flips": [],
+   "photovoltaic": "removed (out-of-scope)"
   }
  },
  "k": 5,
@@ -56,6 +58,7 @@
     "HangCon",
     "Hardhat-Wearing",
     "IFCNet",
+    "IFR_Dataset",
     "MACO",
     "MOCS",
     "OSHA-safety",
@@ -77,6 +80,7 @@
     "Steel-Cross-Section",
     "TBBR",
     "TunGPR",
+    "UrbanTwin",
     "VCVW-3D",
     "Visible-Dust",
     "bfa-yolo-dataset",
@@ -85,7 +89,7 @@
     "pictor-ppe",
     "small-tool"
    ],
-   "_gt": "49 datasets declare task.object-detection"
+   "_gt": "exact+descendant: 51 datasets fit task.object-detection"
   },
   {
    "family": "discovery",
@@ -97,6 +101,7 @@
    "q": "semantic segmentation dataset",
    "expect": [
     "3DFacilities",
+    "3d_bridge_segmentation",
     "ACID",
     "AIDCON",
     "BuildingWorld",
@@ -131,7 +136,7 @@
     "mep2bim",
     "mlstruct-fp"
    ],
-   "_gt": "34 datasets declare task.semantic-segmentation"
+   "_gt": "exact+descendant: 35 datasets fit task.semantic-segmentation"
   },
   {
    "family": "discovery",
@@ -153,7 +158,7 @@
     "Thermal-Workers",
     "ThermalNet"
    ],
-   "_gt": "10 datasets declare task.image-classification"
+   "_gt": "exact+descendant: 10 datasets fit task.image-classification"
   },
   {
    "family": "discovery",
@@ -172,7 +177,24 @@
     "UAV-Construction",
     "VL-Con"
    ],
-   "_gt": "7 datasets declare task.image-captioning"
+   "_gt": "exact+descendant: 7 datasets fit task.image-captioning"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "3D reconstruction",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "3d reconstruction dataset",
+   "expect": [
+    "BuildingWorld",
+    "DamCrack",
+    "HBD",
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
+   ],
+   "_gt": "exact+descendant: 5 datasets fit task.3d-reconstruction"
   },
   {
    "family": "discovery",
@@ -189,7 +211,24 @@
     "SWIT-Dataset",
     "vtt-coniot"
    ],
-   "_gt": "5 datasets declare task.action-recognition"
+   "_gt": "exact+descendant: 5 datasets fit task.action-recognition"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Question answering",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "question answering dataset",
+   "expect": [
+    "BDAChat",
+    "BMKG",
+    "ConstructionSite-10k",
+    "VideoCAD",
+    "VizArQA"
+   ],
+   "_gt": "exact+descendant: 5 datasets fit task.question-answering"
   },
   {
    "family": "discovery",
@@ -206,7 +245,23 @@
     "MACO",
     "UrbanTwin"
    ],
-   "_gt": "5 datasets declare task.instance-segmentation"
+   "_gt": "exact+descendant: 5 datasets fit task.instance-segmentation"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "pose estimation dataset",
+   "expect": [
+    "CML",
+    "Construction-Equipment-Pose",
+    "VPM",
+    "wfcdataset"
+   ],
+   "_gt": "exact+descendant: 4 datasets fit task.pose-estimation"
   },
   {
    "family": "discovery",
@@ -222,37 +277,7 @@
     "VideoCAD",
     "VizArQA"
    ],
-   "_gt": "4 datasets declare task.visual-question-answering"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object tracking",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "object tracking dataset",
-   "expect": [
-    "CMOT",
-    "Earthmoving-Equipment",
-    "UrbanTwin"
-   ],
-   "_gt": "3 datasets declare task.object-tracking"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Pose estimation",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "pose estimation dataset",
-   "expect": [
-    "CML",
-    "Construction-Equipment-Pose",
-    "VPM"
-   ],
-   "_gt": "3 datasets declare task.pose-estimation"
+   "_gt": "exact+descendant: 4 datasets fit task.visual-question-answering"
   },
   {
    "family": "discovery",
@@ -267,7 +292,22 @@
     "ConSLAM",
     "Kenki-Posi"
    ],
-   "_gt": "3 datasets declare task.simultaneous-localization-and-mapping"
+   "_gt": "exact+descendant: 3 datasets fit task.simultaneous-localization-and-mapping"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Object tracking",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "object tracking dataset",
+   "expect": [
+    "CMOT",
+    "Earthmoving-Equipment",
+    "UrbanTwin"
+   ],
+   "_gt": "exact+descendant: 3 datasets fit task.object-tracking"
   },
   {
    "family": "discovery",
@@ -282,7 +322,7 @@
     "BIM_updating",
     "UGD"
    ],
-   "_gt": "3 datasets declare task.point-cloud-segmentation"
+   "_gt": "exact+descendant: 3 datasets fit task.point-cloud-segmentation"
   },
   {
    "family": "discovery",
@@ -297,22 +337,7 @@
     "CSeg",
     "DrafterBench"
    ],
-   "_gt": "3 datasets declare task.change-detection"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "3D reconstruction",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "3d reconstruction dataset",
-   "expect": [
-    "BuildingWorld",
-    "DamCrack",
-    "HBD"
-   ],
-   "_gt": "3 datasets declare task.3d-reconstruction"
+   "_gt": "exact+descendant: 3 datasets fit task.change-detection"
   },
   {
    "family": "discovery",
@@ -324,93 +349,10 @@
    "q": "bim reconstruction dataset",
    "expect": [
     "BIMNet",
-    "LOD4-Building-Image-Modeling"
-   ],
-   "_gt": "2 datasets declare task.bim-reconstruction"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Crack detection",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "crack detection dataset",
-   "expect": [
-    "TOPO-Loss-Crack",
-    "concrete-crack-lab"
-   ],
-   "_gt": "2 datasets declare task.crack-detection"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Named entity recognition",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "named entity recognition dataset",
-   "expect": [
-    "cms-domain-corpora",
-    "code-accord"
-   ],
-   "_gt": "2 datasets declare task.named-entity-recognition"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Defect detection",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "defect detection dataset",
-   "expect": [
-    "RDD2022",
-    "camhighways"
-   ],
-   "_gt": "2 datasets declare task.defect-detection"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Structure from motion",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "structure from motion dataset",
-   "expect": [
     "LOD4-Building-Image-Modeling",
-    "Opening-Segmentation"
+    "ResBIM"
    ],
-   "_gt": "2 datasets declare task.structure-from-motion"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "3D object detection",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "3d object detection dataset",
-   "expect": [
-    "IFR_Dataset",
-    "UrbanTwin"
-   ],
-   "_gt": "2 datasets declare task.3d-object-detection"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Cost optimization",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "cost optimization dataset",
-   "expect": [
-    "DTCTP",
-    "RAOA-DTCTP"
-   ],
-   "_gt": "2 datasets declare task.cost-optimization"
+   "_gt": "exact+descendant: 3 datasets fit task.bim-reconstruction"
   },
   {
    "family": "discovery",
@@ -424,7 +366,77 @@
     "BDAChat",
     "xBD"
    ],
-   "_gt": "2 datasets declare task.damage-classification"
+   "_gt": "exact+descendant: 2 datasets fit task.damage-classification"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Crack detection",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "crack detection dataset",
+   "expect": [
+    "TOPO-Loss-Crack",
+    "concrete-crack-lab"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.crack-detection"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Cost optimization",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "cost optimization dataset",
+   "expect": [
+    "DTCTP",
+    "RAOA-DTCTP"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.cost-optimization"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Defect detection",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "defect detection dataset",
+   "expect": [
+    "RDD2022",
+    "camhighways"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.defect-detection"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "3D object detection",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "3d object detection dataset",
+   "expect": [
+    "IFR_Dataset",
+    "UrbanTwin"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.3d-object-detection"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Structure from motion",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "structure from motion dataset",
+   "expect": [
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.structure-from-motion"
   },
   {
    "family": "discovery",
@@ -438,7 +450,21 @@
     "archseek",
     "wikiarch"
    ],
-   "_gt": "2 datasets declare task.information-retrieval"
+   "_gt": "exact+descendant: 2 datasets fit task.information-retrieval"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Named entity recognition",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "named entity recognition dataset",
+   "expect": [
+    "cms-domain-corpora",
+    "code-accord"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.named-entity-recognition"
   },
   {
    "family": "discovery",
@@ -464,6 +490,7 @@
     "GDUT-HWD",
     "HangCon",
     "Hardhat-Wearing",
+    "IFR_Dataset",
     "MACO",
     "MOCS",
     "OSHA-safety",
@@ -488,7 +515,7 @@
     "pictor-ppe",
     "small-tool"
    ],
-   "_gt": "38 datasets: task.object-detection ∩ ground_rgb"
+   "_gt": "exact+descendant: 39 datasets fit task.object-detection ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -499,6 +526,7 @@
    },
    "q": "ground rgb semantic segmentation dataset",
    "expect": [
+    "3d_bridge_segmentation",
     "ACID",
     "CDW-Seg",
     "CIS",
@@ -524,7 +552,7 @@
     "bfa-yolo-dataset",
     "camhighways"
    ],
-   "_gt": "24 datasets: task.semantic-segmentation ∩ ground_rgb"
+   "_gt": "exact+descendant: 25 datasets fit task.semantic-segmentation ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -546,7 +574,7 @@
     "SODA",
     "TBBR"
    ],
-   "_gt": "10 datasets: task.object-detection ∩ aerial_rgb"
+   "_gt": "exact+descendant: 10 datasets fit task.object-detection ∩ aerial_rgb"
   },
   {
    "family": "discovery",
@@ -566,7 +594,26 @@
     "MOCS",
     "TBBR"
    ],
-   "_gt": "8 datasets: task.semantic-segmentation ∩ aerial_rgb"
+   "_gt": "exact+descendant: 8 datasets fit task.semantic-segmentation ∩ aerial_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "point_cloud",
+    "license": "any"
+   },
+   "q": "point cloud semantic segmentation dataset",
+   "expect": [
+    "3d_bridge_segmentation",
+    "BuildingWorld",
+    "GOOSE-Ex",
+    "PC-Urban",
+    "Rohbau3D",
+    "UrbanTwin",
+    "camhighways"
+   ],
+   "_gt": "exact+descendant: 7 datasets fit task.semantic-segmentation ∩ point_cloud"
   },
   {
    "family": "discovery",
@@ -585,7 +632,7 @@
     "DamSegment",
     "MINC-2500"
    ],
-   "_gt": "7 datasets: task.image-classification ∩ ground_rgb"
+   "_gt": "exact+descendant: 7 datasets fit task.image-classification ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -603,25 +650,23 @@
     "SODA-ktsh",
     "VL-Con"
    ],
-   "_gt": "6 datasets: task.image-captioning ∩ ground_rgb"
+   "_gt": "exact+descendant: 6 datasets fit task.image-captioning ∩ ground_rgb"
   },
   {
    "family": "discovery",
    "need": {
-    "task": "Semantic segmentation",
-    "modality": "point_cloud",
+    "task": "3D reconstruction",
+    "modality": "ground_rgb",
     "license": "any"
    },
-   "q": "point cloud semantic segmentation dataset",
+   "q": "ground rgb 3d reconstruction dataset",
    "expect": [
-    "BuildingWorld",
-    "GOOSE-Ex",
-    "PC-Urban",
-    "Rohbau3D",
-    "UrbanTwin",
-    "camhighways"
+    "DamCrack",
+    "HBD",
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
    ],
-   "_gt": "6 datasets: task.semantic-segmentation ∩ point_cloud"
+   "_gt": "exact+descendant: 4 datasets fit task.3d-reconstruction ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -634,9 +679,10 @@
    "expect": [
     "CML",
     "Construction-Equipment-Pose",
-    "VPM"
+    "VPM",
+    "wfcdataset"
    ],
-   "_gt": "3 datasets: task.pose-estimation ∩ ground_rgb"
+   "_gt": "exact+descendant: 4 datasets fit task.pose-estimation ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -651,7 +697,7 @@
     "ConSLAM",
     "Kenki-Posi"
    ],
-   "_gt": "3 datasets: task.simultaneous-localization-and-mapping ∩ ground_rgb"
+   "_gt": "exact+descendant: 3 datasets fit task.simultaneous-localization-and-mapping ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -666,273 +712,7 @@
     "BIM_updating",
     "UGD"
    ],
-   "_gt": "3 datasets: task.point-cloud-segmentation ∩ point_cloud"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object detection",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video object detection dataset",
-   "expect": [
-    "CMOT",
-    "Earthmoving-Equipment"
-   ],
-   "_gt": "2 datasets: task.object-detection ∩ video"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Action recognition",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video action recognition dataset",
-   "expect": [
-    "CMA",
-    "Earthmoving-Equipment"
-   ],
-   "_gt": "2 datasets: task.action-recognition ∩ video"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object tracking",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video object tracking dataset",
-   "expect": [
-    "CMOT",
-    "Earthmoving-Equipment"
-   ],
-   "_gt": "2 datasets: task.object-tracking ∩ video"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Image captioning",
-    "modality": "aerial_rgb",
-    "license": "any"
-   },
-   "q": "aerial rgb image captioning dataset",
-   "expect": [
-    "ACID",
-    "UAV-Construction"
-   ],
-   "_gt": "2 datasets: task.image-captioning ∩ aerial_rgb"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Simultaneous localization and mapping",
-    "modality": "point_cloud",
-    "license": "any"
-   },
-   "q": "point cloud simultaneous localization and mapping dataset",
-   "expect": [
-    "ConPR",
-    "ConSLAM"
-   ],
-   "_gt": "2 datasets: task.simultaneous-localization-and-mapping ∩ point_cloud"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Simultaneous localization and mapping",
-    "modality": "sensor",
-    "license": "any"
-   },
-   "q": "sensor simultaneous localization and mapping dataset",
-   "expect": [
-    "ConPR",
-    "ConSLAM"
-   ],
-   "_gt": "2 datasets: task.simultaneous-localization-and-mapping ∩ sensor"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object detection",
-    "modality": "depth",
-    "license": "any"
-   },
-   "q": "depth object detection dataset",
-   "expect": [
-    "PM-HMCW",
-    "VCVW-3D"
-   ],
-   "_gt": "2 datasets: task.object-detection ∩ depth"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Semantic segmentation",
-    "modality": "depth",
-    "license": "any"
-   },
-   "q": "depth semantic segmentation dataset",
-   "expect": [
-    "3DFacilities",
-    "VCVW-3D"
-   ],
-   "_gt": "2 datasets: task.semantic-segmentation ∩ depth"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Image classification",
-    "modality": "thermal",
-    "license": "any"
-   },
-   "q": "thermal image classification dataset",
-   "expect": [
-    "Thermal-Workers",
-    "ThermalNet"
-   ],
-   "_gt": "2 datasets: task.image-classification ∩ thermal"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Visual question answering",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb visual question answering dataset",
-   "expect": [
-    "ConstructionSite-10k",
-    "VizArQA"
-   ],
-   "_gt": "2 datasets: task.visual-question-answering ∩ ground_rgb"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object detection",
-    "modality": "drawing",
-    "license": "any"
-   },
-   "q": "drawing object detection dataset",
-   "expect": [
-    "PID",
-    "mep2bim"
-   ],
-   "_gt": "2 datasets: task.object-detection ∩ drawing"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Semantic segmentation",
-    "modality": "drawing",
-    "license": "any"
-   },
-   "q": "drawing semantic segmentation dataset",
-   "expect": [
-    "mep2bim",
-    "mlstruct-fp"
-   ],
-   "_gt": "2 datasets: task.semantic-segmentation ∩ drawing"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Object detection",
-    "modality": "gpr",
-    "license": "any"
-   },
-   "q": "gpr object detection dataset",
-   "expect": [
-    "GPR",
-    "TunGPR"
-   ],
-   "_gt": "2 datasets: task.object-detection ∩ gpr"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Crack detection",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb crack detection dataset",
-   "expect": [
-    "TOPO-Loss-Crack",
-    "concrete-crack-lab"
-   ],
-   "_gt": "2 datasets: task.crack-detection ∩ ground_rgb"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Named entity recognition",
-    "modality": "text",
-    "license": "any"
-   },
-   "q": "text named entity recognition dataset",
-   "expect": [
-    "cms-domain-corpora",
-    "code-accord"
-   ],
-   "_gt": "2 datasets: task.named-entity-recognition ∩ text"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Defect detection",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb defect detection dataset",
-   "expect": [
-    "RDD2022",
-    "camhighways"
-   ],
-   "_gt": "2 datasets: task.defect-detection ∩ ground_rgb"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Structure from motion",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb structure from motion dataset",
-   "expect": [
-    "LOD4-Building-Image-Modeling",
-    "Opening-Segmentation"
-   ],
-   "_gt": "2 datasets: task.structure-from-motion ∩ ground_rgb"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "Action recognition",
-    "modality": "sensor",
-    "license": "any"
-   },
-   "q": "sensor action recognition dataset",
-   "expect": [
-    "SWIT-Dataset",
-    "vtt-coniot"
-   ],
-   "_gt": "2 datasets: task.action-recognition ∩ sensor"
-  },
-  {
-   "family": "discovery",
-   "need": {
-    "task": "3D object detection",
-    "modality": "point_cloud",
-    "license": "any"
-   },
-   "q": "point cloud 3d object detection dataset",
-   "expect": [
-    "IFR_Dataset",
-    "UrbanTwin"
-   ],
-   "_gt": "2 datasets: task.3d-object-detection ∩ point_cloud"
+   "_gt": "exact+descendant: 3 datasets fit task.point-cloud-segmentation ∩ point_cloud"
   },
   {
    "family": "discovery",
@@ -946,77 +726,203 @@
     "AEC_Objects_in_IFC-based_BIM",
     "IFCNet"
    ],
-   "_gt": "2 datasets: task.object-detection ∩ bim"
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ bim"
   },
   {
    "family": "discovery",
    "need": {
-    "task": "Cost optimization",
-    "modality": "tabular",
+    "task": "Object detection",
+    "modality": "video",
     "license": "any"
    },
-   "q": "tabular cost optimization dataset",
+   "q": "video object detection dataset",
    "expect": [
-    "DTCTP",
-    "RAOA-DTCTP"
+    "CMOT",
+    "Earthmoving-Equipment"
    ],
-   "_gt": "2 datasets: task.cost-optimization ∩ tabular"
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ video"
   },
   {
    "family": "discovery",
    "need": {
-    "task": "Damage classification",
-    "modality": "satellite_rgb",
+    "task": "Object detection",
+    "modality": "gpr",
     "license": "any"
    },
-   "q": "satellite rgb damage classification dataset",
+   "q": "gpr object detection dataset",
    "expect": [
-    "BDAChat",
-    "xBD"
+    "GPR",
+    "TunGPR"
    ],
-   "_gt": "2 datasets: task.damage-classification ∩ satellite_rgb"
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ gpr"
   },
   {
    "family": "discovery",
    "need": {
-    "task": "Instance segmentation",
-    "modality": "ground_rgb",
+    "task": "Object detection",
+    "modality": "point_cloud",
     "license": "any"
    },
-   "q": "ground rgb instance segmentation dataset",
+   "q": "point cloud object detection dataset",
    "expect": [
-    "HBD",
-    "MACO"
+    "IFR_Dataset",
+    "UrbanTwin"
    ],
-   "_gt": "2 datasets: task.instance-segmentation ∩ ground_rgb"
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ point_cloud"
   },
   {
    "family": "discovery",
    "need": {
-    "task": "Change detection",
-    "modality": "text",
+    "task": "Object detection",
+    "modality": "drawing",
     "license": "any"
    },
-   "q": "text change detection dataset",
+   "q": "drawing object detection dataset",
    "expect": [
-    "CSeg",
-    "DrafterBench"
+    "PID",
+    "mep2bim"
    ],
-   "_gt": "2 datasets: task.change-detection ∩ text"
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ drawing"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Object detection",
+    "modality": "depth",
+    "license": "any"
+   },
+   "q": "depth object detection dataset",
+   "expect": [
+    "PM-HMCW",
+    "VCVW-3D"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.object-detection ∩ depth"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "depth",
+    "license": "any"
+   },
+   "q": "depth semantic segmentation dataset",
+   "expect": [
+    "3DFacilities",
+    "VCVW-3D"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.semantic-segmentation ∩ depth"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "drawing",
+    "license": "any"
+   },
+   "q": "drawing semantic segmentation dataset",
+   "expect": [
+    "mep2bim",
+    "mlstruct-fp"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.semantic-segmentation ∩ drawing"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Image classification",
+    "modality": "thermal",
+    "license": "any"
+   },
+   "q": "thermal image classification dataset",
+   "expect": [
+    "Thermal-Workers",
+    "ThermalNet"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.image-classification ∩ thermal"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Image captioning",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "q": "aerial rgb image captioning dataset",
+   "expect": [
+    "ACID",
+    "UAV-Construction"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.image-captioning ∩ aerial_rgb"
   },
   {
    "family": "discovery",
    "need": {
     "task": "3D reconstruction",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "q": "aerial rgb 3d reconstruction dataset",
+   "expect": [
+    "DamCrack",
+    "LOD4-Building-Image-Modeling"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.3d-reconstruction ∩ aerial_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Action recognition",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video action recognition dataset",
+   "expect": [
+    "CMA",
+    "Earthmoving-Equipment"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.action-recognition ∩ video"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Action recognition",
+    "modality": "sensor",
+    "license": "any"
+   },
+   "q": "sensor action recognition dataset",
+   "expect": [
+    "SWIT-Dataset",
+    "vtt-coniot"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.action-recognition ∩ sensor"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Question answering",
+    "modality": "text",
+    "license": "any"
+   },
+   "q": "text question answering dataset",
+   "expect": [
+    "BMKG",
+    "VizArQA"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.question-answering ∩ text"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Question answering",
     "modality": "ground_rgb",
     "license": "any"
    },
-   "q": "ground rgb 3d reconstruction dataset",
+   "q": "ground rgb question answering dataset",
    "expect": [
-    "DamCrack",
-    "HBD"
+    "ConstructionSite-10k",
+    "VizArQA"
    ],
-   "_gt": "2 datasets: task.3d-reconstruction ∩ ground_rgb"
+   "_gt": "exact+descendant: 2 datasets fit task.question-answering ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -1030,7 +936,189 @@
     "BuildingWorld",
     "UrbanTwin"
    ],
-   "_gt": "2 datasets: task.instance-segmentation ∩ point_cloud"
+   "_gt": "exact+descendant: 2 datasets fit task.instance-segmentation ∩ point_cloud"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Instance segmentation",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb instance segmentation dataset",
+   "expect": [
+    "HBD",
+    "MACO"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.instance-segmentation ∩ ground_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "depth",
+    "license": "any"
+   },
+   "q": "depth pose estimation dataset",
+   "expect": [
+    "CML",
+    "wfcdataset"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.pose-estimation ∩ depth"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Visual question answering",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb visual question answering dataset",
+   "expect": [
+    "ConstructionSite-10k",
+    "VizArQA"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.visual-question-answering ∩ ground_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "point_cloud",
+    "license": "any"
+   },
+   "q": "point cloud simultaneous localization and mapping dataset",
+   "expect": [
+    "ConPR",
+    "ConSLAM"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.simultaneous-localization-and-mapping ∩ point_cloud"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "sensor",
+    "license": "any"
+   },
+   "q": "sensor simultaneous localization and mapping dataset",
+   "expect": [
+    "ConPR",
+    "ConSLAM"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.simultaneous-localization-and-mapping ∩ sensor"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Object tracking",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video object tracking dataset",
+   "expect": [
+    "CMOT",
+    "Earthmoving-Equipment"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.object-tracking ∩ video"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Change detection",
+    "modality": "text",
+    "license": "any"
+   },
+   "q": "text change detection dataset",
+   "expect": [
+    "CSeg",
+    "DrafterBench"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.change-detection ∩ text"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Damage classification",
+    "modality": "satellite_rgb",
+    "license": "any"
+   },
+   "q": "satellite rgb damage classification dataset",
+   "expect": [
+    "BDAChat",
+    "xBD"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.damage-classification ∩ satellite_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Crack detection",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb crack detection dataset",
+   "expect": [
+    "TOPO-Loss-Crack",
+    "concrete-crack-lab"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.crack-detection ∩ ground_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Cost optimization",
+    "modality": "tabular",
+    "license": "any"
+   },
+   "q": "tabular cost optimization dataset",
+   "expect": [
+    "DTCTP",
+    "RAOA-DTCTP"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.cost-optimization ∩ tabular"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Defect detection",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb defect detection dataset",
+   "expect": [
+    "RDD2022",
+    "camhighways"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.defect-detection ∩ ground_rgb"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "3D object detection",
+    "modality": "point_cloud",
+    "license": "any"
+   },
+   "q": "point cloud 3d object detection dataset",
+   "expect": [
+    "IFR_Dataset",
+    "UrbanTwin"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.3d-object-detection ∩ point_cloud"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Structure from motion",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb structure from motion dataset",
+   "expect": [
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.structure-from-motion ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -1044,7 +1132,7 @@
     "archseek",
     "wikiarch"
    ],
-   "_gt": "2 datasets: task.information-retrieval ∩ ground_rgb"
+   "_gt": "exact+descendant: 2 datasets fit task.information-retrieval ∩ ground_rgb"
   },
   {
    "family": "discovery",
@@ -1058,7 +1146,21 @@
     "archseek",
     "wikiarch"
    ],
-   "_gt": "2 datasets: task.information-retrieval ∩ text"
+   "_gt": "exact+descendant: 2 datasets fit task.information-retrieval ∩ text"
+  },
+  {
+   "family": "discovery",
+   "need": {
+    "task": "Named entity recognition",
+    "modality": "text",
+    "license": "any"
+   },
+   "q": "text named entity recognition dataset",
+   "expect": [
+    "cms-domain-corpora",
+    "code-accord"
+   ],
+   "_gt": "exact+descendant: 2 datasets fit task.named-entity-recognition ∩ text"
   },
   {
    "family": "fitness",
@@ -1345,485 +1447,6 @@
     "verdict": "fit"
    },
    "_gt": "archseek declares task.information-retrieval"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Object detection",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "ACID",
-    "CHVG",
-    "CODD",
-    "CUBIT",
-    "ConRebSeg",
-    "DoriaNET",
-    "Earthmoving-Equipment",
-    "GDUT-HWD",
-    "GPR",
-    "Hardhat-Wearing",
-    "IFCNet",
-    "MACO",
-    "OSHA-safety",
-    "Object-Detection-Construction",
-    "PID",
-    "Peru-Construction",
-    "RDD2022",
-    "ROADWork",
-    "Rebar-Counting",
-    "SHEL5K",
-    "SHWD",
-    "Scaffolding",
-    "TBBR",
-    "Visible-Dust",
-    "small-tool"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "25 commercial_ok datasets for task.object-detection"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Semantic segmentation",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "ACID",
-    "CDW-Seg",
-    "CODD",
-    "CSeg",
-    "ConRebSeg",
-    "Concrete-Crack",
-    "Construction-Site-Segmentation",
-    "DoriaNET",
-    "Fire-ART",
-    "GOOSE-Ex",
-    "Opening-Segmentation",
-    "PC-Urban",
-    "ROADWork",
-    "Rohbau3D",
-    "TBBR",
-    "UrbanTwin",
-    "camhighways",
-    "mlstruct-fp"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "18 commercial_ok datasets for task.semantic-segmentation"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Image classification",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "Building-Characteristics",
-    "Construction-Material-Textual",
-    "MHC",
-    "MINC-2500",
-    "Thermal-Workers"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "5 commercial_ok datasets for task.image-classification"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Image captioning",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "ACID",
-    "ROADWork",
-    "UAV-Construction",
-    "VL-Con"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "4 commercial_ok datasets for task.image-captioning"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Action recognition",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "CMA",
-    "Earthmoving-Equipment",
-    "SMART",
-    "vtt-coniot"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "4 commercial_ok datasets for task.action-recognition"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Instance segmentation",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "HBD",
-    "MACO",
-    "UrbanTwin"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "3 commercial_ok datasets for task.instance-segmentation"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Visual question answering",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "VideoCAD"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "1 commercial_ok datasets for task.visual-question-answering"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Object tracking",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "Earthmoving-Equipment",
-    "UrbanTwin"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "2 commercial_ok datasets for task.object-tracking"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Pose estimation",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "CML",
-    "Construction-Equipment-Pose"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "2 commercial_ok datasets for task.pose-estimation"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Simultaneous localization and mapping",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "Kenki-Posi"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "1 commercial_ok datasets for task.simultaneous-localization-and-mapping"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Point cloud segmentation",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "BIMNet",
-    "BIM_updating",
-    "UGD"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "3 commercial_ok datasets for task.point-cloud-segmentation"
-  },
-  {
-   "family": "license",
-   "need": {
-    "task": "Change detection",
-    "modality": "",
-    "license": "commercial"
-   },
-   "expect": [
-    "BIM_updating",
-    "CSeg",
-    "DrafterBench"
-   ],
-   "licenseConstraint": "commercial_ok",
-   "_gt": "3 commercial_ok datasets for task.change-detection"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Object detection",
-    "modality": "point_cloud",
-    "license": "any"
-   },
-   "q": "point cloud object detection dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.object-detection ∩ point_cloud"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Semantic segmentation",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video semantic segmentation dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.semantic-segmentation ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Image classification",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video image classification dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.image-classification ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Image captioning",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video image captioning dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.image-captioning ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Action recognition",
-    "modality": "aerial_rgb",
-    "license": "any"
-   },
-   "q": "aerial rgb action recognition dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.action-recognition ∩ aerial_rgb"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Instance segmentation",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video instance segmentation dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.instance-segmentation ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Visual question answering",
-    "modality": "aerial_rgb",
-    "license": "any"
-   },
-   "q": "aerial rgb visual question answering dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.visual-question-answering ∩ aerial_rgb"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Object tracking",
-    "modality": "aerial_rgb",
-    "license": "any"
-   },
-   "q": "aerial rgb object tracking dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.object-tracking ∩ aerial_rgb"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Pose estimation",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video pose estimation dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.pose-estimation ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Simultaneous localization and mapping",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video simultaneous localization and mapping dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.simultaneous-localization-and-mapping ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Point cloud segmentation",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb point cloud segmentation dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.point-cloud-segmentation ∩ ground_rgb"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Change detection",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video change detection dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.change-detection ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "3D reconstruction",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video 3d reconstruction dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.3d-reconstruction ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "BIM reconstruction",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video bim reconstruction dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.bim-reconstruction ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Crack detection",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video crack detection dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.crack-detection ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Named entity recognition",
-    "modality": "ground_rgb",
-    "license": "any"
-   },
-   "q": "ground rgb named entity recognition dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.named-entity-recognition ∩ ground_rgb"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Defect detection",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video defect detection dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.defect-detection ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "Structure from motion",
-    "modality": "video",
-    "license": "any"
-   },
-   "q": "video structure from motion dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "in-domain but 0 datasets: task.structure-from-motion ∩ video"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "MRI tumor segmentation dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "out-of-domain (not an AEC task)"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "stock price prediction dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "out-of-domain (not an AEC task)"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "handwritten digit recognition dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "out-of-domain (not an AEC task)"
-  },
-  {
-   "family": "abstain",
-   "need": {
-    "task": "",
-    "modality": "",
-    "license": "any"
-   },
-   "q": "protein folding dataset",
-   "expect": [],
-   "abstain": true,
-   "_gt": "out-of-domain (not an AEC task)"
   },
   {
    "family": "fitness",
@@ -2132,6 +1755,485 @@
    },
    "hard": true,
    "_gt": "same modality ['ground_rgb']; declares ['Image captioning'], none in subtree of 'Information retrieval'"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Object detection",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "ACID",
+    "CHVG",
+    "CODD",
+    "CUBIT",
+    "ConRebSeg",
+    "DoriaNET",
+    "Earthmoving-Equipment",
+    "GDUT-HWD",
+    "GPR",
+    "Hardhat-Wearing",
+    "IFCNet",
+    "MACO",
+    "OSHA-safety",
+    "Object-Detection-Construction",
+    "PID",
+    "Peru-Construction",
+    "RDD2022",
+    "ROADWork",
+    "Rebar-Counting",
+    "SHEL5K",
+    "SHWD",
+    "Scaffolding",
+    "TBBR",
+    "UrbanTwin",
+    "Visible-Dust",
+    "small-tool"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "26 commercial_ok datasets fit task.object-detection"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "ACID",
+    "CDW-Seg",
+    "CODD",
+    "CSeg",
+    "ConRebSeg",
+    "Concrete-Crack",
+    "Construction-Site-Segmentation",
+    "DoriaNET",
+    "Fire-ART",
+    "GOOSE-Ex",
+    "Opening-Segmentation",
+    "PC-Urban",
+    "ROADWork",
+    "Rohbau3D",
+    "TBBR",
+    "UrbanTwin",
+    "camhighways",
+    "mlstruct-fp"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "18 commercial_ok datasets fit task.semantic-segmentation"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Image classification",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "Building-Characteristics",
+    "Construction-Material-Textual",
+    "MHC",
+    "MINC-2500",
+    "Thermal-Workers"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "5 commercial_ok datasets fit task.image-classification"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Image captioning",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "ACID",
+    "ROADWork",
+    "UAV-Construction",
+    "VL-Con"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "4 commercial_ok datasets fit task.image-captioning"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "3D reconstruction",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "HBD",
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "3 commercial_ok datasets fit task.3d-reconstruction"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Action recognition",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "CMA",
+    "Earthmoving-Equipment",
+    "SMART",
+    "vtt-coniot"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "4 commercial_ok datasets fit task.action-recognition"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Question answering",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "BMKG",
+    "VideoCAD"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "2 commercial_ok datasets fit task.question-answering"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Instance segmentation",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "HBD",
+    "MACO",
+    "UrbanTwin"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "3 commercial_ok datasets fit task.instance-segmentation"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "CML",
+    "Construction-Equipment-Pose"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "2 commercial_ok datasets fit task.pose-estimation"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Visual question answering",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "VideoCAD"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "1 commercial_ok datasets fit task.visual-question-answering"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "Kenki-Posi"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "1 commercial_ok datasets fit task.simultaneous-localization-and-mapping"
+  },
+  {
+   "family": "license",
+   "need": {
+    "task": "Object tracking",
+    "modality": "",
+    "license": "commercial"
+   },
+   "expect": [
+    "Earthmoving-Equipment",
+    "UrbanTwin"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "_gt": "2 commercial_ok datasets fit task.object-tracking"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video semantic segmentation dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.semantic-segmentation ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Image classification",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video image classification dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.image-classification ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Image captioning",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video image captioning dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.image-captioning ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Action recognition",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "q": "aerial rgb action recognition dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.action-recognition ∩ aerial_rgb"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Instance segmentation",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video instance segmentation dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.instance-segmentation ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Visual question answering",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "q": "aerial rgb visual question answering dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.visual-question-answering ∩ aerial_rgb"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Object tracking",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "q": "aerial rgb object tracking dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.object-tracking ∩ aerial_rgb"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video pose estimation dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.pose-estimation ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video simultaneous localization and mapping dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.simultaneous-localization-and-mapping ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Point cloud segmentation",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb point cloud segmentation dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.point-cloud-segmentation ∩ ground_rgb"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Change detection",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video change detection dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.change-detection ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "3D reconstruction",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video 3d reconstruction dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.3d-reconstruction ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "BIM reconstruction",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video bim reconstruction dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.bim-reconstruction ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Crack detection",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video crack detection dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.crack-detection ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Named entity recognition",
+    "modality": "ground_rgb",
+    "license": "any"
+   },
+   "q": "ground rgb named entity recognition dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.named-entity-recognition ∩ ground_rgb"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Defect detection",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video defect detection dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.defect-detection ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Structure from motion",
+    "modality": "video",
+    "license": "any"
+   },
+   "q": "video structure from motion dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.structure-from-motion ∩ video"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "Object detection",
+    "modality": "geospatial",
+    "license": "any"
+   },
+   "q": "geospatial object detection dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "exact+descendant: 0 datasets fit task.object-detection ∩ geospatial"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "MRI tumor segmentation dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "out-of-domain (not an AEC task)"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "stock price prediction dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "out-of-domain (not an AEC task)"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "handwritten digit recognition dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "out-of-domain (not an AEC task)"
+  },
+  {
+   "family": "abstain",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "q": "protein folding dataset",
+   "expect": [],
+   "abstain": true,
+   "_gt": "out-of-domain (not an AEC task)"
   }
  ]
 }

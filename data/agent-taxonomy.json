@@ -1028,13 +1028,9 @@
         "count": 1
       },
       "photovoltaic power forecasting": {
-        "canonical_id": "task.photovoltaic-power-forecasting",
-        "preferred_label": "Photovoltaic power forecasting",
-        "broader": null,
-        "related": [],
-        "status": "proposed",
-        "category": "prediction-recommendation",
-        "source": "proposed-new-task",
+        "out_of_scope": true,
+        "reason": "non-AEC-core (solar PV power forecasting); 1 dataset NYSolarForecastLab. Dropped per OC reconcile of round-4 (Critic). Not a task axis in the benchmark.",
+        "source": "out-of-scope",
         "count": 1
       },
       "architectural simulation": {
@@ -1130,12 +1126,6 @@
         "raw": "generative design",
         "id": "task.generative-design",
         "category": "generation-synthesis",
-        "broader": null
-      },
-      {
-        "raw": "photovoltaic power forecasting",
-        "id": "task.photovoltaic-power-forecasting",
-        "category": "prediction-recommendation",
         "broader": null
       },
       {
