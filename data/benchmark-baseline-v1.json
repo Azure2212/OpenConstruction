@@ -1,0 +1,1866 @@
+{
+  "_meta": {
+    "title": "OpenConstruction Data Agent — official v1 reference baseline",
+    "owner": "OC_DATA_1",
+    "generated": "2026-06-20",
+    "engine_commit": "abd3376",
+    "golden_set": "data-agent-goldenset.json (v1.1, hard negatives)",
+    "taxonomy": "agent-taxonomy.json",
+    "method": "Node/CI, no fetch, no LLM-judge; scored on C4-selected",
+    "note": "Reference rule-based agent. fitnessAccuracy reflects a SEMANTICS GAP on related-task near-misses: the engine taskIdMatch counts `related` tasks as fit, while the v1.1 GT counts related-only datasets as unfit. This is a measured divergence, not a bug to mask. See golden-set-audit-G1.3.md + baseline writeup."
+  },
+  "metrics": {
+    "precisionAtK": 0.812,
+    "ndcgAtK": 0.908,
+    "fitnessAccuracy": 0.75,
+    "licenseCorrectness": 1,
+    "abstentionCorrectness": 0.936,
+    "hallucinationRate": 0
+  },
+  "counts": {
+    "discovery": 72,
+    "fitness": 44,
+    "license_constrained": 12,
+    "abstain": 22
+  },
+  "k": 5,
+  "cases": 138,
+  "fitness_breakdown": {
+    "positives": {
+      "correct": 22,
+      "total": 22,
+      "acc": 1
+    },
+    "negatives": {
+      "correct": 11,
+      "total": 22,
+      "acc": 0.5
+    }
+  },
+  "perCase": [
+    {
+      "q": "object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "DamSegment",
+        "ROI-1555",
+        "CMOT",
+        "OSHA-safety"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 52,
+        "hits": 5
+      }
+    },
+    {
+      "q": "semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Fire-ART",
+        "3d_bridge_segmentation",
+        "DamCrack",
+        "DamSegment",
+        "BuildingWorld"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 0.786,
+        "selected": 5,
+        "relevant": 37,
+        "hits": 4
+      }
+    },
+    {
+      "q": "image classification dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "DamSegment",
+        "BuildingSense",
+        "CTR",
+        "MHC"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 0.83,
+        "selected": 5,
+        "relevant": 10,
+        "hits": 4
+      }
+    },
+    {
+      "q": "image captioning dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConstructionSite-10k",
+        "VL-Con",
+        "ACID",
+        "UAV-Construction",
+        "Construction-Activity-Scenes"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 7,
+        "hits": 5
+      }
+    },
+    {
+      "q": "action recognition dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "SWIT-Dataset",
+        "SMART",
+        "CMA",
+        "vtt-coniot",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 7,
+        "hits": 5
+      }
+    },
+    {
+      "q": "instance segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BuildingWorld",
+        "CUBIT-InSeg",
+        "ROI-1555",
+        "HBD",
+        "CIS"
+      ],
+      "score": {
+        "p": 0.6,
+        "ndcg": 0.699,
+        "selected": 5,
+        "relevant": 5,
+        "hits": 3
+      }
+    },
+    {
+      "q": "visual question answering dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BDAChat",
+        "ConstructionSite-10k",
+        "VizArQA",
+        "VideoCAD",
+        "BMKG"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 4,
+        "hits": 4
+      }
+    },
+    {
+      "q": "object tracking dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CMOT",
+        "UrbanTwin",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "pose estimation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "wfcdataset",
+        "VPM",
+        "Construction-Equipment-Pose",
+        "CML"
+      ],
+      "score": {
+        "p": 0.75,
+        "ndcg": 0.733,
+        "selected": 4,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "simultaneous localization and mapping dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConSLAM",
+        "ConPR",
+        "Kenki-Posi"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "point cloud segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "3d_bridge_segmentation",
+        "UGD",
+        "BIMNet",
+        "UrbanTwin"
+      ],
+      "score": {
+        "p": 0.6,
+        "ndcg": 0.906,
+        "selected": 5,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "change detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "CSeg",
+        "DrafterBench"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "3d reconstruction dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "BuildingWorld",
+        "BIMNet",
+        "LOD4-Building-Image-Modeling",
+        "HBD"
+      ],
+      "score": {
+        "p": 0.6,
+        "ndcg": 0.947,
+        "selected": 5,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "bim reconstruction dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ResBIM",
+        "BIMNet",
+        "LOD4-Building-Image-Modeling",
+        "DamCrack",
+        "BuildingWorld"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.693,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "crack detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "concrete-crack-lab",
+        "camhighways",
+        "RDD2022",
+        "TOPO-Loss-Crack"
+      ],
+      "score": {
+        "p": 0.5,
+        "ndcg": 0.877,
+        "selected": 4,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "named entity recognition dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "code-accord",
+        "cms-domain-corpora"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "defect detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ADPT_Dataset",
+        "camhighways",
+        "concrete-crack-lab",
+        "RDD2022",
+        "TOPO-Loss-Crack"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.651,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "structure from motion dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "LOD4-Building-Image-Modeling",
+        "Opening-Segmentation",
+        "BuildingWorld",
+        "DamCrack",
+        "HBD"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "3d object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "DamSegment",
+        "ROI-1555",
+        "CMOT",
+        "OSHA-safety"
+      ],
+      "score": {
+        "p": 0,
+        "ndcg": 0,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 0
+      }
+    },
+    {
+      "q": "cost optimization dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DTCTP",
+        "RAOA-DTCTP"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "damage classification dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BDAChat",
+        "xBD"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "information retrieval dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "wikiarch",
+        "archseek",
+        "BMKG"
+      ],
+      "score": {
+        "p": 0.667,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "DamSegment",
+        "ROI-1555",
+        "CMOT",
+        "OSHA-safety"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 41,
+        "hits": 5
+      }
+    },
+    {
+      "q": "ground rgb semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Fire-ART",
+        "3d_bridge_segmentation",
+        "DamCrack",
+        "DamSegment",
+        "Stirrup-Rebar"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 0.786,
+        "selected": 5,
+        "relevant": 27,
+        "hits": 4
+      }
+    },
+    {
+      "q": "aerial rgb object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "AIDCON",
+        "CUBIT",
+        "RDD2022",
+        "TBBR"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 12,
+        "hits": 5
+      }
+    },
+    {
+      "q": "aerial rgb semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "CSeg",
+        "AIDCON",
+        "CIS",
+        "TBBR"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 10,
+        "hits": 5
+      }
+    },
+    {
+      "q": "ground rgb image classification dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "DamSegment",
+        "CTR",
+        "Building-Characteristics",
+        "BCS"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 7,
+        "hits": 5
+      }
+    },
+    {
+      "q": "ground rgb image captioning dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConstructionSite-10k",
+        "VL-Con",
+        "ACID",
+        "Construction-Activity-Scenes",
+        "ROADWork"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 6,
+        "hits": 5
+      }
+    },
+    {
+      "q": "point cloud semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "3d_bridge_segmentation",
+        "BuildingWorld",
+        "Rohbau3D",
+        "GOOSE-Ex",
+        "camhighways"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 0.661,
+        "selected": 5,
+        "relevant": 6,
+        "hits": 4
+      }
+    },
+    {
+      "q": "ground rgb pose estimation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "wfcdataset",
+        "VPM",
+        "Construction-Equipment-Pose",
+        "CML"
+      ],
+      "score": {
+        "p": 0.75,
+        "ndcg": 0.733,
+        "selected": 4,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "ground rgb simultaneous localization and mapping dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConSLAM",
+        "ConPR",
+        "Kenki-Posi"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "point cloud point cloud segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "3d_bridge_segmentation",
+        "UGD",
+        "BIMNet",
+        "UrbanTwin"
+      ],
+      "score": {
+        "p": 0.6,
+        "ndcg": 0.906,
+        "selected": 5,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "video object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CMOT",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "video action recognition dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CMA",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "video object tracking dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CMOT",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "aerial rgb image captioning dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ACID",
+        "UAV-Construction"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "point cloud simultaneous localization and mapping dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConSLAM",
+        "ConPR"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "sensor simultaneous localization and mapping dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConSLAM",
+        "ConPR"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "depth object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "PM-HMCW",
+        "VCVW-3D"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "depth semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "VCVW-3D",
+        "3DFacilities"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "thermal image classification dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Thermal-Workers",
+        "ThermalNet"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb visual question answering dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ConstructionSite-10k",
+        "VizArQA"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "drawing object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "PID",
+        "mep2bim",
+        "CISOL"
+      ],
+      "score": {
+        "p": 0.667,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "drawing semantic segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "mep2bim",
+        "mlstruct-fp"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "gpr object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "GPR",
+        "TunGPR"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb crack detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "concrete-crack-lab",
+        "camhighways",
+        "RDD2022",
+        "TOPO-Loss-Crack"
+      ],
+      "score": {
+        "p": 0.5,
+        "ndcg": 0.877,
+        "selected": 4,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "text named entity recognition dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "code-accord",
+        "cms-domain-corpora"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb defect detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ADPT_Dataset",
+        "camhighways",
+        "concrete-crack-lab",
+        "RDD2022",
+        "TOPO-Loss-Crack"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.651,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb structure from motion dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "LOD4-Building-Image-Modeling",
+        "Opening-Segmentation",
+        "DamCrack",
+        "HBD"
+      ],
+      "score": {
+        "p": 0.5,
+        "ndcg": 1,
+        "selected": 4,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "sensor action recognition dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "SWIT-Dataset",
+        "vtt-coniot"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "point cloud 3d object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "IFR_Dataset",
+        "BIM_updating",
+        "UrbanTwin",
+        "BIMNet",
+        "UGD"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.92,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "bim object detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "AEC_Objects_in_IFC-based_BIM",
+        "IFCNet"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "tabular cost optimization dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DTCTP",
+        "RAOA-DTCTP"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "satellite rgb damage classification dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BDAChat",
+        "xBD"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb instance segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ROI-1555",
+        "HBD",
+        "CIS",
+        "Fire-ART",
+        "MACO"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.624,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "text change detection dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CSeg",
+        "DrafterBench"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb 3d reconstruction dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "DamCrack",
+        "LOD4-Building-Image-Modeling",
+        "HBD",
+        "camhighways",
+        "Opening-Segmentation"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.92,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "point cloud instance segmentation dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BuildingWorld",
+        "UrbanTwin",
+        "Rohbau3D",
+        "GOOSE-Ex",
+        "camhighways"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "ground rgb information retrieval dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "wikiarch",
+        "archseek"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "text information retrieval dataset",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "wikiarch",
+        "archseek",
+        "BMKG"
+      ],
+      "score": {
+        "p": 0.667,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "family": "fitness",
+      "dataset": "ACID",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "3DFacilities",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BCS",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "ACID",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "CMA",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BuildingWorld",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BDAChat",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "CMOT",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "CML",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "ConPR",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BIMNet",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BIM_updating",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BuildingWorld",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BIMNet",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "TOPO-Loss-Crack",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "cms-domain-corpora",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "RDD2022",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "LOD4-Building-Image-Modeling",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "IFR_Dataset",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "DTCTP",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BDAChat",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "archseek",
+      "expected": "fit",
+      "got": "fit",
+      "ok": true
+    },
+    {
+      "q": "{\"task\":\"Object detection\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "MACO",
+        "UrbanTwin",
+        "ROADWork",
+        "OSHA-safety",
+        "GPR"
+      ],
+      "score": {
+        "p": 0.8,
+        "ndcg": 0.786,
+        "selected": 5,
+        "relevant": 28,
+        "hits": 4
+      }
+    },
+    {
+      "q": "{\"task\":\"Semantic segmentation\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Fire-ART",
+        "Weak_and_Self_supervision",
+        "MACO",
+        "UrbanTwin",
+        "ROADWork"
+      ],
+      "score": {
+        "p": 0.6,
+        "ndcg": 0.616,
+        "selected": 5,
+        "relevant": 19,
+        "hits": 3
+      }
+    },
+    {
+      "q": "{\"task\":\"Image classification\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "MHC",
+        "Building-Characteristics",
+        "Construction-Material-Textual",
+        "Thermal-Workers",
+        "MINC-2500"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 5,
+        "relevant": 5,
+        "hits": 5
+      }
+    },
+    {
+      "q": "{\"task\":\"Image captioning\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "ROADWork",
+        "VL-Con",
+        "ACID",
+        "UAV-Construction"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 4,
+        "relevant": 4,
+        "hits": 4
+      }
+    },
+    {
+      "q": "{\"task\":\"Action recognition\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "SMART",
+        "CMA",
+        "vtt-coniot",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 0.869,
+        "selected": 4,
+        "relevant": 6,
+        "hits": 4
+      }
+    },
+    {
+      "q": "{\"task\":\"Instance segmentation\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Fire-ART",
+        "MACO",
+        "UrbanTwin",
+        "ROADWork",
+        "CDW-Seg"
+      ],
+      "score": {
+        "p": 0.4,
+        "ndcg": 0.531,
+        "selected": 5,
+        "relevant": 3,
+        "hits": 2
+      }
+    },
+    {
+      "q": "{\"task\":\"Visual question answering\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BMKG",
+        "aec-bench",
+        "VideoCAD"
+      ],
+      "score": {
+        "p": 0.333,
+        "ndcg": 0.5,
+        "selected": 3,
+        "relevant": 1,
+        "hits": 1
+      }
+    },
+    {
+      "q": "{\"task\":\"Object tracking\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "UrbanTwin",
+        "Earthmoving-Equipment"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "{\"task\":\"Pose estimation\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "CML",
+        "Construction-Equipment-Pose"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 2,
+        "relevant": 2,
+        "hits": 2
+      }
+    },
+    {
+      "q": "{\"task\":\"Simultaneous localization and mapping\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "Kenki-Posi"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 1,
+        "relevant": 1,
+        "hits": 1
+      }
+    },
+    {
+      "q": "{\"task\":\"Point cloud segmentation\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "UrbanTwin",
+        "UGD",
+        "BIMNet"
+      ],
+      "score": {
+        "p": 0.75,
+        "ndcg": 0.906,
+        "selected": 4,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "{\"task\":\"Change detection\",\"modality\":\"\",\"license\":\"commercial\"}",
+      "wantAbstain": false,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "CSeg",
+        "DrafterBench"
+      ],
+      "score": {
+        "p": 1,
+        "ndcg": 1,
+        "selected": 3,
+        "relevant": 3,
+        "hits": 3
+      }
+    },
+    {
+      "q": "point cloud object detection dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "IFR_Dataset",
+        "UrbanTwin"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video semantic segmentation dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video image classification dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video image captioning dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "aerial rgb action recognition dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video instance segmentation dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "aerial rgb visual question answering dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "aerial rgb object tracking dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video pose estimation dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video simultaneous localization and mapping dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "ground rgb point cloud segmentation dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "3d_bridge_segmentation",
+        "IFR_Dataset"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video change detection dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video 3d reconstruction dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video bim reconstruction dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video crack detection dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "ground rgb named entity recognition dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video defect detection dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "video structure from motion dataset",
+      "wantAbstain": true,
+      "abstained": true,
+      "selected": [],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "MRI tumor segmentation dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "BIM_updating",
+        "Fire-ART",
+        "Weak_and_Self_supervision",
+        "3d_bridge_segmentation",
+        "DamCrack"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "stock price prediction dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "Component_based_Machine_Learning_data",
+        "ResBIM",
+        "BIM_updating",
+        "Fire-ART",
+        "BDAChat"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "handwritten digit recognition dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "Fire-ART",
+        "BDAChat",
+        "camhighways",
+        "SWIT-Dataset",
+        "CISOL"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "q": "protein folding dataset",
+      "wantAbstain": true,
+      "abstained": false,
+      "selected": [
+        "OSHA-safety",
+        "SWIT-Dataset",
+        "Scaffolding",
+        "ResBIM",
+        "BIM_updating"
+      ],
+      "score": {
+        "p": null,
+        "ndcg": null
+      }
+    },
+    {
+      "family": "fitness",
+      "dataset": "xBD",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "Weak_and_Self_supervision",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "SCUT-HEAD",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "MINC-2500",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "GDUT-HWD",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "Concrete-Crack",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "BMKG",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "SHWD",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "ACID",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "Construction-Equipment-Pose",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "IFR_Dataset",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "Hardhat-Wearing",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "BIMNet",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "camhighways",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "RDD2022",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "ifc-bench",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "concrete-crack-lab",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "DamCrack",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "MOCS",
+      "expected": "unfit",
+      "got": "fit",
+      "ok": false
+    },
+    {
+      "family": "fitness",
+      "dataset": "CCS-ResourceUse",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "SMART",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    },
+    {
+      "family": "fitness",
+      "dataset": "Construction-Activity-Scenes",
+      "expected": "unfit",
+      "got": "unfit",
+      "ok": true
+    }
+  ]
+}
