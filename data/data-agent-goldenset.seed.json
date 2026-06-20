@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "title": "OpenConstruction Data Agent — benchmark golden set (SEED)",
+    "status": "SEED — authoritative ground truth is OWNED & VERIFIED by OC_DATA_1.",
+    "purpose": "Deterministic, no-LLM-judge evaluation of the reference baseline (window.OCDataAgent.runBenchmark). Scored on C4-SELECTED.",
+    "schema": {
+      "k": "top-k cutoff",
+      "cases[].need": "HARD constraints — facet values MUST use OC_DATA_1 ids: modality ∈ data/agent-taxonomy.json modality_buckets ids (point_cloud, ground_rgb, aerial_rgb, satellite_rgb, bim, drawing, tabular, text, video, depth, thermal, gpr, sensor, geospatial, hyperspectral); license ∈ {any, commercial_ok}",
+      "cases[].q": "SOFT natural-language text — used only for ranking tie-breaks, never as a hard constraint",
+      "cases[].expect": "dataset id/title substrings that SHOULD be C4-selected (case-insensitive). Empty => must abstain.",
+      "cases[].abstain": "true => agent must return 'none-fit'",
+      "cases[].fitnessExpect": "(optional, OC_DATA_1) {datasetId, verdict} to score C3 fitness-accuracy"
+    },
+    "integrity": "Modality ids reconciled to OC_DATA_1's agent-taxonomy.json (2026-06-19). Discovery/abstention cases reference titles present in the catalog (cross-checked vs eval-queries.json). Task-constrained, license-constrained and per-dataset fitness-verdict cases are LEFT TO OC_DATA_1 (see _oc_data_1_todo) — no unverified per-dataset facts asserted here.",
+    "owner": "OC_DATA_1",
+    "consumes": "data/datasets.json, data/agent-taxonomy.json"
+  },
+  "k": 5,
+  "cases": [
+    { "need": { "modality": "point_cloud" }, "q": "urban point cloud semantic segmentation dataset",
+      "expect": ["pc-urban", "point cloud", "rohbau3d", "underground garage", "semanticbridge"], "abstain": false },
+
+    { "need": { "modality": "bim" }, "q": "IFC BIM model dataset",
+      "expect": ["ifcnet", "ifc-bench", "bimnet", "resbim", "bim"], "abstain": false },
+
+    { "need": { "modality": "drawing" }, "q": "floor plan / CAD drawing dataset",
+      "expect": ["cubicasa", "floor plan", "floorplan", "cad"], "abstain": false },
+
+    { "need": { "modality": "ground_rgb" }, "q": "hardhat / PPE detection site photos",
+      "expect": ["hardhat", "safetyhelmet", "helmet and vest", "personal protective", "concrete crack"], "abstain": false },
+
+    { "need": { "modality": "tabular" }, "q": "tabular construction dataset",
+      "expect": ["tabular", "energy", "cost", "structural"], "abstain": false },
+
+    { "need": { "modality": "aerial_rgb" }, "q": "aerial / UAV construction imagery",
+      "expect": ["aerial", "uav", "drone"], "abstain": false },
+
+    { "q": "best pizza recipe in town", "expect": [], "abstain": true },
+    { "q": "medieval poetry critique", "expect": [], "abstain": true },
+    { "q": "underwater basket weaving tutorial", "expect": [], "abstain": true }
+  ],
+  "_oc_data_1_todo": {
+    "note": "OC_DATA_1 to author + verify against data/datasets.json + agent-taxonomy.json before these are reportable:",
+    "task_constrained_cases": "Add cases with need.task (canonical via task_canon) to exercise the task-hierarchy path (e.g. need.task='semantic segmentation' should also select datasets tagged narrower seg tasks); requires the related/broader links in task_canon to be complete.",
+    "license_constrained_cases": "Add need.license='commercial_ok' cases whose expect lists ONLY datasets verified commercial_ok (drives license-correctness).",
+    "abstain_over_constrained": "Add in-domain but over-constrained needs (modality+annotation+commercial_ok with no catalog match) to test C5 abstention beyond out-of-domain.",
+    "fitness_verdicts": "Add cases[].fitnessExpect for a labeled sample to score C3 fitness-accuracy.",
+    "scale_target": "Grow to ~O(100-300) deterministic items (OC_DATA_1 feasibility: ~250-350 clean core)."
+  }
+}
