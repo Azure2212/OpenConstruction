@@ -320,49 +320,68 @@
     return expect.some(e => { const en = norm(e); return en && (idN === en || idN.includes(en) || nameN.includes(en)); });
   }
   function dcg(rels) { return rels.reduce((s, r, i) => s + r / Math.log2(i + 2), 0); }
-  function benchmarkOn(corpus, goldenSet) {
+
+  // A `produce(corpus, need, c, K)` returns the per-case OUTCOME the scorer consumes:
+  //   fitness case -> { verdict }
+  //   select case  -> { selectedIds:[...], abstained:bool, licenseCorrect:bool }
+  // The default is the deterministic ENGINE; benchmarkAgent injects a producer that maps an
+  // external agent's contract output. ONE metric loop => one blessed math (G1.6 carries over).
+  function _engineProduce(corpus, need, c, K) {
+    if (c.fitnessExpect && c.fitnessExpect.datasetId) {
+      const rec0 = corpus.byId.get(norm(c.fitnessExpect.datasetId));
+      return { verdict: rec0 ? c3Fitness(rec0, need).verdict : 'missing' };
+    }
+    const c1 = c1Discovery(corpus, need);
+    const compare = c4CompareSelect(c1.slice(0, Math.max(K, 8)), need);
+    const selected = compare.selected.slice(0, K).map(s => s.rec);     // C4-selected
+    const c5 = c5Reliability(compare, need, corpus);
+    return { selectedIds: selected.map(s => s.id), abstained: c5.abstained, licenseCorrect: c5.licenseCorrect };
+  }
+
+  // benchmarkOn(corpus, goldenSet[, produce]) — produce defaults to the engine, so calling it
+  // with two args reproduces the blessed baseline byte-for-byte (behaviour-preserving refactor).
+  function benchmarkOn(corpus, goldenSet, produce) {
+    produce = produce || _engineProduce;
     const K = goldenSet.k || 5, cases = goldenSet.cases || [];
     let pSum = 0, ndcgSum = 0, nDisc = 0, absT = 0, absC = 0, licT = 0, licC = 0, halluc = 0, hallucN = 0, fitT = 0, fitC = 0;
     const perCase = [];
     for (const c of cases) {
-      // hard constraints come ONLY from c.need; c.q is soft text used for ranking tie-breaks
-      // (so a structured need is not silently over-constrained by a task parsed from the query).
+      // hard constraints come ONLY from c.need; c.q is soft text used for ranking tie-breaks.
       let need;
       if ('need' in c) { need = parseNeed(c.need); need.raw = c.q || need.raw || ''; }
       else need = parseNeed(c.q || '');
 
-      // (A) fitness-verdict case: c3Fitness on a specific dataset vs the expected verdict
+      // (A) fitness-verdict case: outcome.verdict vs the expected verdict
       if (c.fitnessExpect && c.fitnessExpect.datasetId) {
         fitT++;
-        const rec0 = corpus.byId.get(norm(c.fitnessExpect.datasetId));
-        const got = rec0 ? c3Fitness(rec0, need).verdict : 'missing';
-        const ok = rec0 && got === c.fitnessExpect.verdict;
+        const got = (produce(corpus, need, c, K) || {}).verdict || 'missing';
+        const ok = got === c.fitnessExpect.verdict;
         if (ok) fitC++;
-        perCase.push({ family: 'fitness', dataset: c.fitnessExpect.datasetId, expected: c.fitnessExpect.verdict, got, ok: !!ok });
+        perCase.push({ family: 'fitness', dataset: c.fitnessExpect.datasetId, expected: c.fitnessExpect.verdict, got, ok });
         continue;
       }
 
-      const c1 = c1Discovery(corpus, need);
-      const compare = c4CompareSelect(c1.slice(0, Math.max(K, 8)), need);
-      const selected = compare.selected.slice(0, K).map(s => s.rec);   // <-- score on C4-selected
-      const c5 = c5Reliability(compare, need, corpus);
+      // (B) discovery / license / abstain: score the produced selection set (capped to K)
+      const out = produce(corpus, need, c, K) || {};
+      const selIds = arr(out.selectedIds).slice(0, K);
+      const selectedRecs = selIds.map(id => corpus.byId.get(norm(id)) || null);
       const expect = arr(c.expect);
       const wantAbstain = c.abstain === true || expect.length === 0;
       let rec = { p: null, ndcg: null };
       if (!wantAbstain) {
         const relevantCount = corpus.datasets.filter(d => matchExpected(d, expect)).length || expect.length; // TRUE |R|
-        const rels = selected.map(r => matchExpected(r, expect) ? 1 : 0);
+        const rels = selectedRecs.map(r => (r && matchExpected(r, expect)) ? 1 : 0);
         const hits = rels.reduce((a, b) => a + b, 0);
-        const p = hits / Math.max(1, selected.length);                 // selection precision
+        const p = hits / Math.max(1, selIds.length);                   // selection precision
         const idcg = dcg(Array.from({ length: Math.min(relevantCount, K) }, () => 1));
         const nd = idcg ? dcg(rels) / idcg : 0;
         pSum += p; ndcgSum += nd; nDisc++;
-        rec = { p: +p.toFixed(3), ndcg: +nd.toFixed(3), selected: selected.length, relevant: relevantCount, hits };
+        rec = { p: +p.toFixed(3), ndcg: +nd.toFixed(3), selected: selIds.length, relevant: relevantCount, hits };
       }
-      absT++; if (c5.abstained === wantAbstain) absC++;
-      if (need.license && need.license !== 'any') { licT++; if (c5.licenseCorrect) licC++; }
-      selected.forEach(s => { hallucN++; if (!corpus.byId.has(norm(s.id))) halluc++; });
-      perCase.push({ q: c.q || (c.need && JSON.stringify(c.need)) || '', wantAbstain, abstained: c5.abstained, selected: selected.map(s => s.id), score: rec });
+      absT++; if (!!out.abstained === wantAbstain) absC++;
+      if (need.license && need.license !== 'any') { licT++; if (out.licenseCorrect) licC++; }
+      selIds.forEach(id => { hallucN++; if (!corpus.byId.has(norm(id))) halluc++; }); // unknown id = hallucination
+      perCase.push({ q: c.q || (c.need && JSON.stringify(c.need)) || '', wantAbstain, abstained: !!out.abstained, selected: selIds, score: rec });
     }
     return {
       cases: cases.length, k: K, scoredOn: 'C4-selected',
@@ -379,12 +398,47 @@
   }
   async function runBenchmark(goldenSet) { return benchmarkOn(await loadCorpus(), goldenSet); }
 
+  // ---------------------------------------------- AGENT-AGNOSTIC SCORING ADAPTER (B4, OC_DATA_1)
+  // benchmarkAgent(agentRunFn, goldenSet, corpus) — score ANY agent on golden set v1.2 using the
+  // SAME blessed metric math as benchmarkOn. agentRunFn(input) is SYNC and returns the contract:
+  //   { selected_ids:[...], fitness_verdict?:{id,verdict}, abstained:bool }
+  // The agent input HIDES the GT: { q, need, k, fitness_target? } (fitness_target = the dataset id
+  // to judge; never the expected verdict / expect list). For an async LLM, the harness (Analyst)
+  // pre-collects outputs per case and passes a sync lookup as agentRunFn — keeps this adapter pure.
+  function _agentProducer(agentRunFn) {
+    return function (corpus, need, c, K) {
+      const input = c.fitnessExpect && c.fitnessExpect.datasetId
+        ? { q: c.q || '', need: c.need || {}, k: K, fitness_target: c.fitnessExpect.datasetId }
+        : { q: c.q || '', need: c.need || {}, k: K };
+      const out = agentRunFn(input) || {};
+      if (c.fitnessExpect && c.fitnessExpect.datasetId) {
+        const v = out.fitness_verdict;
+        return { verdict: (v && (v.verdict || v)) || 'missing' };
+      }
+      const selIds = arr(out.selected_ids).slice(0, K);
+      // license-correctness mirrors c5: every top-K selected dataset is commercial_ok===true
+      let licenseCorrect = true;
+      if (need.license && need.license !== 'any') {
+        licenseCorrect = selIds.every(id => { const r = corpus.byId.get(norm(id)); return !!(r && r.rights && r.rights.commercial_ok === true); });
+      }
+      return { selectedIds: selIds, abstained: !!out.abstained, licenseCorrect };
+    };
+  }
+  function benchmarkAgent(agentRunFn, goldenSet, corpus) {
+    if (!corpus) throw new Error('benchmarkAgent: pass a corpus (buildCorpus(datasets) in Node, or use runBenchmarkAgent in the browser).');
+    const res = benchmarkOn(corpus, goldenSet, _agentProducer(agentRunFn));
+    res.scoredOn = 'agent-selected'; res.subject = 'external-agent';
+    res.note = 'Agent-agnostic. Same metric math as benchmarkOn (G1.6-blessed). Contract: {selected_ids, fitness_verdict?, abstained}. No LLM-judge. GT owned by OC_DATA_1.';
+    return res;
+  }
+  async function runBenchmarkAgent(agentRunFn, goldenSet) { return benchmarkAgent(agentRunFn, goldenSet, await loadCorpus()); }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
     loadResources, setTaxonomy, loadCorpus, buildCorpus, datasetRecord, runOn, benchmarkOn,
     licenseRights, licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
-    run, runBenchmark,
+    run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
       { id: 'C1', name: 'Discovery', desc: 'Retrieve candidate datasets for a stated need.' },
