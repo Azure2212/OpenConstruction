@@ -105,7 +105,7 @@
     const out = $('#daBenchOut');
     out.innerHTML = '<span class="da-muted">Loading golden set…</span>';
     let gs = null;
-    for (const url of ['data/data-agent-goldenset.seed.json', 'data/eval-queries.json', '../data/data-agent-goldenset.seed.json']) {
+    for (const url of ['data/data-agent-goldenset.json', 'data/data-agent-goldenset.seed.json', '../data/data-agent-goldenset.json']) {
       try { const res = await fetch(url, { cache: 'no-cache' }); if (res.ok) { gs = await res.json(); break; } } catch (e) {}
     }
     if (!gs) { out.innerHTML = '<span class="text-danger">No golden set found.</span>'; return; }
@@ -114,8 +114,8 @@
       out.innerHTML =
         '<div class="da-metrics">' +
         metric('precision@' + m.k, m.precisionAtK) + metric('nDCG@' + m.k, m.ndcgAtK) +
-        metric('abstention-correctness', m.abstentionCorrectness) + metric('license-correctness', m.licenseCorrectness) +
-        metric('hallucination-rate', m.hallucinationRate) + metric('cases', m.cases) +
+        metric('fitness-accuracy', m.fitnessAccuracy) + metric('license-correctness', m.licenseCorrectness) +
+        metric('abstention-correctness', m.abstentionCorrectness) + metric('hallucination-rate', m.hallucinationRate) +
         '</div><p class="da-muted small mt-2">' + esc(m.note) + '</p>';
     } catch (e) { out.innerHTML = '<span class="text-danger">Benchmark error: ' + esc(e.message) + '</span>'; console.error(e); }
   }

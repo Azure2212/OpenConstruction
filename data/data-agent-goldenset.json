@@ -15,6 +15,13 @@
    "fitness": 44,
    "license": 12,
    "abstain": 22
+  },
+  "audit": {
+   "by": "OC_DATA_1",
+   "date": "2026-06-20",
+   "action": "G1.3 manual audit vs datasets.json",
+   "fixed": "regenerated 22 fitness-unfit negatives: diversified (was 21/22 MINC-2500) + near-miss hard negatives; each verified subtree-disjoint=genuinely unfit",
+   "label_errors_found": 0
   }
  },
  "k": 5,
@@ -1069,19 +1076,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Object detection",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.object-detection"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Semantic segmentation",
     "modality": "",
     "license": "any"
@@ -1091,19 +1085,6 @@
     "verdict": "fit"
    },
    "_gt": "3DFacilities declares task.semantic-segmentation"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Semantic segmentation",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.semantic-segmentation"
   },
   {
    "family": "fitness",
@@ -1121,19 +1102,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Image classification",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "SCUT-HEAD",
-    "verdict": "unfit"
-   },
-   "_gt": "SCUT-HEAD does NOT declare task.image-classification"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Image captioning",
     "modality": "",
     "license": "any"
@@ -1143,19 +1111,6 @@
     "verdict": "fit"
    },
    "_gt": "ACID declares task.image-captioning"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Image captioning",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.image-captioning"
   },
   {
    "family": "fitness",
@@ -1173,19 +1128,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Action recognition",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.action-recognition"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Instance segmentation",
     "modality": "",
     "license": "any"
@@ -1195,19 +1137,6 @@
     "verdict": "fit"
    },
    "_gt": "BuildingWorld declares task.instance-segmentation"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Instance segmentation",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.instance-segmentation"
   },
   {
    "family": "fitness",
@@ -1225,19 +1154,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Visual question answering",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.visual-question-answering"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Object tracking",
     "modality": "",
     "license": "any"
@@ -1247,19 +1163,6 @@
     "verdict": "fit"
    },
    "_gt": "CMOT declares task.object-tracking"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Object tracking",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.object-tracking"
   },
   {
    "family": "fitness",
@@ -1277,19 +1180,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Pose estimation",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.pose-estimation"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Simultaneous localization and mapping",
     "modality": "",
     "license": "any"
@@ -1299,19 +1189,6 @@
     "verdict": "fit"
    },
    "_gt": "ConPR declares task.simultaneous-localization-and-mapping"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Simultaneous localization and mapping",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.simultaneous-localization-and-mapping"
   },
   {
    "family": "fitness",
@@ -1329,19 +1206,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Point cloud segmentation",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.point-cloud-segmentation"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Change detection",
     "modality": "",
     "license": "any"
@@ -1351,19 +1215,6 @@
     "verdict": "fit"
    },
    "_gt": "BIM_updating declares task.change-detection"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Change detection",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.change-detection"
   },
   {
    "family": "fitness",
@@ -1381,19 +1232,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "3D reconstruction",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.3d-reconstruction"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "BIM reconstruction",
     "modality": "",
     "license": "any"
@@ -1403,19 +1241,6 @@
     "verdict": "fit"
    },
    "_gt": "BIMNet declares task.bim-reconstruction"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "BIM reconstruction",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.bim-reconstruction"
   },
   {
    "family": "fitness",
@@ -1433,19 +1258,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Crack detection",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.crack-detection"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Named entity recognition",
     "modality": "",
     "license": "any"
@@ -1455,19 +1267,6 @@
     "verdict": "fit"
    },
    "_gt": "cms-domain-corpora declares task.named-entity-recognition"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Named entity recognition",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.named-entity-recognition"
   },
   {
    "family": "fitness",
@@ -1485,19 +1284,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Defect detection",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.defect-detection"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Structure from motion",
     "modality": "",
     "license": "any"
@@ -1507,19 +1293,6 @@
     "verdict": "fit"
    },
    "_gt": "LOD4-Building-Image-Modeling declares task.structure-from-motion"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Structure from motion",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.structure-from-motion"
   },
   {
    "family": "fitness",
@@ -1537,19 +1310,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "3D object detection",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.3d-object-detection"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Cost optimization",
     "modality": "",
     "license": "any"
@@ -1559,19 +1319,6 @@
     "verdict": "fit"
    },
    "_gt": "DTCTP declares task.cost-optimization"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Cost optimization",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.cost-optimization"
   },
   {
    "family": "fitness",
@@ -1589,19 +1336,6 @@
   {
    "family": "fitness",
    "need": {
-    "task": "Damage classification",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.damage-classification"
-  },
-  {
-   "family": "fitness",
-   "need": {
     "task": "Information retrieval",
     "modality": "",
     "license": "any"
@@ -1611,19 +1345,6 @@
     "verdict": "fit"
    },
    "_gt": "archseek declares task.information-retrieval"
-  },
-  {
-   "family": "fitness",
-   "need": {
-    "task": "Information retrieval",
-    "modality": "",
-    "license": "any"
-   },
-   "fitnessExpect": {
-    "datasetId": "MINC-2500",
-    "verdict": "unfit"
-   },
-   "_gt": "MINC-2500 does NOT declare task.information-retrieval"
   },
   {
    "family": "license",
@@ -2103,6 +1824,314 @@
    "expect": [],
    "abstain": true,
    "_gt": "out-of-domain (not an AEC task)"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Object detection",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "xBD",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "declares a related task; declares ['Damage classification', 'Building detection'], none in subtree of 'Object detection'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Semantic segmentation",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "Weak_and_Self_supervision",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares a related task; declares ['Object segmentation'], none in subtree of 'Semantic segmentation'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Image classification",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "SCUT-HEAD",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Object detection'], none in subtree of 'Image classification'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Image captioning",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "MINC-2500",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Image Classification'], none in subtree of 'Image captioning'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Action recognition",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "GDUT-HWD",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Object detection'], none in subtree of 'Action recognition'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Instance segmentation",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "Concrete-Crack",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares a related task; declares ['Semantic Segmentation'], none in subtree of 'Instance segmentation'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Visual question answering",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "BMKG",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['text']; declares a related task; declares ['Knowledge Graph Reasoning', 'Case-Based Retrieval', 'Question Answering'], none in subtree of 'Visual question answering'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Object tracking",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "SHWD",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Object detection'], none in subtree of 'Object tracking'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "ACID",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Object detection', 'Semantic segmentation', 'Image captioning'], none in subtree of 'Pose estimation'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "Construction-Equipment-Pose",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Pose estimation'], none in subtree of 'Simultaneous localization and mapping'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Point cloud segmentation",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "IFR_Dataset",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['point_cloud']; declares a related task; declares ['3D Object Detection'], none in subtree of 'Point cloud segmentation'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Change detection",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "Hardhat-Wearing",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Object detection'], none in subtree of 'Change detection'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "3D reconstruction",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "BIMNet",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['point_cloud']; declares a related task; declares ['Point cloud segmentation', 'BIM reconstruction'], none in subtree of '3D reconstruction'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "BIM reconstruction",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "camhighways",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb', 'point_cloud']; declares a related task; declares ['Digital twin generation', 'Semantic segmentation', 'Defect detection'], none in subtree of 'BIM reconstruction'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Crack detection",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "RDD2022",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares a related task; declares ['Object detection', 'Road damage detection'], none in subtree of 'Crack detection'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Named entity recognition",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "ifc-bench",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['text']; declares ['BIM querying'], none in subtree of 'Named entity recognition'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Defect detection",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "concrete-crack-lab",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares a related task; declares ['Crack detection'], none in subtree of 'Defect detection'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Structure from motion",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "DamCrack",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['aerial_rgb', 'ground_rgb']; declares a related task; declares ['Image classification', 'Object detection', 'Semantic segmentation', '3D reconstruction'], none in subtree of 'Structure from motion'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "3D object detection",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "MOCS",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares a related task; declares ['Object detection', 'Semantic segmentation'], none in subtree of '3D object detection'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Cost optimization",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "CCS-ResourceUse",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['tabular']; declares ['Material flow analysis'], none in subtree of 'Cost optimization'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Damage classification",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "SMART",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['satellite_rgb']; declares ['Activity recognition'], none in subtree of 'Damage classification'"
+  },
+  {
+   "family": "fitness",
+   "need": {
+    "task": "Information retrieval",
+    "modality": "",
+    "license": "any"
+   },
+   "fitnessExpect": {
+    "datasetId": "Construction-Activity-Scenes",
+    "verdict": "unfit"
+   },
+   "hard": true,
+   "_gt": "same modality ['ground_rgb']; declares ['Image captioning'], none in subtree of 'Information retrieval'"
   }
  ]
 }

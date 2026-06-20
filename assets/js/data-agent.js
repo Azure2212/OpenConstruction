@@ -46,11 +46,11 @@
     _taskMap = new Map(); _idToNode = new Map();
     const tc = (_tax && _tax.task_canon) || {};
     Object.entries(tc.map || {}).forEach(([label, v]) => {
-      const node = { ids: [v.canonical_id], broader: v.broader || null, related: arr(v.related), preferred: v.preferred_label || v.canonical_id };
-      _taskMap.set(norm(label), node);
-      _idToNode.set(v.canonical_id, { broader: v.broader || null, related: arr(v.related), preferred: v.preferred_label || v.canonical_id });
+      const ids = v.split ? arr(v.split) : [v.canonical_id];   // honor `.split` (compound label -> several ids)
+      _taskMap.set(norm(label), { ids, broader: v.broader || null, related: arr(v.related), preferred: v.preferred_label || v.canonical_id || norm(label) });
+      ids.forEach(id => { if (id) _idToNode.set(id, { broader: v.broader || null, related: arr(v.related), preferred: v.preferred_label || id }); });
     });
-    // split_rules: one label -> several canonical ids (e.g. "semantic and instance segmentation")
+    // split_rules: one label -> several canonical ids (kept for robustness; map may also carry `.split`)
     Object.entries(tc.split_rules || {}).forEach(([label, ids]) => {
       _taskMap.set(norm(label), { ids: arr(ids), broader: null, related: [], preferred: norm(label) });
     });
@@ -86,23 +86,24 @@
     return uniq(out);
   }
 
-  // License -> rights class via OC_DATA_1's by_license map + fallback_keyword_rules.
-  // Returns one of 'commercial_ok' | 'noncommercial' | 'unknown' (commercial-use axis).
-  function classFromCommercialOk(ok) { return ok === true ? 'commercial_ok' : (ok === false ? 'noncommercial' : 'unknown'); }
-  function licenseClass(raw) {
+  // License -> per-axis RIGHTS via OC_DATA_1's by_license map + fallback_keyword_rules
+  // (import contract, round-3-OC_DATA_1.md). Returns {commercial_ok, derivatives_ok, share_alike,
+  // attribution, cls}. The C3 license gate tests commercial_ok === true (NOT cls === 'permissive').
+  function licenseRights(raw) {
     const key = norm(raw);
-    const entry = _licByKey[key];
-    if (entry) return classFromCommercialOk(entry.commercial_ok);
+    const e = _licByKey[key];
+    if (e) return { commercial_ok: e.commercial_ok, derivatives_ok: e.derivatives_ok, share_alike: e.share_alike, attribution: e.attribution, cls: e.cls };
     const hay = ' ' + key + ' ';
     for (const rule of _licFallback) {
       if (rule.if_contains && rule.if_contains.some(t => hay.includes(norm(t)))) {
-        if ('class' in rule) return rule.class === 'unknown' ? 'unknown' : rule.class;
-        if ('commercial_ok' in rule) return classFromCommercialOk(rule.commercial_ok);
+        if (rule.class === 'unknown') return { commercial_ok: null, derivatives_ok: null, share_alike: null, attribution: null, cls: 'unknown' };
+        if ('commercial_ok' in rule) return { commercial_ok: rule.commercial_ok, derivatives_ok: null, share_alike: null, attribution: null, cls: rule.commercial_ok ? 'permissive' : 'noncommercial' };
       }
-      if (rule.else) return 'commercial_ok'; // documented default "commercial_ok=true"
+      if (rule.else) return { commercial_ok: true, derivatives_ok: null, share_alike: null, attribution: null, cls: 'permissive' }; // documented default
     }
-    return 'unknown';
+    return { commercial_ok: null, derivatives_ok: null, share_alike: null, attribution: null, cls: 'unknown' };
   }
+  function licenseClass(raw) { return licenseRights(raw).cls; } // display convenience
 
   // ---------------------------------------------- task canon + hierarchy (from task_canon.map)
   function canonTaskIds(label) {
@@ -155,7 +156,7 @@
       annotationRaw: arr(ds.annotation_types), annotation: annotationBuckets(ds.annotation_types),
       classes: arr(ds.classes), numClasses: ds.num_classes != null ? ds.num_classes : (arr(ds.classes).length || null),
       numImages: ds.num_images != null ? ds.num_images : null,
-      license: ds.license || 'Not specified', licenseClass: licenseClass(ds.license),
+      license: ds.license || 'Not specified', rights: licenseRights(ds.license), licenseClass: licenseClass(ds.license),
       doi: ds.doi || null, paper: ds.paper || null, access: ds.access || null, note: ds.note || null
     };
   }
@@ -197,7 +198,7 @@
     return {
       raw: n.raw || '', task: n.task || '', taskIds: n.task ? canonTaskIds(n.task) : [],
       modality: n.modality || '', annotation: n.annotation || '',
-      license: (licIn === 'permissive') ? 'commercial_ok' : licIn,  // accept legacy 'permissive'
+      license: (licIn === 'permissive' || licIn === 'commercial') ? 'commercial_ok' : licIn,  // accept 'commercial'/'permissive'
       intendedUse: n.intendedUse || '', k: n.k || 5
     };
   }
@@ -215,8 +216,8 @@
     add('annotation', 'Annotation: ' + (need.annotation || '—'), annReq, annReq && rec.annotation.includes(need.annotation),
         rec.annotationRaw.length ? rec.annotationRaw.join(', ') : 'no declared annotations');
     const licReq = need.license && need.license !== 'any';
-    add('license', 'License (commercial-use): ' + (need.license || 'any'), licReq, licReq && rec.licenseClass === 'commercial_ok',
-        rec.license + ' (' + rec.licenseClass + ')');
+    add('license', 'License (commercial-use): ' + (need.license || 'any'), licReq, licReq && rec.rights.commercial_ok === true,
+        rec.license + ' (' + rec.licenseClass + ', commercial_ok=' + rec.rights.commercial_ok + ')');
     if (need.intendedUse === 'training') {
       const ready = rec.annotation.length > 0 && (rec.numClasses || rec.classes.length);
       add('ml_ready', 'Declared training-readiness', false, ready, 'annotations=' + (rec.annotation.join(',') || 'none') + '; classes=' + (rec.numClasses || rec.classes.length || 0));
@@ -236,7 +237,7 @@
       if (need.taskIds.length && datasetSupportsTask(rec, need.taskIds)) { s += W.task; matched.push('task'); }
       if (need.modality && rec.modality.includes(need.modality)) { s += W.modality; matched.push('modality'); }
       if (need.annotation && rec.annotation.includes(need.annotation)) { s += W.annotation; matched.push('annotation'); }
-      if (need.license !== 'any' && rec.licenseClass === 'commercial_ok') { s += W.license; matched.push('license'); }
+      if (need.license !== 'any' && rec.rights.commercial_ok === true) { s += W.license; matched.push('license'); }
       if (terms.length) {
         const hay = norm(rec.name + ' ' + rec.tasksRaw.join(' ') + ' ' + (rec.modalityRaw || '') + ' ' + rec.classes.join(' '));
         const hits = terms.filter(tk => hay.includes(tk)).length;
@@ -279,7 +280,7 @@
     const out = { abstained: false, verdict: 'answered', flags: [], hallucinationSafe: true, licenseCorrect: true, confidence: 0 };
     selected.forEach(s => { if (!corpus.byId.has(norm(s.rec.id))) out.hallucinationSafe = false; });
     if (need.license && need.license !== 'any') {
-      out.licenseCorrect = selected.every(s => s.rec.licenseClass === 'commercial_ok');
+      out.licenseCorrect = selected.every(s => s.rec.rights.commercial_ok === true);
       if (!out.licenseCorrect) out.flags.push('A selected dataset does not satisfy the license constraint.');
     }
     if (!selected.length) {
@@ -322,7 +323,7 @@
   function dcg(rels) { return rels.reduce((s, r, i) => s + r / Math.log2(i + 2), 0); }
   function benchmarkOn(corpus, goldenSet) {
     const K = goldenSet.k || 5, cases = goldenSet.cases || [];
-    let pSum = 0, ndcgSum = 0, nDisc = 0, absT = 0, absC = 0, licT = 0, licC = 0, halluc = 0, hallucN = 0;
+    let pSum = 0, ndcgSum = 0, nDisc = 0, absT = 0, absC = 0, licT = 0, licC = 0, halluc = 0, hallucN = 0, fitT = 0, fitC = 0;
     const perCase = [];
     for (const c of cases) {
       // hard constraints come ONLY from c.need; c.q is soft text used for ranking tie-breaks
@@ -330,6 +331,18 @@
       let need;
       if ('need' in c) { need = parseNeed(c.need); need.raw = c.q || need.raw || ''; }
       else need = parseNeed(c.q || '');
+
+      // (A) fitness-verdict case: c3Fitness on a specific dataset vs the expected verdict
+      if (c.fitnessExpect && c.fitnessExpect.datasetId) {
+        fitT++;
+        const rec0 = corpus.byId.get(norm(c.fitnessExpect.datasetId));
+        const got = rec0 ? c3Fitness(rec0, need).verdict : 'missing';
+        const ok = rec0 && got === c.fitnessExpect.verdict;
+        if (ok) fitC++;
+        perCase.push({ family: 'fitness', dataset: c.fitnessExpect.datasetId, expected: c.fitnessExpect.verdict, got, ok: !!ok });
+        continue;
+      }
+
       const c1 = c1Discovery(corpus, need);
       const compare = c4CompareSelect(c1.slice(0, Math.max(K, 8)), need);
       const selected = compare.selected.slice(0, K).map(s => s.rec);   // <-- score on C4-selected
@@ -358,7 +371,9 @@
       ndcgAtK: nDisc ? +(ndcgSum / nDisc).toFixed(3) : null,
       abstentionCorrectness: absT ? +(absC / absT).toFixed(3) : null,
       licenseCorrectness: licT ? +(licC / licT).toFixed(3) : null,
+      fitnessAccuracy: fitT ? +(fitC / fitT).toFixed(3) : null,
       hallucinationRate: hallucN ? +(halluc / hallucN).toFixed(3) : 0,
+      counts: { discovery: nDisc, fitness: fitT, license_constrained: licT, abstain: absT - nDisc },
       note: 'Deterministic. Scored on C4-selected. nDCG IDCG over the true relevant set. No LLM-judge. GT owned by OC_DATA_1.',
       perCase
     };
@@ -369,7 +384,7 @@
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
     loadResources, setTaxonomy, loadCorpus, buildCorpus, datasetRecord, runOn, benchmarkOn,
-    licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
+    licenseRights, licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
     run, runBenchmark,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
