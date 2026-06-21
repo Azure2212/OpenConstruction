@@ -433,12 +433,59 @@
   }
   async function runBenchmarkAgent(agentRunFn, goldenSet) { return benchmarkAgent(agentRunFn, goldenSet, await loadCorpus()); }
 
+  // ---------------------------------------------- CATEGORY-E COMPARE-SELECT SCORING (B-step, OC_DATA_1)
+  // Grades an agent's `result.ranking` (array of dataset IDs, best-first) against benchmark-category-E.json.
+  // REUSES the policy baked into each case by scripts/gen_category_E_grade.js (do NOT reinvent):
+  //   • EPS-top1: top-1 correct  <=>  agent ranking[0] ∈ case.gt_top1_set  (the within-EPS set).
+  //   • Kendall-τ vs case.gt_ranking, with case.gt_ties groups treated as EITHER-ORDER (excluded pairs).
+  function kendallTau(agentRanking, gtRanking, gtTies) {
+    const gtPos = {}; gtRanking.forEach((id, i) => { gtPos[id] = i; });
+    const tieOf = {}; (gtTies || []).forEach((g, gi) => g.forEach(id => { tieOf[id] = gi; }));
+    const sameTie = (a, b) => tieOf[a] !== undefined && tieOf[a] === tieOf[b];
+    const aPos = {}; arr(agentRanking).forEach((id, i) => { if (aPos[id] === undefined) aPos[id] = i; });
+    let next = arr(agentRanking).length; gtRanking.forEach(id => { if (aPos[id] === undefined) aPos[id] = next++; }); // omitted -> last (deterministic)
+    let C = 0, D = 0;
+    for (let i = 0; i < gtRanking.length; i++) for (let j = i + 1; j < gtRanking.length; j++) {
+      const a = gtRanking[i], b = gtRanking[j];
+      if (sameTie(a, b)) continue;                                  // GT-tied => either-order => not scored
+      const gtS = Math.sign(gtPos[a] - gtPos[b]), aS = Math.sign(aPos[a] - aPos[b]);
+      if (aS === 0) { D++; continue; }
+      if (gtS === aS) C++; else D++;
+    }
+    return (C + D) ? +((C - D) / (C + D)).toFixed(4) : 1;            // no comparable pairs => trivially 1
+  }
+  function scoreCompareSelect(c, agentRanking) {
+    const r = arr(agentRanking);
+    const top1 = r.length > 0 && (c.gt_top1_set || [c.gt_best]).indexOf(r[0]) >= 0;   // EPS-top1 via baked set
+    return { top1Correct: !!top1, tau: kendallTau(r, c.gt_ranking || [], c.gt_ties || []), agentTop1: r[0] || null };
+  }
+  // benchmarkAgentCompare(agentRunFn, categoryE) — categoryE = parsed benchmark-category-E.json.
+  // agentRunFn(input) is SYNC; input HIDES the GT = { q, need, candidate_ids }. Returns ranking via
+  // result.ranking (contract Analyst adds to submit_answer). Async LLMs: pre-collect -> sync lookup.
+  function benchmarkAgentCompare(agentRunFn, categoryE) {
+    const cases = (categoryE && categoryE.cases) || [];
+    let t1 = 0, tauSum = 0; const perCase = [];
+    for (const c of cases) {
+      const out = agentRunFn({ q: c.q, need: c.need, candidate_ids: (c.candidate_ids || []).slice() }) || {};
+      const s = scoreCompareSelect(c, out.ranking);
+      if (s.top1Correct) t1++; tauSum += s.tau;
+      perCase.push({ task: (c.need && c.need.task) || '', top1Correct: s.top1Correct, tau: s.tau,
+        agentTop1: s.agentTop1, gtBest: c.gt_best, gtTop1Set: c.gt_top1_set, gtRanking: c.gt_ranking });
+    }
+    return { category: 'E', cases: cases.length,
+      top1Accuracy: cases.length ? +(t1 / cases.length).toFixed(4) : null,
+      meanTau: cases.length ? +(tauSum / cases.length).toFixed(4) : null,
+      note: 'compare-select. EPS-top1 (gt_top1_set) + Kendall-τ with gt_ties either-order — policy from gen_category_E_grade.js. No LLM-judge.',
+      perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
     loadResources, setTaxonomy, loadCorpus, buildCorpus, datasetRecord, runOn, benchmarkOn,
     licenseRights, licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
     run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
+    benchmarkAgentCompare, scoreCompareSelect, kendallTau,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
       { id: 'C1', name: 'Discovery', desc: 'Retrieve candidate datasets for a stated need.' },

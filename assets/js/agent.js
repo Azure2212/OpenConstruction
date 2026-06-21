@@ -28,6 +28,8 @@
     '4. When done, call submit_answer exactly once:',
     '   - discovery need -> selected_ids = every dataset that fits (may be many); abstained=false.',
     '   - single-dataset fitness question -> set fitness_verdict={id,verdict} (fit|unfit).',
+    '   - multi-dataset COMPARISON / "rank these" / "which is best among N" -> also set ranking =',
+    '     the dataset ids ordered best->worst, and set selected_ids to the best one(s).',
     '   - if NO dataset in the catalog fits the need -> selected_ids=[], abstained=true.',
     '5. Prefer precision: only include datasets you verified fit. Do not pad the list.'
   ].join('\n');
@@ -47,7 +49,7 @@
   }
 
   function normalizeAnswer(a) {
-    return { selected_ids: arr(a && a.selected_ids), fitness_verdict: (a && a.fitness_verdict) || null, abstained: !!(a && a.abstained) };
+    return { selected_ids: arr(a && a.selected_ids), ranking: arr(a && a.ranking), fitness_verdict: (a && a.fitness_verdict) || null, abstained: !!(a && a.abstained) };
   }
 
   // deps: { api, corpus, taxonomy, llm, tools?, maxSteps?, systemPrompt? }
@@ -77,7 +79,7 @@
         if (!toolCalls || !toolCalls.length) {
           // no tool call: nudge once to force a submit, else stop
           if (!run._nudged) { run._nudged = true; messages.push({ role: 'user', content: 'Please finish by calling submit_answer with your result.' }); continue; }
-          return { answer: { selected_ids: [], abstained: true, _incomplete: true }, trace: trace, steps: step + 1, ok: false, reason: 'no tool call', usage: usage };
+          return { answer: { selected_ids: [], ranking: [], abstained: true, _incomplete: true }, selected_ids: [], ranking: [], trace: trace, steps: step + 1, ok: false, reason: 'no tool call', usage: usage };
         }
 
         var submitted = null;
@@ -92,9 +94,9 @@
           // feed tool result back (truncate big payloads in the message, keep full in trace)
           messages.push({ role: 'tool', tool_call_id: tc.id || ('tc_' + step + '_' + i), name: name, content: JSON.stringify(result).slice(0, 6000) });
         }
-        if (submitted) { run._nudged = false; return { answer: submitted, trace: trace, steps: step + 1, ok: true, usage: usage }; }
+        if (submitted) { run._nudged = false; return { answer: submitted, selected_ids: submitted.selected_ids, ranking: submitted.ranking, trace: trace, steps: step + 1, ok: true, usage: usage }; }
       }
-      return { answer: { selected_ids: [], abstained: true, _incomplete: true }, trace: trace, steps: maxSteps, ok: false, reason: 'max steps', usage: usage };
+      return { answer: { selected_ids: [], ranking: [], abstained: true, _incomplete: true }, selected_ids: [], ranking: [], trace: trace, steps: maxSteps, ok: false, reason: 'max steps', usage: usage };
     }
     run._nudged = false;
     return { run: run, tools: tools, systemPrompt: sys };

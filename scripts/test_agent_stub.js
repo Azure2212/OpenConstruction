@@ -97,6 +97,20 @@ var tk = agentTools.createTools(api, corpus, taxonomy);
   var lp = await loopAgent.run('loop forever');
   check('max-steps: returns incomplete, not crash', !lp.ok && lp.answer._incomplete === true && lp.steps === 3, { ok: lp.ok, steps: lp.steps });
 
+  console.log('\n[8] agent loop — COMPARISON surfaces ranking (best->worst)');
+  var cmpAgent = Agent.createAgent({ api: api, corpus: corpus, taxonomy: taxonomy, tools: tk, llm: makeStub(function (messages) {
+    var st = lastToolMsg(messages, 'search_datasets');
+    if (!st) return toolCall('search_datasets', { modality: 'point_cloud', query: 'point cloud' });
+    var ids = (JSON.parse(st.content).results || []).slice(0, 3).map(function (r) { return r.id; });
+    // best->worst ranking; selected_ids = the best one
+    return toolCall('submit_answer', { selected_ids: ids.slice(0, 1), ranking: ids, abstained: false });
+  }) });
+  var cm = await cmpAgent.run('compare these point cloud datasets and rank best to worst');
+  check('comparison: result.ranking present, ordered, real ids (OC_DATA_1 contract)', Array.isArray(cm.ranking) && cm.ranking.length === 3 && cm.ranking.every(function (id) { return corpus.byId.has(id.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()); }), cm.ranking);
+  check('comparison: result.ranking === answer.ranking (top-level mirrors answer)', JSON.stringify(cm.ranking) === JSON.stringify(cm.answer.ranking));
+  check('comparison: selected_ids = best (ranking[0])', cm.answer.selected_ids.length === 1 && cm.answer.selected_ids[0] === cm.ranking[0]);
+  check('discovery answer still carries ranking (empty when not a comparison)', Array.isArray(d.answer.ranking) && d.answer.ranking.length === 0, d.answer.ranking);
+
   console.log('\n==== ' + pass + ' passed, ' + fail + ' failed ====');
   process.exit(fail ? 1 : 0);
 })();

@@ -93,9 +93,10 @@
       }},
       { type: 'function', function: {
         name: 'submit_answer',
-        description: 'Declare your final answer and finish. selected_ids = dataset ids that satisfy the need (empty if none). For a single-dataset fitness question, also set fitness_verdict. Set abstained=true when no dataset in the catalog fits.',
+        description: 'Declare your final answer and finish. selected_ids = dataset ids that satisfy the need (empty if none). For a single-dataset fitness question, also set fitness_verdict. For a multi-dataset COMPARISON / "rank these" / "which is best among N" task, also set ranking = the dataset ids ordered best→worst. Set abstained=true when no dataset in the catalog fits.',
         parameters: { type: 'object', properties: {
           selected_ids: { type: 'array', items: { type: 'string' } },
+          ranking: { type: 'array', items: { type: 'string' }, description: 'ordered dataset ids best->worst (comparison/Category-E tasks)' },
           fitness_verdict: { type: 'object', properties: { id: { type: 'string' }, verdict: { type: 'string', enum: ['fit', 'unfit'] } } },
           abstained: { type: 'boolean' }
         }, required: ['selected_ids', 'abstained'] }
@@ -182,7 +183,7 @@
         return { count: matches.length, matches: matches };
       }
       if (name === 'submit_answer') {
-        return { _final: true, selected_ids: arr(args.selected_ids), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
+        return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
       }
       return { error: 'unknown tool: ' + name };
     }
