@@ -53,7 +53,7 @@
   // deps: { api, corpus, taxonomy, llm, tools?, maxSteps?, systemPrompt? }
   function createAgent(deps) {
     var api = deps.api;
-    var tools = deps.tools || (typeof require !== 'undefined' ? require('./agent-tools.js') : window.OCAgentTools).createTools(api, deps.corpus, deps.taxonomy);
+    var tools = deps.tools || (typeof require !== 'undefined' ? require('./agent-tools.js') : window.OCAgentTools).createTools(api, deps.corpus, deps.taxonomy, { benchmarkResults: deps.benchmarkResults });
     var maxSteps = deps.maxSteps || 8;
     var sys = deps.systemPrompt || SYSTEM_PROMPT;
 

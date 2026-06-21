@@ -1,0 +1,95 @@
+{
+ "_meta": {
+  "spec": ".doc §7.2",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "heterogeneity": "3 diverse modality TYPES (point cloud + image/annotations + tabular) per ACTION_PLAN 4.6/R-guarantee",
+  "redistribution_logic": "permissive/public-domain/copyleft -> cached sample; NC/ND/unknown -> synthetic/reduced (schema/shape only)"
+ },
+ "datasets": [
+  {
+   "dataset_id": "PC-Urban",
+   "name": "PC-Urban: Urban Point Cloud",
+   "modality_bucket": "point_cloud",
+   "raw_modality": "Point Cloud",
+   "license": "CC BY 4.0",
+   "license_class": "permissive",
+   "commercial_ok": true,
+   "redistribution_plan": "cached-sample",
+   "access": "https://ieee-dataport.org/documents/pc-urban-outdoor-dataset-3d-point-cloud-semantic-segmentation",
+   "doi": "http://dx.doi.org/10.1109/ACCESS.2021.3062547",
+   "expected_inventory": {
+    "declared_count": 66425,
+    "expected_formats": [
+     ".ply/.pcd/.las",
+     "per-point label files"
+    ],
+    "note": "declared from metadata; exact file counts/formats VERIFIED at retrieve-time (Phase 3)"
+   },
+   "sampling_rule": "cache a reduced sample (license permits redistribution)"
+  },
+  {
+   "dataset_id": "Construction-Site-Segmentation",
+   "name": "construction-site-segmentation dataset",
+   "modality_bucket": "ground_rgb",
+   "raw_modality": "Ground RGB",
+   "license": "MIT",
+   "license_class": "permissive",
+   "commercial_ok": true,
+   "redistribution_plan": "cached-sample",
+   "access": "https://github.com/RyanWangZf/construction-site-segmentation",
+   "doi": "https://doi.org/10.1111/mice.12701",
+   "expected_inventory": {
+    "declared_count": 859,
+    "expected_formats": [
+     ".jpg/.png images",
+     "annotation files (masks/boxes)"
+    ],
+    "note": "declared from metadata; exact file counts/formats VERIFIED at retrieve-time (Phase 3)"
+   },
+   "sampling_rule": "cache a reduced sample (license permits redistribution)"
+  },
+  {
+   "dataset_id": "wblca-benchmark-v2-data",
+   "name": "Whole-building Life Cycle Assessment (WBLCA) Dataset",
+   "modality_bucket": "tabular",
+   "raw_modality": "tabular",
+   "license": "CC BY 4.0",
+   "license_class": "permissive",
+   "commercial_ok": true,
+   "redistribution_plan": "cached-sample",
+   "access": "https://doi.org/10.6084/m9.figshare.28462145",
+   "doi": "https://doi.org/10.1038/s41597-025-05216-0",
+   "expected_inventory": {
+    "declared_count": 292,
+    "expected_formats": [
+     ".csv/.parquet",
+     "schema/header row"
+    ],
+    "note": "declared from metadata; exact file counts/formats VERIFIED at retrieve-time (Phase 3)"
+   },
+   "sampling_rule": "cache a reduced sample (license permits redistribution)"
+  },
+  {
+   "dataset_id": "DTCTP",
+   "name": "Construction Time–Cost Trade-off Dataset",
+   "modality_bucket": "tabular",
+   "raw_modality": "Tabular",
+   "license": "Not Specified",
+   "license_class": "unknown",
+   "commercial_ok": null,
+   "redistribution_plan": "synthetic-or-reduced",
+   "access": "https://drive.google.com/file/d/1ZfAiCvkOmByq5T0nyUxTCsA4C3eEdBrd/view",
+   "doi": "https://doi.org/10.1108/ECAM-06-2022-0601",
+   "expected_inventory": {
+    "declared_count": 15,
+    "expected_formats": [
+     ".csv/.parquet",
+     "schema/header row"
+    ],
+    "note": "declared from metadata; exact file counts/formats VERIFIED at retrieve-time (Phase 3)"
+   },
+   "sampling_rule": "generate synthetic/reduced data (redistribution NOT permitted) preserving schema/shape only"
+  }
+ ]
+}
