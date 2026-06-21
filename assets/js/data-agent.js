@@ -156,8 +156,33 @@
       classes: arr(ds.classes), numClasses: ds.num_classes != null ? ds.num_classes : (arr(ds.classes).length || null),
       numImages: ds.num_images != null ? ds.num_images : null,
       license: ds.license || 'Not specified', rights: licenseRights(ds.license), licenseClass: licenseClass(ds.license),
+      authors: ds.authors != null ? ds.authors : null,
       doi: ds.doi || null, paper: ds.paper || null, access: ds.access || null, note: ds.note || null
     };
+  }
+
+  // ---------------------------------------------- access classification (STATED access from metadata)
+  // open | gated | registration_required | restricted | unknown. NOT broken_link (needs a live probe — Phase 3).
+  function classifyAccess(rec) {
+    var a = String((rec && rec.access) || '').toLowerCase().trim();
+    if (!a || a === 'not specified' || a === 'unknown' || a === 'n/a' || a === 'tbd') return 'unknown';
+    if (/restricted|private|not publicly|by agreement|\beula\b|\bnda\b|license agreement|on request only|requires approval|upon agreement/.test(a)) return 'restricted';
+    if (/regist(er|ration)|sign[- ]?up|create an account|account required|log[- ]?in|sign[- ]?in/.test(a)) return 'registration_required';
+    if (/request|apply|contact|e-?mail|permission|forms?\.gle|google form|inquir|\bform\b/.test(a)) return 'gated';
+    if (/https?:\/\//.test(a)) return 'open';
+    return 'unknown';
+  }
+
+  // ---------------------------------------------- citation (deterministic, from metadata)
+  function citation(rec) {
+    var raw = rec && rec.authors;
+    var list = Array.isArray(raw) ? raw.map(function (x) { return typeof x === 'string' ? x : (x && x.name) || ''; }).filter(Boolean)
+             : (raw ? [String(raw)] : []);
+    var who = list.length ? (list.length > 3 ? list[0] + ' et al.' : list.join(', ')) : '';
+    var yr = rec && rec.year ? ' (' + rec.year + ')' : '';
+    var name = (rec && (rec.name || rec.id)) || '';
+    var text = (who ? who + yr + '. ' : '') + name + '.' + (rec && rec.doi ? ' ' + rec.doi : '');
+    return { text: text.trim(), source_url: (rec && (rec.doi || rec.paper || rec.access)) || null, doi: (rec && rec.doi) || null };
   }
   let _corpus = null;
   async function loadCorpus(force) {
@@ -479,6 +504,59 @@
       perCase };
   }
 
+  // ---------------------------------------------- CATEGORY-B: access-status + license + report metrics (OC_DATA_1)
+  // Deterministic, no LLM-judge. access-status GT is host-derived (benchmark-category-B.json);
+  // completeness fields align with agent-tools.js validate_metadata (provenance=doi|paper, license, access).
+  function scoreAccessStatus(pred, gt) { return { correct: norm(pred) === norm(gt), pred: pred || null, gt: gt }; }
+  var REPORT_REQUIRED_FIELDS = ['datasets', 'rationale', 'source_citation', 'license', 'access', 'limitations', 'residual_risks'];
+  var GROUNDED_FIELDS = ['source_citation', 'license', 'access'];
+  function _present(v) { return v != null && String(v).trim() !== '' && !(Array.isArray(v) && v.length === 0); }
+  // reportCompleteness — scores an agent REPORT vs the required fields; grounds the verifiable ones
+  // (source_citation/license/access) against the real dataset record. provenanceCompleteness = grounded subset.
+  function reportCompleteness(report, rec, required) {
+    report = report || {}; required = required || REPORT_REQUIRED_FIELDS;
+    var present = [], grounded = [], missing = [];
+    required.forEach(function (f) {
+      if (!_present(report[f])) { missing.push(f); return; }
+      present.push(f);
+      if (GROUNDED_FIELDS.indexOf(f) >= 0 && rec) {
+        var val = norm(report[f]), ok = false;
+        if (f === 'license') ok = val === norm(rec.license) || (report.license_class && norm(report.license_class) === norm(rec.rights && rec.rights.cls));
+        else if (f === 'access') ok = val === norm(rec.access);
+        else if (f === 'source_citation') ok = !!((rec.doi && val.indexOf(norm(rec.doi)) >= 0) || (rec.paper && val.indexOf(norm(rec.paper)) >= 0));
+        if (ok) grounded.push(f);
+      }
+    });
+    var credited = required.filter(function (f) {
+      if (missing.indexOf(f) >= 0) return false;
+      if (GROUNDED_FIELDS.indexOf(f) >= 0) return grounded.indexOf(f) >= 0;   // grounded fields only count if grounded
+      return true;
+    }).length;
+    return { completeness: +(credited / required.length).toFixed(3), provenanceCompleteness: +(grounded.length / GROUNDED_FIELDS.length).toFixed(3),
+      present: present, grounded: grounded, missing: missing };
+  }
+  // citation presence + accuracy vs the real doi/paper
+  function citationScore(reportCitation, rec) {
+    var c = String(reportCitation == null ? '' : reportCitation), present = _present(c);
+    var accurate = !!(rec && ((rec.doi && norm(c).indexOf(norm(rec.doi)) >= 0) || (rec.paper && norm(c).indexOf(norm(rec.paper)) >= 0)));
+    return { present: present, accurate: accurate, doiSyntax: /10\.\d{4,9}\//.test(c), score: +((present ? 0.5 : 0) + (accurate ? 0.5 : 0)).toFixed(2) };
+  }
+  // benchmarkAccessLicense(agentRunFn, categoryB) — grades agent {access_status, commercial_ok} vs GT.
+  // Input HIDES GT: { q, dataset_id, evidence }. License REUSES commercial_ok. No LLM-judge.
+  function benchmarkAccessLicense(agentRunFn, categoryB) {
+    var cases = (categoryB && categoryB.cases) || [], accT = 0, accC = 0, licT = 0, licC = 0, perCase = [];
+    cases.forEach(function (c) {
+      var out = agentRunFn({ q: c.q, dataset_id: c.dataset_id, evidence: c.evidence }) || {};
+      var row = { dataset: c.dataset_id, subtype: c.subtype };
+      if (c.gt_access_status != null) { accT++; var ok = norm(out.access_status) === norm(c.gt_access_status); if (ok) accC++; row.access = { pred: out.access_status || null, gt: c.gt_access_status, correct: ok }; }
+      if ('gt_commercial_ok' in c) { licT++; var lok = (out.commercial_ok === c.gt_commercial_ok); if (lok) licC++; row.license = { pred: (out.commercial_ok === undefined ? null : out.commercial_ok), gt: c.gt_commercial_ok, correct: lok }; }
+      perCase.push(row);
+    });
+    return { category: 'B', cases: cases.length, accessStatusAccuracy: accT ? +(accC / accT).toFixed(4) : null,
+      licenseCorrectness: licT ? +(licC / licT).toFixed(4) : null, counts: { access: accT, license: licT },
+      note: 'Deterministic. access-status exact-match vs host-derived GT; license reuses commercial_ok. No LLM-judge.', perCase: perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
@@ -486,6 +564,7 @@
     licenseRights, licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
     run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
     benchmarkAgentCompare, scoreCompareSelect, kendallTau,
+    scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
       { id: 'C1', name: 'Discovery', desc: 'Retrieve candidate datasets for a stated need.' },
