@@ -42,7 +42,7 @@ console.log('\n[2] toolbox = PRIMITIVES ONLY (no oracle)');
 var tk = agentTools.createTools(api, corpus, taxonomy);
 (function () {
   var names = tk.toolNames.sort();
-  check('exposes exactly the primitive toolset (9)', JSON.stringify(names) === JSON.stringify(['check_fitness', 'check_license', 'compare_resources', 'get_dataset', 'list_tasks', 'recommend_benchmark', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
+  check('exposes exactly the primitive toolset (11)', JSON.stringify(names) === JSON.stringify(['check_access', 'check_fitness', 'check_license', 'compare_resources', 'get_citation', 'get_dataset', 'list_tasks', 'recommend_benchmark', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
   check('NO oracle/selector tool exposed', names.indexOf('compare_select') < 0 && names.indexOf('recommend') < 0 && names.indexOf('solve') < 0 && names.indexOf('c4CompareSelect') < 0 && names.indexOf('rank_best') < 0, names);
   var sd = tk.dispatch('search_datasets', { modality: 'point_cloud' });
   check('search_datasets returns candidates (no fit verdict leaked)', sd.results.length > 0 && sd.results[0].verdict === undefined && sd.results.every(function (r) { return corpus.byId.has(String(r.id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()); }), { n: sd.results.length });

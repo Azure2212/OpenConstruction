@@ -557,6 +557,44 @@
       note: 'Deterministic. access-status exact-match vs host-derived GT; license reuses commercial_ok. No LLM-judge.', perCase: perCase };
   }
 
+  // ---------------------------------------------- C6 provenance-report assembler (GRADER-SIDE REFERENCE)
+  // Builds the CANONICAL complete report from metadata for the selected datasets. ANTI-CIRCULARITY:
+  // this is NOT exposed as an agent tool. The AGENT builds its OWN report from the primitives it calls
+  // (get_citation / check_access / check_license / get_dataset); reportCompleteness scores the agent's
+  // report and credits a grounded field only when the agent actually surfaced it — so an agent that
+  // skips a primitive loses that field and completeness < 1 (not trivially 1.0).
+  function assembleReport(selectedIds, corpus) {
+    var recs = arr(selectedIds).map(function (id) { return corpus.byId.get(norm(id)); }).filter(Boolean);
+    function limitationsFor(r) {
+      var L = [];
+      if (!r.rights || r.rights.cls === 'unknown') L.push(r.id + ': license unclear — reuse rights not groundable');
+      if (classifyAccess(r) === 'unknown') L.push(r.id + ': access status not groundable from metadata');
+      if (r.numImages == null && r.numClasses == null) L.push(r.id + ': scale not reported (no image/class counts)');
+      if (r.modalityRaw && (!r.modality || r.modality.length === 0)) L.push(r.id + ': modality unparseable from metadata');
+      return L;
+    }
+    var per = recs.map(function (r) {
+      var cit = citation(r);
+      var srcCit = cit.text + (cit.source_url && cit.text.indexOf(cit.source_url) < 0 ? ' ' + cit.source_url : '');
+      return { id: r.id, name: r.name, source_url: cit.source_url, source_citation: srcCit,
+        license: r.license, license_class: r.rights && r.rights.cls, access: r.access || null,
+        access_status: classifyAccess(r), modality: r.modalityRaw || null,
+        task: (r.tasksRaw && r.tasksRaw[0]) || null, limitations: limitationsFor(r) };
+    });
+    var primary = per[0] || {};
+    var residual = ['Access/link liveness NOT verified at metadata level (needs Phase-3 live probe).',
+                    'Metadata-only report: no file inventory / profiling performed.'];
+    if (per.some(function (p) { return p.license_class === 'unknown'; }))
+      residual.push('≥1 selected dataset has an unclear license — confirm terms before reuse.');
+    return { datasets: per.map(function (p) { return { id: p.id, name: p.name, modality: p.modality, task: p.task }; }),
+      rationale: 'Selected ' + per.length + ' dataset(s) matching the stated need; per-dataset provenance below.',
+      per_dataset: per,
+      source_citation: primary.source_citation || '', license: primary.license || '',
+      license_class: primary.license_class || '', access: primary.access || '', access_status: primary.access_status || '',
+      limitations: (function () { var L = per.reduce(function (acc, p) { return acc.concat(p.limitations); }, []); return L.length ? L : ['No metadata-level limitations identified for the selected dataset(s).']; })(),
+      residual_risks: residual };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
@@ -565,6 +603,7 @@
     run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
     benchmarkAgentCompare, scoreCompareSelect, kendallTau,
     scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
+    classifyAccess, citation, assembleReport,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
       { id: 'C1', name: 'Discovery', desc: 'Retrieve candidate datasets for a stated need.' },

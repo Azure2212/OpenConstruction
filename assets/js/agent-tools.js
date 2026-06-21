@@ -92,6 +92,16 @@
         }, required: [] }
       }},
       { type: 'function', function: {
+        name: 'check_access',
+        description: 'Classify ONE dataset\'s STATED access from its metadata: open | gated | registration_required | restricted | unknown (NOT broken-link — that needs a live check). Use to reason about whether/how a dataset can be obtained.',
+        parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] }
+      }},
+      { type: 'function', function: {
+        name: 'get_citation',
+        description: 'Get the deterministic citation/attribution for ONE dataset (authors/year/name/DOI) + source URL. Use to ground provenance in a report.',
+        parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] }
+      }},
+      { type: 'function', function: {
         name: 'submit_answer',
         description: 'Declare your final answer and finish. selected_ids = dataset ids that satisfy the need (empty if none). For a single-dataset fitness question, also set fitness_verdict. For a multi-dataset COMPARISON / "rank these" / "which is best among N" task, also set ranking = the dataset ids ordered best→worst. Set abstained=true when no dataset in the catalog fits.',
         parameters: { type: 'object', properties: {
@@ -181,6 +191,17 @@
           return { id: b.id, name: b.name, task: b.task, dataset_id: b.dataset_id, primary_metric: pk, primary_metric_direction: lower ? 'lower' : 'higher', n_methods: rows.length, best: best, source_url: b.source_url };
         });
         return { count: matches.length, matches: matches };
+      }
+      if (name === 'check_access') {
+        var ar = corpus.byId.get(norm(args.id));
+        if (!ar) return { error: 'dataset not found', id: args.id };
+        return { id: ar.id, access_status: api.classifyAccess(ar), evidence: ar.access || null };
+      }
+      if (name === 'get_citation') {
+        var cr = corpus.byId.get(norm(args.id));
+        if (!cr) return { error: 'dataset not found', id: args.id };
+        var c = api.citation(cr);
+        return { id: cr.id, citation: c.text, source_url: c.source_url, doi: c.doi, authors: cr.authors || null, year: cr.year || null };
       }
       if (name === 'submit_answer') {
         return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
