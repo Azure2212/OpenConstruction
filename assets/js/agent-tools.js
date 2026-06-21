@@ -15,11 +15,108 @@
   function norm(s) { return String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function arr(v) { return Array.isArray(v) ? v.filter(function (x) { return x != null && String(x).trim() !== ''; }) : (v == null || v === '' ? [] : [v]); }
 
+  // ============================================================ TF2 RETRIEVE: local file inspection
+  // Deterministic, OFFLINE primitives that run on a LOCAL sample dir/file under data/samples/<id>/.
+  // Reproduces OC_DATA_1's Category-C ground truth (data/samples/*/_FIXTURE.json + benchmark-category-C.json):
+  //   format by MAGIC BYTES + extension — png/ply/coco/json/csv/text, plus empty (0 bytes) and
+  //   corrupted (extension<->content/magic mismatch). NO network, NO model. (`_FIXTURE.json` is GT metadata,
+  //   excluded from the agent-visible inventory.)
+  var _fs = null, _path = null;
+  try { if (typeof require !== 'undefined') { _fs = require('fs'); _path = require('path'); } } catch (e) { _fs = null; _path = null; }
+
+  function extOf(name) { var m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/); return m ? m[1] : ''; }
+  function isPrintable(buf) {            // text vs binary heuristic (no NUL, <30% control bytes in first 1KB)
+    var n = Math.min(buf.length, 1024), ctrl = 0;
+    for (var i = 0; i < n; i++) { var b = buf[i]; if (b === 0) return false; if (b < 9 || (b > 13 && b < 32)) ctrl++; }
+    return ctrl / Math.max(n, 1) < 0.30;
+  }
+  function sniffMagic(buf) {             // -> empty|png|jpeg|gif|pdf|zip|ply|json|text|binary
+    if (!buf || buf.length === 0) return 'empty';
+    if (buf.length >= 4 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'png';
+    if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpeg';
+    if (buf.length >= 4 && buf.slice(0, 4).toString('latin1') === 'GIF8') return 'gif';
+    if (buf.length >= 4 && buf.slice(0, 4).toString('latin1') === '%PDF') return 'pdf';
+    if (buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && (buf[2] === 3 || buf[2] === 5)) return 'zip';
+    if (buf.length >= 3 && buf.slice(0, 3).toString('latin1') === 'ply') return 'ply';
+    if (isPrintable(buf)) { var t = buf.toString('utf8').replace(/^﻿/, '').replace(/^\s+/, ''); return (t.charAt(0) === '{' || t.charAt(0) === '[') ? 'json' : 'text'; }
+    return 'binary';
+  }
+  function isCoco(buf) {                 // COCO = a JSON object with images + annotations + categories
+    try { var o = JSON.parse(buf.toString('utf8')); return !!(o && typeof o === 'object' && o.images && o.annotations && o.categories); }
+    catch (e) { return false; }
+  }
+  var EXT_SIG = { png: 'png', jpg: 'jpeg', jpeg: 'jpeg', gif: 'gif', pdf: 'pdf', zip: 'zip', ply: 'ply' };
+  // -> { format, magic, ext, size_bytes }. `magic === format` (matches GT gt_format/gt_magic).
+  function classifyFileFormat(name, buf) {
+    var ext = extOf(name), size = buf ? buf.length : 0;
+    if (size === 0) return { format: 'empty', magic: 'empty', ext: ext, size_bytes: 0 };
+    var magic = sniffMagic(buf), fmt;
+    if (magic === 'json') { fmt = isCoco(buf) ? 'coco' : 'json'; }
+    else if (EXT_SIG[ext]) { fmt = (magic === EXT_SIG[ext]) ? magic : 'corrupted'; }   // ext promises a signature -> must match
+    else if (magic === 'png' || magic === 'jpeg' || magic === 'gif' || magic === 'pdf' || magic === 'zip' || magic === 'ply') { fmt = magic; } // real signature, ext didn't predict it
+    else if (magic === 'text') { fmt = (ext === 'csv' || ext === 'tsv') ? 'csv' : 'text'; }
+    else { fmt = 'binary'; }
+    return { format: fmt, magic: fmt, ext: ext, size_bytes: size };
+  }
+
+  // format -> modality bucket (taxonomy ids). HONEST: raster-image bytes can't distinguish ground/aerial/satellite.
+  var FORMAT_MODALITY = { ply: 'point_cloud', pcd: 'point_cloud', las: 'point_cloud', laz: 'point_cloud', e57: 'point_cloud',
+    png: 'ground_rgb', jpeg: 'ground_rgb', gif: 'ground_rgb', csv: 'tabular', tsv: 'tabular', parquet: 'tabular',
+    ifc: 'bim', rvt: 'bim', dwg: 'drawing', dxf: 'drawing', mp4: 'video', avi: 'video', mov: 'video' };
+  var MODALITY_PRIORITY = ['point_cloud', 'bim', 'drawing', 'video', 'tabular', 'ground_rgb'];
+  function guessModality(formats) {
+    var present = {}; formats.forEach(function (f) { var m = FORMAT_MODALITY[f]; if (m) present[m] = 1; });
+    for (var i = 0; i < MODALITY_PRIORITY.length; i++) if (present[MODALITY_PRIORITY[i]]) return MODALITY_PRIORITY[i];
+    return null;
+  }
+  function guessAnnotationFormat(fmts, exts) {
+    if (fmts.indexOf('coco') >= 0) return 'coco';
+    if (exts.indexOf('xml') >= 0) return 'pascal_voc';
+    if (exts.indexOf('labels') >= 0) return 'per_point_labels';
+    if (exts.indexOf('txt') >= 0 && (fmts.indexOf('png') >= 0 || fmts.indexOf('jpeg') >= 0)) return 'yolo';
+    return 'none';
+  }
+
+  // resolve_url's URL host/scheme classifier (`classifyUrl`) lives in data-agent.js as the SINGLE
+  // rulebook, shared with classifyAccess (C6 / Category-B). The tool calls api.classifyUrl (see dispatch).
+
+  // Sandbox a caller-supplied path to the samples root (accepts repo-relative "data/samples/X" OR "X").
+  function resolveSamplePath(baseDir, samplesRoot, p) {
+    if (!_path) return { error: 'path module unavailable' };
+    var rel = String(p == null ? '' : p); if (!rel.trim()) return { error: 'no path given' };
+    var root = _path.resolve(samplesRoot);
+    var c1 = _path.resolve(baseDir, rel);
+    if (c1 === root || c1.indexOf(root + _path.sep) === 0) return { abs: c1 };
+    var c2 = _path.resolve(root, rel);
+    if (c2 === root || c2.indexOf(root + _path.sep) === 0) return { abs: c2 };
+    return { error: 'path is outside the samples sandbox' };
+  }
+  function walkFiles(absDir) {            // bounded, sorted, recursive; excludes _FIXTURE.json
+    var out = [], MAXF = 5000, MAXD = 8;
+    (function rec(dir, prefix, depth) {
+      if (out.length >= MAXF || depth > MAXD) return;
+      var entries; try { entries = _fs.readdirSync(dir); } catch (e) { return; }
+      entries.sort();
+      for (var i = 0; i < entries.length; i++) {
+        var nm = entries[i]; if (nm === '_FIXTURE.json') continue;
+        var abs = _path.join(dir, nm), st; try { st = _fs.statSync(abs); } catch (e) { continue; }
+        var rel = prefix ? prefix + '/' + nm : nm;
+        if (st.isDirectory()) rec(abs, rel, depth + 1);
+        else if (st.isFile() && out.length < MAXF) out.push({ rel: rel, abs: abs });
+      }
+    })(absDir, '', 0);
+    return out;
+  }
+
   // api = window.OCDataAgent / require('data-agent.js'); corpus = api.buildCorpus(...); taxonomy = the loaded agent-taxonomy.json
   // opts = { benchmarkResults?: <parsed data/benchmark-results.json> } (for recommend_benchmark)
   function createTools(api, corpus, taxonomy, opts) {
     opts = opts || {};
     var benchmarkResults = opts.benchmarkResults || null;
+    // TF2 retrieve: where the local sample fixtures live. baseDir resolves repo-relative paths
+    // ("data/samples/<id>"); samplesRoot sandboxes them. Defaults derive from this module's location.
+    var baseDir = opts.baseDir || (_path ? _path.resolve(__dirname, '../..') : '.');
+    var samplesRoot = opts.samplesRoot || (_path ? _path.join(baseDir, 'data', 'samples') : 'data/samples');
     var compareMod = (typeof require !== 'undefined') ? require('./data-agent-compare.js') : (typeof window !== 'undefined' ? window.OCDataAgentCompare : null);
     var comparer = compareMod ? compareMod.createComparer(api) : null;
     // Vocabulary the agent may use (so it can phrase tasks canonically). Built from task_canon.map.
@@ -100,6 +197,21 @@
         name: 'get_citation',
         description: 'Get the deterministic citation/attribution for ONE dataset (authors/year/name/DOI) + source URL. Use to ground provenance in a report.',
         parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] }
+      }},
+      { type: 'function', function: {
+        name: 'inventory_files',
+        description: 'Inventory the files in a LOCAL retrieved/cached sample directory (a dataset folder under data/samples). Returns the raw on-disk listing — each file\'s name, extension, detected type/format, and size in bytes — plus counts by type. Reports only what is on disk (it does NOT judge fitness or quality). Detected types include empty (0 bytes) and corrupted (extension/content mismatch).',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'local directory, e.g. data/samples/PC-Urban' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'detect_format',
+        description: 'Detect the format of a LOCAL path (a single file OR a sample directory) by magic bytes + extension: png/jpeg/ply/coco/json/csv/text, plus empty (0 bytes) and corrupted (extension vs content/magic mismatch). For a directory it also returns the set of formats, a modality guess, and the annotation format (e.g. coco). Observation only — no quality verdict.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'local file or directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'resolve_url',
+        description: 'Classify a URL\'s scheme and host DETERMINISTICALLY, WITHOUT contacting the network. Returns scheme, host, whether it is a DOI (+prefix), the repository kind (github/zenodo/figshare/ieee_dataport/…), and an access class (open | registration_required | gated | restricted | unknown) derived from the host. It does NOT check liveness (HTTP 200 vs 404).',
+        parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] }
       }},
       { type: 'function', function: {
         name: 'submit_answer',
@@ -203,6 +315,39 @@
         var c = api.citation(cr);
         return { id: cr.id, citation: c.text, source_url: c.source_url, doi: c.doi, authors: cr.authors || null, year: cr.year || null };
       }
+      if (name === 'inventory_files') {
+        if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
+        var rp = resolveSamplePath(baseDir, samplesRoot, args.path);
+        if (rp.error) return { error: rp.error, path: args.path };
+        var ist; try { ist = _fs.statSync(rp.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
+        if (!ist.isDirectory()) return { error: 'inventory_files expects a directory (use detect_format for a single file)', path: args.path };
+        var files = [], counts = {};
+        walkFiles(rp.abs).forEach(function (f) {
+          var buf; try { buf = _fs.readFileSync(f.abs); } catch (e) { buf = Buffer.alloc(0); }
+          var c = classifyFileFormat(f.rel, buf);
+          // task contract {name,ext,type,size_bytes} + GT-shape aliases {format,bytes} (one object satisfies both)
+          files.push({ name: f.rel, ext: c.ext, type: c.format, size_bytes: c.size_bytes, format: c.format, bytes: c.size_bytes });
+          counts[c.format] = (counts[c.format] || 0) + 1;
+        });
+        return { path: args.path, file_count: files.length, files: files, counts_by_type: counts, by_format: counts };
+      }
+      if (name === 'detect_format') {
+        if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
+        var dp = resolveSamplePath(baseDir, samplesRoot, args.path);
+        if (dp.error) return { error: dp.error, path: args.path };
+        var dst; try { dst = _fs.statSync(dp.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
+        if (dst.isFile()) {
+          var fb; try { fb = _fs.readFileSync(dp.abs); } catch (e) { fb = Buffer.alloc(0); }
+          var cf = classifyFileFormat(_path.basename(dp.abs), fb);
+          return { path: args.path, target: 'file', format: cf.format, magic: cf.magic, ext: cf.ext, size_bytes: cf.size_bytes,
+                   modality_guess: guessModality([cf.format]), annotation_format: guessAnnotationFormat([cf.format], [cf.ext]), formats: [cf.format] };
+        }
+        var dfmts = [], dexts = [];
+        walkFiles(dp.abs).forEach(function (f) { var b; try { b = _fs.readFileSync(f.abs); } catch (e) { b = Buffer.alloc(0); } var c = classifyFileFormat(f.rel, b); dfmts.push(c.format); dexts.push(c.ext); });
+        var uniq = dfmts.filter(function (v, i) { return dfmts.indexOf(v) === i; }).sort();
+        return { path: args.path, target: 'dir', formats: uniq, modality_guess: guessModality(dfmts), annotation_format: guessAnnotationFormat(dfmts, dexts) };
+      }
+      if (name === 'resolve_url') { return api.classifyUrl ? api.classifyUrl(args.url) : { error: 'classifyUrl unavailable (update data-agent.js)' }; }
       if (name === 'submit_answer') {
         return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
       }
@@ -213,7 +358,8 @@
              toolNames: schemas.map(function (s) { return s.function.name; }) };
   }
 
-  var API = { createTools: createTools };
+  // Export the pure TF2 file classifier for reuse. (classifyUrl now lives in data-agent.js — one rulebook.)
+  var API = { createTools: createTools, classifyFileFormat: classifyFileFormat };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.OCAgentTools = API;
 })();

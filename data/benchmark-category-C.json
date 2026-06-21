@@ -1,0 +1,170 @@
+{
+ "_meta": {
+  "category": "C",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "fixtures_root": "data/samples/",
+  "fixtures_synthetic": true,
+  "detect_format_contract": "by magic bytes + extension: png(89504E47)/ply('ply')/coco(json w/ images+annotations+categories)/json/csv/text/empty; extension↔magic mismatch => 'corrupted'.",
+  "inventory_files_contract": "{file_count, by_format:{fmt:n}, files:[{name,ext,bytes,format}]} (excludes _FIXTURE.json).",
+  "alignment": "path/shape contract for OC_SPECIALIST_1's inventory_files/detect_format (TF2, not yet built) to consume.",
+  "flags": [
+   "GT grounds the SYNTHETIC fixtures (deterministic), NOT the real datasets' actual files — real-file inventory = live retrieve (Phase 3+)",
+   "format choice per modality is a representative synthetic pick (e.g. PC as .ply+.labels, not .pcd/.las)",
+   "_FIXTURE.json is metadata, excluded from agent-visible inventory GT"
+  ]
+ },
+ "cases": [
+  {
+   "category": "C",
+   "subtype": "inventory",
+   "path": "data/samples/PC-Urban",
+   "gt_inventory": {
+    "file_count": 2,
+    "by_format": {
+     "text": 1,
+     "ply": 1
+    },
+    "files": [
+     {
+      "name": "cloud.labels",
+      "ext": "labels",
+      "bytes": 16,
+      "format": "text"
+     },
+     {
+      "name": "cloud.ply",
+      "ext": "ply",
+      "bytes": 231,
+      "format": "ply"
+     }
+    ]
+   }
+  },
+  {
+   "category": "C",
+   "subtype": "inventory",
+   "path": "data/samples/Construction-Site-Segmentation",
+   "gt_inventory": {
+    "file_count": 3,
+    "by_format": {
+     "coco": 1,
+     "png": 2
+    },
+    "files": [
+     {
+      "name": "annotations.json",
+      "ext": "json",
+      "bytes": 541,
+      "format": "coco"
+     },
+     {
+      "name": "img_0001.png",
+      "ext": "png",
+      "bytes": 73,
+      "format": "png"
+     },
+     {
+      "name": "img_0002.png",
+      "ext": "png",
+      "bytes": 73,
+      "format": "png"
+     }
+    ]
+   }
+  },
+  {
+   "category": "C",
+   "subtype": "inventory",
+   "path": "data/samples/wblca-benchmark-v2-data",
+   "gt_inventory": {
+    "file_count": 1,
+    "by_format": {
+     "csv": 1
+    },
+    "files": [
+     {
+      "name": "data.csv",
+      "ext": "csv",
+      "bytes": 116,
+      "format": "csv"
+     }
+    ]
+   }
+  },
+  {
+   "category": "C",
+   "subtype": "inventory",
+   "path": "data/samples/DTCTP",
+   "gt_inventory": {
+    "file_count": 1,
+    "by_format": {
+     "csv": 1
+    },
+    "files": [
+     {
+      "name": "data.csv",
+      "ext": "csv",
+      "bytes": 67,
+      "format": "csv"
+     }
+    ]
+   }
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/PC-Urban/cloud.ply",
+   "gt_format": "ply",
+   "gt_magic": "ply"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/PC-Urban/cloud.labels",
+   "gt_format": "text",
+   "gt_magic": "text"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/Construction-Site-Segmentation/img_0001.png",
+   "gt_format": "png",
+   "gt_magic": "png"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/Construction-Site-Segmentation/annotations.json",
+   "gt_format": "coco",
+   "gt_magic": "coco"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/wblca-benchmark-v2-data/data.csv",
+   "gt_format": "csv",
+   "gt_magic": "csv"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/_edgecases/broken.png",
+   "gt_format": "corrupted",
+   "gt_magic": "corrupted"
+  },
+  {
+   "category": "C",
+   "subtype": "format-detection",
+   "path": "data/samples/_edgecases/empty.csv",
+   "gt_format": "empty",
+   "gt_magic": "empty"
+  },
+  {
+   "category": "C",
+   "subtype": "annotation-format",
+   "path": "data/samples/Construction-Site-Segmentation/annotations.json",
+   "gt_annotation_format": "coco"
+  }
+ ]
+}

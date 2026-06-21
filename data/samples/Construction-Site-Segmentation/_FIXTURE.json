@@ -1,0 +1,33 @@
+{
+ "dataset_id": "Construction-Site-Segmentation",
+ "synthetic": true,
+ "reduced": true,
+ "inventory_gt": {
+  "file_count": 3,
+  "by_format": {
+   "coco": 1,
+   "png": 2
+  },
+  "files": [
+   {
+    "name": "annotations.json",
+    "ext": "json",
+    "bytes": 541,
+    "format": "coco"
+   },
+   {
+    "name": "img_0001.png",
+    "ext": "png",
+    "bytes": 73,
+    "format": "png"
+   },
+   {
+    "name": "img_0002.png",
+    "ext": "png",
+    "bytes": 73,
+    "format": "png"
+   }
+  ]
+ },
+ "note": "SYNTHETIC/REDUCED stand-in \u2014 NOT real dataset content. GT grounded in these fixture bytes."
+}

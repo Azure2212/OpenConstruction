@@ -1,0 +1,50 @@
+{
+ "images": [
+  {
+   "id": 1,
+   "file_name": "img_0001.png",
+   "width": 2,
+   "height": 2
+  },
+  {
+   "id": 2,
+   "file_name": "img_0002.png",
+   "width": 2,
+   "height": 2
+  }
+ ],
+ "annotations": [
+  {
+   "id": 1,
+   "image_id": 1,
+   "category_id": 1,
+   "bbox": [
+    0,
+    0,
+    1,
+    1
+   ],
+   "area": 1,
+   "iscrowd": 0
+  },
+  {
+   "id": 2,
+   "image_id": 2,
+   "category_id": 1,
+   "bbox": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "area": 1,
+   "iscrowd": 0
+  }
+ ],
+ "categories": [
+  {
+   "id": 1,
+   "name": "structure"
+  }
+ ]
+}

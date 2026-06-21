@@ -1,0 +1,27 @@
+{
+ "dataset_id": "PC-Urban",
+ "synthetic": true,
+ "reduced": true,
+ "inventory_gt": {
+  "file_count": 2,
+  "by_format": {
+   "text": 1,
+   "ply": 1
+  },
+  "files": [
+   {
+    "name": "cloud.labels",
+    "ext": "labels",
+    "bytes": 16,
+    "format": "text"
+   },
+   {
+    "name": "cloud.ply",
+    "ext": "ply",
+    "bytes": 231,
+    "format": "ply"
+   }
+  ]
+ },
+ "note": "SYNTHETIC/REDUCED stand-in \u2014 NOT real dataset content. GT grounded in these fixture bytes."
+}

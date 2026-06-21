@@ -161,15 +161,60 @@
     };
   }
 
+  // ---------------------------------------------- URL host/scheme classification (ONE RULEBOOK)
+  // Deterministic, NO network. Single source of truth for access-class-by-host, shared by
+  // classifyAccess (C6/Category-B) and the agent's resolve_url tool. Host rules grounded in the
+  // Category-B host-derived GT (data/benchmark-category-B.json). Liveness (200 vs 404) NOT probed.
+  var OPEN_DATA_DOI = { '10.6084': 'figshare', '10.5281': 'zenodo', '10.17632': 'mendeley', '10.7910': 'dataverse' };
+  function classifyUrl(url) {
+    var raw = String(url == null ? '' : url).trim();
+    if (!raw) return { url: raw, scheme: 'invalid', host: null, is_doi: false, doi_prefix: null, repository: 'other', access_class: 'unknown', note: 'empty url' };
+    var lower = raw.toLowerCase();
+    var scheme = 'none', host = null, rest = raw;
+    var sm = raw.match(/^([a-z][a-z0-9+.\-]*):\/\//i);
+    if (sm) { scheme = sm[1].toLowerCase(); rest = raw.slice(sm[0].length); }
+    else if (/^doi:/i.test(raw)) { scheme = 'doi'; rest = raw.replace(/^doi:/i, ''); }
+    else if (/^10\.\d{4,9}\//.test(raw)) { scheme = 'doi'; }
+    var hm = rest.match(/^([^\/:?#]+)/); if (hm && scheme !== 'doi') host = hm[1].toLowerCase();
+    var isDoi = scheme === 'doi' || /(^|\/)(dx\.)?doi\.org\//.test(lower) || /^doi:10\./.test(lower);
+    var doiPrefix = null; if (isDoi) { var pm = lower.match(/10\.(\d{4,9})\b/); if (pm) doiPrefix = '10.' + pm[1]; }
+    function hostHas(s) { return host && host.indexOf(s) >= 0; }
+    var repository = 'other', access = 'unknown';
+    if (isDoi && doiPrefix && OPEN_DATA_DOI[doiPrefix]) { repository = OPEN_DATA_DOI[doiPrefix]; access = 'open'; } // data-repo DOI
+    else if (isDoi) { repository = 'doi'; access = 'unknown'; }                        // journal DOI = citation, not access
+    else if (hostHas('github.io') || hostHas('github.com')) { repository = 'github'; access = 'open'; }
+    else if (hostHas('zenodo.org')) { repository = 'zenodo'; access = 'open'; }
+    else if (hostHas('figshare.com')) { repository = 'figshare'; access = 'open'; }
+    else if (hostHas('mendeley.com')) { repository = 'mendeley'; access = 'open'; }
+    else if (hostHas('huggingface.co')) { repository = 'huggingface'; access = 'open'; }
+    else if (hostHas('dataverse')) { repository = 'dataverse'; access = 'open'; }
+    else if (hostHas('drive.google.com') || hostHas('docs.google.com')) { repository = 'google_drive'; access = 'open'; }
+    else if (hostHas('data.dtu.dk')) { repository = 'dtu_data'; access = 'open'; }
+    else if (hostHas('purr.purdue.edu')) { repository = 'purdue_purr'; access = 'open'; }
+    else if (hostHas('ieee-dataport.org')) { repository = 'ieee_dataport'; access = 'registration_required'; }
+    else if (hostHas('roboflow')) { repository = 'roboflow'; access = 'registration_required'; }
+    else if (hostHas('sharepoint')) { repository = 'sharepoint'; access = 'gated'; }
+    else { repository = 'other'; access = 'unknown'; }                                // lab/personal host -> not groundable
+    return { url: raw, scheme: scheme, host: host, is_doi: isDoi, doi_prefix: doiPrefix, repository: repository,
+      access_class: access, note: 'host/scheme classification only — liveness (HTTP 200 vs 404) NOT probed' };
+  }
+
   // ---------------------------------------------- access classification (STATED access from metadata)
   // open | gated | registration_required | restricted | unknown. NOT broken_link (needs a live probe — Phase 3).
+  // G3.0 FIX: the catalog's `access` is a bare URL in all 136 (0 access-instruction text), so the old
+  // text-then-"https->open" path degenerated to "open" for everything and mislabeled 8/14 Category-B
+  // cases. Now: a URL/DOI is classified by HOST via classifyUrl (one rulebook with resolve_url); only
+  // genuine free-text instructions fall through to the text signals.
   function classifyAccess(rec) {
-    var a = String((rec && rec.access) || '').toLowerCase().trim();
-    if (!a || a === 'not specified' || a === 'unknown' || a === 'n/a' || a === 'tbd') return 'unknown';
-    if (/restricted|private|not publicly|by agreement|\beula\b|\bnda\b|license agreement|on request only|requires approval|upon agreement/.test(a)) return 'restricted';
-    if (/regist(er|ration)|sign[- ]?up|create an account|account required|log[- ]?in|sign[- ]?in/.test(a)) return 'registration_required';
-    if (/request|apply|contact|e-?mail|permission|forms?\.gle|google form|inquir|\bform\b/.test(a)) return 'gated';
-    if (/https?:\/\//.test(a)) return 'open';
+    var a = String((rec && rec.access) || '').trim();
+    if (!a) return 'unknown';
+    var low = a.toLowerCase();
+    if (/^(https?:\/\/|ftp:\/\/|s3:\/\/|gs:\/\/|doi:)/.test(low) || /^10\.\d{4,9}\//.test(low) || /(^|\/)(dx\.)?doi\.org\//.test(low))
+      return classifyUrl(a).access_class;                                              // URL/DOI -> host rulebook
+    if (low === 'not specified' || low === 'unknown' || low === 'n/a' || low === 'tbd') return 'unknown';
+    if (/restricted|private|not publicly|by agreement|\beula\b|\bnda\b|license agreement|on request only|requires approval|upon agreement/.test(low)) return 'restricted';
+    if (/regist(er|ration)|sign[- ]?up|create an account|account required|log[- ]?in|sign[- ]?in/.test(low)) return 'registration_required';
+    if (/request|apply|contact|e-?mail|permission|forms?\.gle|google form|inquir|\bform\b/.test(low)) return 'gated';
     return 'unknown';
   }
 
@@ -595,6 +640,37 @@
       residual_risks: residual };
   }
 
+  // ---------------------------------------------- CATEGORY-C: RETRIEVE — inventory + format-detection (OC_DATA_1)
+  // Deterministic, no LLM-judge. GT lives in the synthetic fixtures (benchmark-category-C.json, keyed by
+  // path; per-dir _FIXTURE.json). Scores an agent's inventory_files / detect_format output vs GT.
+  function _sameMap(a, b) { a = a || {}; b = b || {}; var ka = Object.keys(a), kb = Object.keys(b); if (ka.length !== kb.length) return false; return ka.every(function (k) { return a[k] === b[k]; }); }
+  function scoreFormatDetection(pred, gt) { return { correct: norm(pred) === norm(gt), pred: pred || null, gt: gt }; }
+  function scoreInventory(pred, gt) {           // file-count + by-format(type) accuracy
+    pred = pred || {}; var fc = pred.file_count === gt.file_count, fm = _sameMap(pred.by_format, gt.by_format);
+    return { fileCountCorrect: fc, formatSetCorrect: fm, correct: fc && fm, accuracy: +(((fc ? 1 : 0) + (fm ? 1 : 0)) / 2).toFixed(3) };
+  }
+  // benchmarkRetrieve(agentRunFn, categoryC) — agent gets { path, subtype }, returns either
+  // { inventory:{file_count,by_format} } or { format }. 'corrupted'/'empty' are first-class formats
+  // (extension↔magic mismatch / 0-byte) → corrupted/missing detection is scored like any other format.
+  function benchmarkRetrieve(agentRunFn, categoryC) {
+    var cases = (categoryC && categoryC.cases) || [], fT = 0, fC = 0, iT = 0, iC = 0, iAcc = 0, edgeT = 0, edgeC = 0, perCase = [];
+    cases.forEach(function (c) {
+      var out = agentRunFn({ path: c.path, subtype: c.subtype }) || {}, row = { path: c.path, subtype: c.subtype };
+      if (c.subtype === 'inventory') { iT++; var s = scoreInventory(out.inventory, c.gt_inventory); if (s.correct) iC++; iAcc += s.accuracy; row.inventory = s; }
+      else { var gt = c.gt_format || c.gt_annotation_format; fT++; var ok = norm(out.format) === norm(gt); if (ok) fC++;
+        if (gt === 'corrupted' || gt === 'empty') { edgeT++; if (ok) edgeC++; }
+        row.format = { pred: out.format || null, gt: gt, correct: ok }; }
+      perCase.push(row);
+    });
+    return { category: 'C', cases: cases.length,
+      formatAccuracy: fT ? +(fC / fT).toFixed(4) : null,
+      inventoryExactAccuracy: iT ? +(iC / iT).toFixed(4) : null,
+      inventoryMeanAccuracy: iT ? +(iAcc / iT).toFixed(4) : null,
+      corruptMissingDetection: edgeT ? +(edgeC / edgeT).toFixed(4) : null,
+      counts: { format: fT, inventory: iT, edge: edgeT },
+      note: 'Deterministic. format-detection exact-match + inventory file-count/by-format vs synthetic-fixture GT; corrupted/empty scored as formats. No LLM-judge.', perCase: perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
@@ -603,7 +679,8 @@
     run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
     benchmarkAgentCompare, scoreCompareSelect, kendallTau,
     scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
-    classifyAccess, citation, assembleReport,
+    scoreFormatDetection, scoreInventory, benchmarkRetrieve,
+    classifyAccess, classifyUrl, citation, assembleReport,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
       { id: 'C1', name: 'Discovery', desc: 'Retrieve candidate datasets for a stated need.' },

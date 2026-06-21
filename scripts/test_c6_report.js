@@ -39,5 +39,22 @@ var degraded = Object.assign({}, rep); delete degraded.source_citation; // an ag
 var rcd = api.reportCompleteness(degraded, doiRec);
 check('missing source_citation -> completeness < 1 (agent must gather it)', rcd.completeness < 1, rcd);
 
+console.log('\n[5] G3.0 — check_access is HOST-based (one rulebook with resolve_url), not "https->open"');
+(function () {
+  // a dataset whose host implies a non-open status proves we no longer degenerate to "open"
+  var regRec = corpus.datasets.filter(function (d) { return api.classifyAccess(d) === 'registration_required'; })[0];
+  check('catalog has >=1 registration_required dataset (host-derived, was mislabeled open)', !!regRec, regRec && regRec.id);
+  if (regRec) {
+    var ca2 = tk.dispatch('check_access', { id: regRec.id });
+    check('check_access returns the HOST-derived status (registration_required), not open', ca2.access_status === 'registration_required', ca2);
+    // ONE RULEBOOK: check_access === classifyUrl(access).access_class === assembleReport.access_status
+    check('check_access === classifyUrl(access).access_class (one rulebook)', ca2.access_status === api.classifyUrl(regRec.access).access_class);
+    var rep5 = api.assembleReport([regRec.id], corpus);
+    check('assembleReport.access_status aligns with check_access (C6 no longer leaks "open")', rep5.per_dataset[0].access_status === ca2.access_status, { report: rep5.per_dataset[0].access_status, tool: ca2.access_status });
+  }
+  // resolve_url shares the same rulebook
+  check('resolve_url(url).access_class === classifyAccess for the same url host', tk.dispatch('resolve_url', { url: 'https://ieee-dataport.org/x' }).access_class === 'registration_required' && api.classifyUrl('https://github.com/x/y').access_class === 'open');
+})();
+
 console.log('\n==== ' + pass + ' passed, ' + fail + ' failed ====');
 process.exit(fail ? 1 : 0);

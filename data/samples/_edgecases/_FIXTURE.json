@@ -1,0 +1,27 @@
+{
+ "dataset_id": "_edgecases",
+ "synthetic": true,
+ "reduced": true,
+ "inventory_gt": {
+  "file_count": 2,
+  "by_format": {
+   "corrupted": 1,
+   "empty": 1
+  },
+  "files": [
+   {
+    "name": "broken.png",
+    "ext": "png",
+    "bytes": 35,
+    "format": "corrupted"
+   },
+   {
+    "name": "empty.csv",
+    "ext": "csv",
+    "bytes": 0,
+    "format": "empty"
+   }
+  ]
+ },
+ "note": "SYNTHETIC/REDUCED stand-in \u2014 NOT real dataset content. GT grounded in these fixture bytes."
+}
