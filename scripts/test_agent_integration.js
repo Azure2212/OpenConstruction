@@ -170,7 +170,7 @@ async function gradeViaAgent(graderWrap, categoryJson) {
   var E = loadJson('benchmark-category-E.json');
   var Eres = await gradeViaAgent(function (fn, c) { return api.benchmarkAgentCompare(fn, c); }, E);
   var Er = Eres.report;
-  console.log('  E:', JSON.stringify({ top1: Er.top1Accuracy, meanTau: Er.meanTau }), '(reasoning-bound: agent weighs evidence; stub uses a naive heuristic — real quality measured tomorrow)');
+  console.log('  E:', JSON.stringify({ nDCG: Er.meanNDCG, top1: Er.top1Accuracy, meanTau: Er.meanTau }), '(nDCG primary [SAP §3.2.1]; reasoning-bound: stub uses a naive heuristic — real quality measured tomorrow)');
   // E is reasoning-bound (compare_resources is evidence-only by design). Assert the loop RUNS and the agent
   // emits a WELL-FORMED ranking (a permutation of the candidate ids — NO fabrication). Score is reported, not forced.
   var wellFormed = (E.cases || []).every(function (c) { var ans = Eres.cache[JSON.stringify({ q: c.q, need: c.need, candidate_ids: (c.candidate_ids || []).slice() })] || {}; var r = ans.ranking || []; var cset = {}; (c.candidate_ids || []).forEach(function (x) { cset[norm(x)] = 1; }); return r.length === (c.candidate_ids || []).length && r.every(function (x) { return cset[norm(x)]; }); });

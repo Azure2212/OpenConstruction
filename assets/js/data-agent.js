@@ -524,28 +524,41 @@
     }
     return (C + D) ? +((C - D) / (C + D)).toFixed(4) : 1;            // no comparable pairs => trivially 1
   }
+  // nDCG of the agent ranking vs GT, GRADED relevance = each candidate's suitability score `gt_scores[i].total`
+  // (Järvelin & Kekäläinen; the standard ranking-agreement metric in agent eval — SAP §3.2.1 "NDCG reflects
+  // how well the system ranks all relevant tools"). gain/log2(rank+1); IDCG = ideal order (by relevance desc).
+  // GT-tied items have equal relevance → DCG is invariant to their order (ties handled for free).
+  function ndcgScore(agentRanking, gtScores) {
+    const rel = {}; (gtScores || []).forEach(s => { rel[s && s.id] = (s && typeof s.total === 'number') ? s.total : (typeof s === 'number' ? s : 0); });
+    const dcg = order => arr(order).reduce((d, id, i) => d + (typeof rel[id] === 'number' ? rel[id] / Math.log2(i + 2) : 0), 0);
+    const ideal = Object.keys(rel).sort((a, b) => rel[b] - rel[a]);
+    const idcg = dcg(ideal);
+    return idcg > 0 ? +(dcg(agentRanking) / idcg).toFixed(4) : null;
+  }
   function scoreCompareSelect(c, agentRanking) {
     const r = arr(agentRanking);
     const top1 = r.length > 0 && (c.gt_top1_set || [c.gt_best]).indexOf(r[0]) >= 0;   // EPS-top1 via baked set
-    return { top1Correct: !!top1, tau: kendallTau(r, c.gt_ranking || [], c.gt_ties || []), agentTop1: r[0] || null };
+    return { ndcg: ndcgScore(r, c.gt_scores || []), top1Correct: !!top1,             // nDCG = PRIMARY ranking-agreement
+      tau: kendallTau(r, c.gt_ranking || [], c.gt_ties || []), agentTop1: r[0] || null };  // Kendall-τ = supplementary
   }
   // benchmarkAgentCompare(agentRunFn, categoryE) — categoryE = parsed benchmark-category-E.json.
   // agentRunFn(input) is SYNC; input HIDES the GT = { q, need, candidate_ids }. Returns ranking via
   // result.ranking (contract Analyst adds to submit_answer). Async LLMs: pre-collect -> sync lookup.
   function benchmarkAgentCompare(agentRunFn, categoryE) {
     const cases = (categoryE && categoryE.cases) || [];
-    let t1 = 0, tauSum = 0; const perCase = [];
+    let t1 = 0, tauSum = 0, ndcgSum = 0, ndcgN = 0; const perCase = [];
     for (const c of cases) {
       const out = agentRunFn({ q: c.q, need: c.need, candidate_ids: (c.candidate_ids || []).slice() }) || {};
       const s = scoreCompareSelect(c, out.ranking);
-      if (s.top1Correct) t1++; tauSum += s.tau;
-      perCase.push({ task: (c.need && c.need.task) || '', top1Correct: s.top1Correct, tau: s.tau,
+      if (s.top1Correct) t1++; tauSum += s.tau; if (typeof s.ndcg === 'number') { ndcgSum += s.ndcg; ndcgN++; }
+      perCase.push({ task: (c.need && c.need.task) || '', ndcg: s.ndcg, top1Correct: s.top1Correct, tau: s.tau,
         agentTop1: s.agentTop1, gtBest: c.gt_best, gtTop1Set: c.gt_top1_set, gtRanking: c.gt_ranking });
     }
     return { category: 'E', cases: cases.length,
+      meanNDCG: ndcgN ? +(ndcgSum / ndcgN).toFixed(4) : null,           // PRIMARY ranking-agreement (SAP §3.2.1)
       top1Accuracy: cases.length ? +(t1 / cases.length).toFixed(4) : null,
-      meanTau: cases.length ? +(tauSum / cases.length).toFixed(4) : null,
-      note: 'compare-select. EPS-top1 (gt_top1_set) + Kendall-τ with gt_ties either-order — policy from gen_category_E_grade.js. No LLM-judge.',
+      meanTau: cases.length ? +(tauSum / cases.length).toFixed(4) : null,  // supplementary rank-correlation
+      note: 'compare-select. PRIMARY = nDCG (graded relevance gt_scores; SAP §3.2.1). Supplementary: EPS-top1 (gt_top1_set) + Kendall-τ with gt_ties either-order. No LLM-judge.',
       perCase };
   }
 
@@ -763,13 +776,43 @@
       note: 'Deterministic. convert validity (#ann+bbox) + split correctness (no-leakage+ratio+reproducible double-call) + annotation validity. No LLM-judge. deferred skipped.', perCase: perCase };
   }
 
+  // ---------------------------------------------- pass@k (reliability over repeated trials) — DAB §3.1.5
+  // Unbiased estimator pass@k = 1 − C(n−c,k)/C(n,k) (Chen et al. 2021, used by DAB), computed as the stable
+  // product ∏_{i=0}^{k-1}(n−c−i)/(n−i). pass@1 = c/n. For our DETERMINISTIC tools every trial is identical
+  // (c∈{0,n}) so pass@k == pass@1; it becomes load-bearing once the STOCHASTIC live model is the agent.
+  function passAtK(n, c, k) {
+    n = n | 0; c = c | 0; k = k | 0;
+    if (k < 1 || n < 1) return null;
+    k = Math.min(k, n);
+    if (c <= 0) return 0;
+    if (c >= n) return 1;
+    let prod = 1;
+    for (let i = 0; i < k; i++) { const num = n - c - i; if (num <= 0) { prod = 0; break; } prod *= num / (n - i); }
+    return +(1 - prod).toFixed(6);
+  }
+  // benchmarkPassK(perCaseOutcomes, k) — perCaseOutcomes = [ [bool,bool,…], … ] : k repeated agent runs per
+  // case (each bool = that trial's pass/fail from any grader). Reports macro pass@1 and pass@k. Reusable
+  // across A–F: run the agent k times per case, threshold each run with the relevant grader, pass the booleans.
+  function benchmarkPassK(perCaseOutcomes, k) {
+    const cases = perCaseOutcomes || []; let p1 = 0, pk = 0; const perCase = [];
+    cases.forEach(outs => {
+      const o = arr(outs).map(x => !!x), n = (Array.isArray(outs) ? outs.length : 0), c = o.filter(Boolean).length;
+      const c1 = passAtK(n, c, 1), ck = passAtK(n, c, k);
+      if (c1 != null) p1 += c1; if (ck != null) pk += ck; perCase.push({ n: n, c: c, pass1: c1, passK: ck });
+    });
+    const m = cases.length || 1;
+    return { k: k, cases: cases.length, pass1: +(p1 / m).toFixed(6), passK: +(pk / m).toFixed(6),
+      note: 'pass@k via DAB §3.1.5 estimator 1 − C(n−c,k)/C(n,k); deterministic tools ⇒ pass@k == pass@1 (every trial identical). No LLM-judge.', perCase: perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
     loadResources, setTaxonomy, loadCorpus, buildCorpus, datasetRecord, runOn, benchmarkOn,
     licenseRights, licenseClass, modalityBuckets, annotationBuckets, canonTaskIds, taskIdMatch,
     run, runBenchmark, benchmarkAgent, runBenchmarkAgent,
-    benchmarkAgentCompare, scoreCompareSelect, kendallTau,
+    benchmarkAgentCompare, scoreCompareSelect, kendallTau, ndcgScore,
+    passAtK, benchmarkPassK,
     scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
     scoreFormatDetection, scoreInventory, benchmarkRetrieve,
     scoreProfile, benchmarkProfile,

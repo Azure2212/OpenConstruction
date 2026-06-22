@@ -15,13 +15,15 @@ const mkAgent = transform => (input => ({ ranking: transform(byTask[input.need.t
 
 // (1) PERFECT agent: returns gt_ranking exactly
 const perfect = API.benchmarkAgentCompare(mkAgent(c => c.gt_ranking.slice()), E);
-console.log('(1) perfect :', JSON.stringify({ top1: perfect.top1Accuracy, tau: perfect.meanTau, cases: perfect.cases }));
+console.log('(1) perfect :', JSON.stringify({ ndcg: perfect.meanNDCG, top1: perfect.top1Accuracy, tau: perfect.meanTau, cases: perfect.cases }));
+assert(perfect.meanNDCG === 1.0, 'perfect meanNDCG should be 1.0 (primary metric, SAP §3.2.1), got ' + perfect.meanNDCG);
 assert(perfect.top1Accuracy === 1.0, 'perfect top1Accuracy should be 1.0, got ' + perfect.top1Accuracy);
 assert(perfect.meanTau === 1.0, 'perfect meanTau should be 1.0, got ' + perfect.meanTau);
 
 // (2) REVERSED agent: returns gt_ranking reversed
 const reversed = API.benchmarkAgentCompare(mkAgent(c => c.gt_ranking.slice().reverse()), E);
-console.log('(2) reversed:', JSON.stringify({ top1: reversed.top1Accuracy, tau: reversed.meanTau }));
+console.log('(2) reversed:', JSON.stringify({ ndcg: reversed.meanNDCG, top1: reversed.top1Accuracy, tau: reversed.meanTau }));
+assert(reversed.meanNDCG < 1.0, 'reversed meanNDCG should be < 1.0, got ' + reversed.meanNDCG);
 assert(reversed.top1Accuracy === 0.0, 'reversed top1Accuracy should be 0.0, got ' + reversed.top1Accuracy);
 assert(reversed.meanTau <= -0.9, 'reversed meanTau should be ~ -1, got ' + reversed.meanTau);
 

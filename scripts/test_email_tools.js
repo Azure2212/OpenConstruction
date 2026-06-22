@@ -313,5 +313,32 @@ console.log('\n[11] TF5 USE — training READINESS (Category-F: convert / split 
   check('TF5 stays in READINESS scope (no accuracy/mAP-result/loss/trained field)', rj.indexOf('"trained"') < 0 && rj.indexOf('"accuracy_result"') < 0 && rj.indexOf('"loss"') < 0 && tk.toolNames.indexOf('train_baseline_model') < 0);
 })();
 
+console.log('\n[12] SCORING ALIGNMENT — nDCG primary for Category-E (SAP §3.2.1) + pass@k wrapper (DAB §3.1.5)');
+(function () {
+  var E = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/benchmark-category-E.json'), 'utf8'));
+  // (a) ndcgScore: ideal order = 1.0; GT-tied swap ~ invariant; relevance from gt_scores[].total
+  var c0 = E.cases[0];
+  check('ndcgScore(ideal) === 1.0 (graded relevance from gt_scores)', api.ndcgScore(c0.gt_ranking, c0.gt_scores) === 1.0);
+  check('ndcgScore(empty ranking) < 1.0 (no credit without ordering)', (api.ndcgScore([], c0.gt_scores) || 0) < 1.0);
+  // (b) benchmarkAgentCompare now reports nDCG (PRIMARY) + top1 + Kendall-τ (supplementary)
+  var byCand = {}; E.cases.forEach(function (c) { byCand[JSON.stringify(c.candidate_ids)] = c; });
+  function agentOf(transform) { return function (inp) { var c = byCand[JSON.stringify(inp.candidate_ids)]; return { ranking: transform(c) }; }; }
+  var perfect = api.benchmarkAgentCompare(agentOf(function (c) { return c.gt_ranking.slice(); }), E);
+  var reversed = api.benchmarkAgentCompare(agentOf(function (c) { return c.gt_ranking.slice().reverse(); }), E);
+  check('E report carries meanNDCG (primary) + top1Accuracy + meanTau (supplementary)', typeof perfect.meanNDCG === 'number' && typeof perfect.top1Accuracy === 'number' && typeof perfect.meanTau === 'number', { ndcg: perfect.meanNDCG, top1: perfect.top1Accuracy, tau: perfect.meanTau });
+  check('perfect agent -> meanNDCG 1.0 / top1 1.0 / meanTau 1.0', perfect.meanNDCG === 1.0 && perfect.top1Accuracy === 1.0 && perfect.meanTau === 1.0, perfect);
+  check('reversed agent -> meanNDCG < 1.0 / top1 0 / meanTau <= -0.9 (nDCG less discriminative than τ here -> τ kept)', reversed.meanNDCG < 1.0 && reversed.top1Accuracy === 0.0 && reversed.meanTau <= -0.9, { ndcg: reversed.meanNDCG, top1: reversed.top1Accuracy, tau: reversed.meanTau });
+  check('Kendall-τ retained as supplementary (not removed)', 'meanTau' in perfect && typeof api.kendallTau === 'function');
+
+  // (c) passAtK estimator (DAB §3.1.5): pass@k = 1 - C(n-c,k)/C(n,k); pass@1 = c/n
+  check('passAtK(10,2,1)=0.2 / (10,2,2)=0.3778 / (50,19,1)=0.38', api.passAtK(10, 2, 1) === 0.2 && Math.abs(api.passAtK(10, 2, 2) - 0.377778) < 1e-5 && api.passAtK(50, 19, 1) === 0.38);
+  check('passAtK edges: c=0 -> 0, c=n -> 1', api.passAtK(5, 0, 3) === 0 && api.passAtK(5, 5, 3) === 1);
+  // (d) benchmarkPassK wrapper: deterministic outcomes -> pass@k == pass@1; stochastic -> estimator
+  var det = api.benchmarkPassK([[true, true, true], [false, false, false]], 3);
+  check('benchmarkPassK deterministic: pass@k == pass@1 (=0.5)', det.pass1 === 0.5 && det.passK === 0.5);
+  var stoch = api.benchmarkPassK([[true, false, true, false, false]], 2);   // n=5,c=2 -> pass@1=0.4, pass@2=0.7
+  check('benchmarkPassK stochastic: pass@1=0.4, pass@2=0.7 (one case, n=5 c=2)', Math.abs(stoch.pass1 - 0.4) < 1e-6 && Math.abs(stoch.passK - 0.7) < 1e-6, stoch);
+})();
+
 console.log('\n==== ' + pass + ' passed, ' + fail + ' failed ====');
 process.exit(fail ? 1 : 0);
