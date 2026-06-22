@@ -42,12 +42,16 @@ console.log('\n[2] toolbox = PRIMITIVES ONLY (no oracle)');
 var tk = agentTools.createTools(api, corpus, taxonomy);
 (function () {
   var names = tk.toolNames.sort();
-  check('exposes exactly the primitive toolset (14)', JSON.stringify(names) === JSON.stringify(['check_access', 'check_fitness', 'check_license', 'compare_resources', 'detect_format', 'get_citation', 'get_dataset', 'inventory_files', 'list_tasks', 'recommend_benchmark', 'resolve_url', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
+  check('exposes exactly the primitive toolset (18)', JSON.stringify(names) === JSON.stringify(['check_access', 'check_fitness', 'check_license', 'compare_resources', 'detect_format', 'get_citation', 'get_dataset', 'inventory_files', 'list_tasks', 'profile_annotations', 'profile_images', 'profile_pointcloud', 'profile_table', 'recommend_benchmark', 'resolve_url', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
   check('NO oracle/selector tool exposed', names.indexOf('compare_select') < 0 && names.indexOf('recommend') < 0 && names.indexOf('solve') < 0 && names.indexOf('c4CompareSelect') < 0 && names.indexOf('rank_best') < 0, names);
   check('TF2 retrieve primitives present (inventory_files/detect_format/resolve_url)', ['inventory_files', 'detect_format', 'resolve_url'].every(function (n) { return names.indexOf(n) >= 0; }), names);
+  check('TF4 modality profilers present (pointcloud/images/table/annotations)', ['profile_pointcloud', 'profile_images', 'profile_table', 'profile_annotations'].every(function (n) { return names.indexOf(n) >= 0; }), names);
   // fixture-path assertion: inventory_files reads the real local sample fixture under data/samples/<id>/
   var inv = tk.dispatch('inventory_files', { path: 'data/samples/PC-Urban' });
   check('inventory_files reads the data/samples/<id>/ fixture (excludes _FIXTURE.json)', inv.file_count === 2 && JSON.stringify(inv.by_format) === JSON.stringify({ text: 1, ply: 1 }) && inv.files.every(function (f) { return f.name !== '_FIXTURE.json' && f.type === f.format; }), inv);
+  // Level-3 tool recall: detect_format routes each fixture's modality to the RIGHT profiler
+  check('Level-3 recall: point_cloud -> profile_pointcloud', tk.dispatch('detect_format', { path: 'data/samples/PC-Urban' }).recommended_profiler === 'profile_pointcloud');
+  check('Level-3 recall: image -> profile_images, tabular -> profile_table', tk.dispatch('detect_format', { path: 'data/samples/Construction-Site-Segmentation' }).recommended_profiler === 'profile_images' && tk.dispatch('detect_format', { path: 'data/samples/DTCTP' }).recommended_profiler === 'profile_table');
   var sd = tk.dispatch('search_datasets', { modality: 'point_cloud' });
   check('search_datasets returns candidates (no fit verdict leaked)', sd.results.length > 0 && sd.results[0].verdict === undefined && sd.results.every(function (r) { return corpus.byId.has(String(r.id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()); }), { n: sd.results.length });
   var cf = tk.dispatch('check_fitness', { id: sd.results[0].id, modality: 'point_cloud' });

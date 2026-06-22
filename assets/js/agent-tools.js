@@ -108,6 +108,147 @@
     return out;
   }
 
+  // ============================================================ Cap-3 UNDERSTAND: modality profilers (TF4)
+  // .doc Capability 3 / Tool Family 4 / Category D ("numerical accuracy vs oracle profiles + successful
+  // tool selection"). Legitimate COMPUTE primitives — observable stats PARSED FROM THE BYTES (point
+  // counts, image resolutions, table schema, label distribution). NOT an oracle: they report what is IN
+  // the file, never the benchmark's expected answer.
+  function _readText(abs) { try { return _fs.readFileSync(abs, 'utf8'); } catch (e) { return ''; } }
+  function _findInDir(absDir, pred) { var hit = null; walkFiles(absDir).some(function (f) { if (pred(f.rel, f.abs)) { hit = f.abs; return true; } return false; }); return hit; }
+  function inferColType(vals) {
+    var nonEmpty = vals.filter(function (v) { return v !== '' && v != null; });
+    if (!nonEmpty.length) return 'empty';
+    if (nonEmpty.every(function (v) { return /^-?\d+$/.test(v); })) return 'integer';
+    if (nonEmpty.every(function (v) { return /^-?\d+(\.\d+)?$/.test(v); })) return 'float';
+    return 'string';
+  }
+  function parseCsv(text) {
+    var lines = String(text).replace(/\r\n?/g, '\n').split('\n').filter(function (l) { return l !== ''; });
+    if (!lines.length) return { header: [], rows: [] };
+    return { header: lines[0].split(','), rows: lines.slice(1).map(function (l) { return l.split(','); }) };
+  }
+  function profileTable(abs) {
+    var isDir = false; try { isDir = _fs.statSync(abs).isDirectory(); } catch (e) {}
+    var file = isDir ? _findInDir(abs, function (n) { return /\.(csv|tsv)$/i.test(n); }) : abs;
+    if (!file) return { error: 'no tabular file found', path: abs };
+    var p = parseCsv(_readText(file));
+    var numeric_stats = {};
+    var cols = p.header.map(function (name, ci) {
+      var nm = name.trim();
+      var vals = p.rows.map(function (r) { return (r[ci] == null ? '' : String(r[ci]).trim()); });
+      var type = inferColType(vals);
+      var dtype = (type === 'integer' || type === 'float') ? 'numeric' : 'categorical';
+      if (dtype === 'numeric') {
+        var nums = vals.filter(function (v) { return v !== ''; }).map(Number);
+        if (nums.length) numeric_stats[nm] = { min: Math.min.apply(null, nums), max: Math.max.apply(null, nums),
+          mean: +(nums.reduce(function (a, b) { return a + b; }, 0) / nums.length).toFixed(6) };
+      }
+      return { name: nm, dtype: dtype, type: type, missing: vals.filter(function (v) { return v === ''; }).length };
+    });
+    // OC_DATA_1 Category-D shape: num_rows, num_columns, columns[{name,dtype}], numeric_stats{col:{min,max,mean}} (+ extras).
+    return { modality: 'tabular', num_rows: p.rows.length, num_columns: p.header.length, n_rows: p.rows.length, n_cols: p.header.length,
+      columns: cols, numeric_stats: numeric_stats };
+  }
+  function parsePlyAscii(text) {
+    var lines = String(text).split(/\r?\n/), i = 0, declared = null, props = [];
+    for (; i < lines.length; i++) {
+      var ln = lines[i].trim(), m;
+      if ((m = ln.match(/^element\s+vertex\s+(\d+)/i))) declared = parseInt(m[1], 10);
+      else if ((m = ln.match(/^property\s+\S+\s+(\S+)/i))) props.push(m[1].toLowerCase());
+      if (/^end_header$/i.test(ln)) { i++; break; }
+    }
+    var xi = props.indexOf('x'), yi = props.indexOf('y'), zi = props.indexOf('z');
+    var li = props.findIndex(function (n) { return /label|class|scalar|seg/.test(n); });
+    var pts = [], labels = [];
+    for (; i < lines.length; i++) {
+      var t = lines[i].trim(); if (!t) continue;
+      var parts = t.split(/\s+/); if (parts.length < props.length) continue;
+      if (xi >= 0 && yi >= 0 && zi >= 0) pts.push([parseFloat(parts[xi]), parseFloat(parts[yi]), parseFloat(parts[zi])]);
+      if (li >= 0) labels.push(parts[li]);
+    }
+    return { declared: declared, count: pts.length || declared || 0, pts: pts, inlineLabels: labels };
+  }
+  function profilePointcloud(abs) {
+    var isDir = false; try { isDir = _fs.statSync(abs).isDirectory(); } catch (e) {}
+    var dir = isDir ? abs : _path.dirname(abs);
+    var pcFile = isDir ? _findInDir(abs, function (n) { return /\.(ply|pcd|las|laz|e57|xyz|pts)$/i.test(n); }) : abs;
+    if (!pcFile) return { error: 'no point-cloud file found', path: abs };
+    var ext = extOf(pcFile);
+    var ply = ext === 'ply' ? parsePlyAscii(_readText(pcFile)) : { count: null, pts: [], inlineLabels: [] };
+    var bbox = null;
+    if (ply.pts && ply.pts.length) {
+      var mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+      ply.pts.forEach(function (p) { for (var d = 0; d < 3; d++) { if (p[d] < mn[d]) mn[d] = p[d]; if (p[d] > mx[d]) mx[d] = p[d]; } });
+      bbox = { min: mn, max: mx };
+    }
+    var centroid = null;
+    if (ply.pts && ply.pts.length) {
+      var sum = [0, 0, 0]; ply.pts.forEach(function (p) { for (var d = 0; d < 3; d++) sum[d] += p[d]; });
+      centroid = sum.map(function (s) { return +(s / ply.pts.length).toFixed(6); });
+    }
+    var labelFile = _findInDir(dir, function (n) { return /\.(labels?|seg)$/i.test(n); });
+    var labelLines = labelFile ? _readText(labelFile).split(/\r?\n/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; }) : [];
+    var src = labelLines.length ? labelLines : ply.inlineLabels;
+    var classes = {}; src.forEach(function (v) { classes[v] = 1; });
+    var nClasses = Object.keys(classes).length;
+    // OC_DATA_1 Category-D shape: num_points, bbox{min,max}, centroid, num_classes, has_labels (+ our extras).
+    return { modality: 'point_cloud', format: ext, num_points: ply.count, point_count: ply.count, bbox: bbox, centroid: centroid,
+      has_labels: src.length > 0, num_classes: nClasses, num_labels: src.length, num_label_classes: nClasses };
+  }
+  function pngDims(abs) { try { var b = _fs.readFileSync(abs); if (b.length >= 24 && b[0] === 0x89 && b[1] === 0x50) return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) }; } catch (e) {} return null; }
+  var IMG_EXT = { png: 1, jpg: 1, jpeg: 1, gif: 1, bmp: 1, tif: 1, tiff: 1, webp: 1 };
+  function profileImages(absDir) {
+    var isDir = false; try { isDir = _fs.statSync(absDir).isDirectory(); } catch (e) {}
+    if (!isDir) return { error: 'profile_images expects a directory', path: absDir };
+    var imgs = walkFiles(absDir).filter(function (f) { return IMG_EXT[extOf(f.rel)]; });
+    var formats = {}, resMap = {}, corrupted = 0;
+    imgs.forEach(function (f) {
+      var buf; try { buf = _fs.readFileSync(f.abs); } catch (e) { buf = Buffer.alloc(0); }
+      var c = classifyFileFormat(f.rel, buf);
+      formats[c.format] = (formats[c.format] || 0) + 1;
+      if (c.format === 'corrupted' || c.format === 'empty') { corrupted++; return; }
+      var d = extOf(f.rel) === 'png' ? pngDims(f.abs) : null;
+      if (d) { var k = d.width + 'x' + d.height; resMap[k] = (resMap[k] || 0) + 1; }
+    });
+    var resolutions = Object.keys(resMap).sort().map(function (k) { var wh = k.split('x'); return { width: +wh[0], height: +wh[1], count: resMap[k] }; });
+    var dom = resolutions.slice().sort(function (a, b) { return b.count - a.count || (a.width * a.height) - (b.width * b.height); })[0] || null;
+    // OC_DATA_1 Category-D image shape merges image+annotation fields; this tool supplies the image side
+    // (num_images, width, height); profile_annotations supplies the annotation side.
+    return { modality: 'image', num_images: imgs.length, image_count: imgs.length,
+      width: dom ? dom.width : null, height: dom ? dom.height : null,
+      resolutions: resolutions, formats: formats, corrupted_count: corrupted };
+  }
+  function profileAnnotations(abs) {
+    var isDir = false; try { isDir = _fs.statSync(abs).isDirectory(); } catch (e) {}
+    var file = isDir ? _findInDir(abs, function (n, a) { var b; try { b = _fs.readFileSync(a); } catch (e) { return false; } return classifyFileFormat(n, b).format === 'coco'; }) : abs;
+    if (!file) return { error: 'no COCO annotation file found', path: abs };
+    var o; try { o = JSON.parse(_readText(file)); } catch (e) { return { error: 'annotation file not valid JSON', path: abs }; }
+    var images = Array.isArray(o.images) ? o.images : [], anns = Array.isArray(o.annotations) ? o.annotations : [], cats = Array.isArray(o.categories) ? o.categories : [];
+    var imgIds = {}; images.forEach(function (im) { imgIds[im.id] = 1; });
+    var catName = {}; cats.forEach(function (c) { catName[c.id] = c.name; });
+    var dist = {}, badImg = 0, badCat = 0;
+    anns.forEach(function (a) {
+      if (!(a.image_id in imgIds)) badImg++;
+      if (!(a.category_id in catName)) badCat++;
+      var nm = catName[a.category_id] != null ? catName[a.category_id] : ('category_' + a.category_id);
+      dist[nm] = (dist[nm] || 0) + 1;
+    });
+    var class_names = cats.slice().sort(function (a, b) { return (a.id || 0) - (b.id || 0); }).map(function (c) { return c.name; });
+    var annType = 'unknown';
+    if (anns.some(function (a) { return a.keypoints; })) annType = 'keypoints';
+    else if (anns.some(function (a) { return a.segmentation && (Array.isArray(a.segmentation) ? a.segmentation.length : true); })) annType = 'segmentation';
+    else if (anns.some(function (a) { return Array.isArray(a.bbox) && a.bbox.length === 4; })) annType = 'bbox';
+    // OC_DATA_1 Category-D image shape (annotation side): num_annotations, num_categories, annotation_type, class_names.
+    return { modality: 'annotations', format: 'coco', num_images: images.length, num_annotations: anns.length,
+      num_categories: cats.length, annotation_type: annType, class_names: class_names,
+      label_distribution: dist, invalid_refs: badImg + badCat,
+      invalid_ref_detail: { bad_image_refs: badImg, bad_category_refs: badCat } };
+  }
+  // Level-3 tool recall: the canonical profiler for a modality bucket (drives `recommended_profiler`).
+  var PROFILER_FOR_MODALITY = { point_cloud: 'profile_pointcloud', ground_rgb: 'profile_images', aerial_rgb: 'profile_images',
+    satellite_rgb: 'profile_images', depth: 'profile_images', thermal: 'profile_images', tabular: 'profile_table' };
+  function profilerForModality(m) { return PROFILER_FOR_MODALITY[m] || null; }
+
   // api = window.OCDataAgent / require('data-agent.js'); corpus = api.buildCorpus(...); taxonomy = the loaded agent-taxonomy.json
   // opts = { benchmarkResults?: <parsed data/benchmark-results.json> } (for recommend_benchmark)
   function createTools(api, corpus, taxonomy, opts) {
@@ -212,6 +353,26 @@
         name: 'resolve_url',
         description: 'Classify a URL\'s scheme and host DETERMINISTICALLY, WITHOUT contacting the network. Returns scheme, host, whether it is a DOI (+prefix), the repository kind (github/zenodo/figshare/ieee_dataport/…), and an access class (open | registration_required | gated | restricted | unknown) derived from the host. It does NOT check liveness (HTTP 200 vs 404).',
         parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] }
+      }},
+      { type: 'function', function: {
+        name: 'profile_pointcloud',
+        description: 'Profile a POINT CLOUD dataset (.ply/.pcd/.las/.laz/.e57). Computes point_count, the xyz bounding box (min/max), and label info (has_labels, num_labels, num_label_classes). Select this ONLY for point-cloud data.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'point-cloud file or its sample directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'profile_images',
+        description: 'Profile an IMAGE dataset directory. Computes image_count, resolutions (width×height with counts), formats, and corrupted_count. Select this ONLY for image data (ground/aerial/satellite RGB, depth, thermal).',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'image sample directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'profile_table',
+        description: 'Profile a TABULAR dataset (.csv/.tsv). Computes n_rows, n_cols, and per-column {name, type (integer/float/string), missing}. Select this ONLY for tabular data.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'csv/tsv file or its sample directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'profile_annotations',
+        description: 'Profile a COCO ANNOTATION file. Computes num_images / num_annotations / num_categories, the label_distribution (count per category), and invalid_refs (annotations pointing at a missing image_id or category_id). Select this for COCO annotation/label files.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO json file or a sample directory under data/samples' } }, required: ['path'] }
       }},
       { type: 'function', function: {
         name: 'submit_answer',
@@ -339,15 +500,32 @@
         if (dst.isFile()) {
           var fb; try { fb = _fs.readFileSync(dp.abs); } catch (e) { fb = Buffer.alloc(0); }
           var cf = classifyFileFormat(_path.basename(dp.abs), fb);
+          var fmod = guessModality([cf.format]);
           return { path: args.path, target: 'file', format: cf.format, magic: cf.magic, ext: cf.ext, size_bytes: cf.size_bytes,
-                   modality_guess: guessModality([cf.format]), annotation_format: guessAnnotationFormat([cf.format], [cf.ext]), formats: [cf.format] };
+                   modality_guess: fmod, annotation_format: guessAnnotationFormat([cf.format], [cf.ext]), formats: [cf.format],
+                   recommended_profiler: profilerForModality(fmod) };
         }
         var dfmts = [], dexts = [];
         walkFiles(dp.abs).forEach(function (f) { var b; try { b = _fs.readFileSync(f.abs); } catch (e) { b = Buffer.alloc(0); } var c = classifyFileFormat(f.rel, b); dfmts.push(c.format); dexts.push(c.ext); });
         var uniq = dfmts.filter(function (v, i) { return dfmts.indexOf(v) === i; }).sort();
-        return { path: args.path, target: 'dir', formats: uniq, modality_guess: guessModality(dfmts), annotation_format: guessAnnotationFormat(dfmts, dexts) };
+        var dmod = guessModality(dfmts), dann = guessAnnotationFormat(dfmts, dexts);
+        return { path: args.path, target: 'dir', formats: uniq, modality_guess: dmod, annotation_format: dann,
+                 recommended_profiler: profilerForModality(dmod),                                  // Level-3 primary tool (by modality)
+                 // complementary tool ONLY for image-style annotations (COCO/VOC/YOLO) — NOT point-cloud
+                 // per-point labels, which profile_pointcloud handles itself.
+                 recommended_annotation_profiler: (dann === 'coco' || dann === 'pascal_voc' || dann === 'yolo') ? 'profile_annotations' : null };
       }
       if (name === 'resolve_url') { return api.classifyUrl ? api.classifyUrl(args.url) : { error: 'classifyUrl unavailable (update data-agent.js)' }; }
+      if (name === 'profile_pointcloud' || name === 'profile_images' || name === 'profile_table' || name === 'profile_annotations') {
+        if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
+        var pp = resolveSamplePath(baseDir, samplesRoot, args.path);
+        if (pp.error) return { error: pp.error, path: args.path };
+        try { _fs.statSync(pp.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
+        if (name === 'profile_pointcloud') return profilePointcloud(pp.abs);
+        if (name === 'profile_images') return profileImages(pp.abs);
+        if (name === 'profile_table') return profileTable(pp.abs);
+        return profileAnnotations(pp.abs);
+      }
       if (name === 'submit_answer') {
         return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
       }
@@ -358,8 +536,8 @@
              toolNames: schemas.map(function (s) { return s.function.name; }) };
   }
 
-  // Export the pure TF2 file classifier for reuse. (classifyUrl now lives in data-agent.js — one rulebook.)
-  var API = { createTools: createTools, classifyFileFormat: classifyFileFormat };
+  // Export pure helpers for reuse/grading. (classifyUrl now lives in data-agent.js — one rulebook.)
+  var API = { createTools: createTools, classifyFileFormat: classifyFileFormat, profilerForModality: profilerForModality };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.OCAgentTools = API;
 })();

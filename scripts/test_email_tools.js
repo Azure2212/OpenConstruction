@@ -191,5 +191,53 @@ console.log('\n[9] TF2 RETRIEVE — inventory_files / detect_format / resolve_ur
   check('resolve_url: deterministic + declares no-liveness-probe', JSON.stringify(tk.dispatch('resolve_url', { url: 'https://zenodo.org/record/1' })) === JSON.stringify(tk.dispatch('resolve_url', { url: 'https://zenodo.org/record/1' })) && /liveness/.test(tk.dispatch('resolve_url', { url: 'x' }).note));
 })();
 
+console.log('\n[10] TF4 UNDERSTAND — profilers graded by OC_DATA_1 benchmark-category-D.json (numeric accuracy vs oracle)');
+(function () {
+  var Dpath = path.join(ROOT, 'data/benchmark-category-D.json');
+  if (!fs.existsSync(Dpath)) { check('benchmark-category-D.json present', false, Dpath); return; }
+  var D = JSON.parse(fs.readFileSync(Dpath, 'utf8'));
+  if (typeof api.benchmarkProfile !== 'function') { check('data-agent exposes benchmarkProfile', false); return; }
+
+  // The agent assembles its profile from OUR tools, routed by modality (Level-3). An image dataset's
+  // profile = profile_images (image side) merged with profile_annotations (annotation side) -> the merged
+  // OC_DATA_1 image shape (num_images/width/height + num_annotations/num_categories/annotation_type/class_names).
+  function profileFor(p) {
+    var df = tk.dispatch('detect_format', { path: p }), which = agentTools.profilerForModality(df.modality_guess), prof = {};
+    if (which === 'profile_pointcloud') prof = tk.dispatch('profile_pointcloud', { path: p });
+    else if (which === 'profile_table') prof = tk.dispatch('profile_table', { path: p });
+    else if (which === 'profile_images') { prof = tk.dispatch('profile_images', { path: p }); if (df.recommended_annotation_profiler) prof = Object.assign({}, prof, tk.dispatch('profile_annotations', { path: p })); }
+    return prof;
+  }
+  function edgeResult(p) { var df = tk.dispatch('detect_format', { path: p }); return df.target === 'file' ? df.format : df.modality_guess; }
+  // G4.0 (Critic): OC_DATA_1 renamed gt_tools to the canonical .doc Tool Family 4 names
+  // (profile_pointcloud/profile_images/profile_table/profile_annotations) — the alias bridge is gone;
+  // the agent's REAL tool names are now scored directly against the canonical GT (one rulebook).
+  function selectTools(p) { var df = tk.dispatch('detect_format', { path: p }), t = [df.recommended_profiler]; if (df.recommended_annotation_profiler) t.push(df.recommended_annotation_profiler); return t; }
+
+  var agentRunFn = function (input) {
+    if (input.subtype === 'numeric-profile') return { profile: profileFor(input.path) };
+    if (input.subtype === 'tool-selection') return { tools: selectTools(input.path) };
+    return { result: edgeResult(input.path) };
+  };
+  var rep = api.benchmarkProfile(agentRunFn, D);
+  check('Category-D profileAccuracy === 1.0 (our profilers === oracle on every fixture)', rep.profileAccuracy === 1.0, rep);
+  check('Category-D edgeCaseAccuracy === 1.0 (corrupted/empty/modality detected)', rep.edgeCaseAccuracy === 1.0, rep);
+  check('Category-D toolSelectionAccuracy === 1.0 (Level-3 routing, canonical gt_tools, no alias)', rep.toolSelectionAccuracy === 1.0, rep.toolSelectionAccuracy);
+
+  // direct field sanity (independent of the grader) + Level-3 routing in OUR canonical names
+  var pc = tk.dispatch('profile_pointcloud', { path: 'data/samples/PC-Urban' });
+  check('profile_pointcloud: num_points 8, centroid [.5,.5,.5], 4 classes', pc.num_points === 8 && JSON.stringify(pc.centroid) === JSON.stringify([0.5, 0.5, 0.5]) && pc.num_classes === 4, pc);
+  var tb = tk.dispatch('profile_table', { path: 'data/samples/wblca-benchmark-v2-data' });
+  check('profile_table: 3x4, dtypes, numeric_stats mean(gfa)=1800', tb.num_rows === 3 && tb.num_columns === 4 && tb.columns[1].dtype === 'numeric' && tb.numeric_stats.gfa_m2.mean === 1800, tb);
+  check('Level-3 routing (our names): point_cloud->profile_pointcloud, tabular->profile_table', tk.dispatch('detect_format', { path: 'data/samples/PC-Urban' }).recommended_profiler === 'profile_pointcloud' && tk.dispatch('detect_format', { path: 'data/samples/DTCTP' }).recommended_profiler === 'profile_table');
+
+  // determinism + COMPUTE-primitive (no oracle-answer/verdict/suitability leak) + honest failure
+  var a = JSON.stringify(tb);
+  check('profilers deterministic (repeat-equal)', a === JSON.stringify(tk.dispatch('profile_table', { path: 'data/samples/wblca-benchmark-v2-data' })));
+  check('profilers are COMPUTE primitives (no verdict/suitability/best/score field)', a.indexOf('verdict') < 0 && a.indexOf('suitab') < 0 && a.indexOf('"best"') < 0 && a.indexOf('"score"') < 0);
+  var wrong = tk.dispatch('profile_table', { path: 'data/samples/PC-Urban' });
+  check('wrong profiler on a non-matching modality fails honestly (no fabricated rows)', wrong.error != null || wrong.num_rows === 0, wrong);
+})();
+
 console.log('\n==== ' + pass + ' passed, ' + fail + ' failed ====');
 process.exit(fail ? 1 : 0);

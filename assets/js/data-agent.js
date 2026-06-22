@@ -671,6 +671,44 @@
       note: 'Deterministic. format-detection exact-match + inventory file-count/by-format vs synthetic-fixture GT; corrupted/empty scored as formats. No LLM-judge.', perCase: perCase };
   }
 
+  // ---------------------------------------------- CATEGORY-D: UNDERSTAND — profiling accuracy (OC_DATA_1)
+  // Deterministic, no LLM-judge. Scores agent {profile}/{tools}/{result} vs ORACLE GT (read from fixture
+  // bytes; benchmark-category-D.json). numeric-profile = fraction of GT fields within tolerance (counts
+  // exact, floats rel 1%); tool-selection = set-match; edge = exact. `defined-only` cases are skipped.
+  // relative tolerance with a 1e-9 floor; for small counts (e.g. 8) the 1% band (<1) forces exact-integer,
+  // while measurements (means/bbox) get the tolerance. Avoids the Number.isInteger(1800.0)===true trap.
+  function _closeNum(a, b, rt) { if (typeof a !== 'number' || typeof b !== 'number') return false; return Math.abs(a - b) <= Math.max(rt * Math.abs(b), 1e-9); }
+  function _eqField(a, b, rt) {
+    if (Array.isArray(b)) return Array.isArray(a) && a.length === b.length && b.every(function (x, i) { return _eqField(a[i], x, rt); });
+    if (b && typeof b === 'object') return !!a && typeof a === 'object' && Object.keys(b).every(function (k) { return _eqField(a[k], b[k], rt); });
+    if (typeof b === 'number') return _closeNum(a, b, rt);
+    if (typeof b === 'boolean') return a === b;
+    return norm(a) === norm(b);
+  }
+  function _setEq(a, b) { a = uniq(arr(a).map(norm)).sort(); b = uniq(arr(b).map(norm)).sort(); return a.length === b.length && a.every(function (x, i) { return x === b[i]; }); }
+  function scoreProfile(pred, gt, relTol) {
+    relTol = relTol || 0.01; pred = pred || {}; var keys = Object.keys(gt || {}), ok = 0, per = {};
+    keys.forEach(function (k) { var c = _eqField(pred[k], gt[k], relTol); per[k] = c; if (c) ok++; });
+    return { fieldsCorrect: ok, total: keys.length, accuracy: keys.length ? +(ok / keys.length).toFixed(3) : null, perField: per };
+  }
+  // benchmarkProfile(agentRunFn, categoryD) — agent gets { path, modality, subtype }; returns
+  // { profile } | { tools } | { result }. defined-only modalities (no fixtures) are NOT scored.
+  function benchmarkProfile(agentRunFn, categoryD) {
+    var cases = ((categoryD && categoryD.cases) || []).filter(function (c) { return c.status !== 'defined-only'; });
+    var pT = 0, pAcc = 0, tT = 0, tC = 0, eT = 0, eC = 0, perCase = [];
+    cases.forEach(function (c) {
+      var out = agentRunFn({ path: c.path, modality: c.modality, subtype: c.subtype }) || {}, row = { path: c.path, subtype: c.subtype, modality: c.modality };
+      if (c.subtype === 'numeric-profile') { pT++; var s = scoreProfile(out.profile, c.gt_profile, c.tolerance && c.tolerance.rel); pAcc += s.accuracy; row.profile = s; }
+      else if (c.subtype === 'tool-selection') { tT++; var ok = _setEq(out.tools, c.gt_tools); if (ok) tC++; row.tools = { pred: out.tools || null, gt: c.gt_tools, correct: ok }; }
+      else if (c.subtype === 'edge-case') { eT++; var ok2 = norm(out.result) === norm(c.gt_result); if (ok2) eC++; row.edge = { pred: out.result || null, gt: c.gt_result, correct: ok2 }; }
+      perCase.push(row);
+    });
+    return { category: 'D', scoredCases: cases.length,
+      profileAccuracy: pT ? +(pAcc / pT).toFixed(4) : null, toolSelectionAccuracy: tT ? +(tC / tT).toFixed(4) : null,
+      edgeCaseAccuracy: eT ? +(eC / eT).toFixed(4) : null, counts: { numeric_profile: pT, tool_selection: tT, edge: eT },
+      note: 'Deterministic. numeric-profile within tolerance (counts exact, floats rel 1%) + modality tool-selection + corrupted/empty/incomplete edge. defined-only skipped. No LLM-judge.', perCase: perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
@@ -680,6 +718,7 @@
     benchmarkAgentCompare, scoreCompareSelect, kendallTau,
     scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
     scoreFormatDetection, scoreInventory, benchmarkRetrieve,
+    scoreProfile, benchmarkProfile,
     classifyAccess, classifyUrl, citation, assembleReport,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [
