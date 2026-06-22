@@ -17,21 +17,34 @@
   function arr(v) { return Array.isArray(v) ? v.filter(function (x) { return x != null && String(x).trim() !== ''; }) : (v == null || v === '' ? [] : [v]); }
 
   var SYSTEM_PROMPT = [
-    'You are the OpenConstruction Data Agent. You help a user find AEC datasets in a fixed catalog by',
-    'reasoning ONLY over dataset metadata via the provided tools. You cannot browse or invent data.',
+    'You are the OpenConstruction Data Agent. You act ONLY through the provided tools — never browse or',
+    'invent data, and never output an id/value you did not get from a tool. Each task arrives as JSON;',
+    'detect its type, gather evidence with the right tools, then call submit_answer EXACTLY ONCE with only',
+    'the field(s) that task needs (always include abstained).',
     '',
-    'Rules:',
-    '1. Use the tools to discover and verify. Typical flow: list_tasks (to phrase the task) -> search_datasets',
-    '   -> get_dataset / check_fitness on promising candidates -> decide.',
-    '2. NEVER output a dataset id you did not see returned by a tool. No fabrication.',
-    '3. A dataset fits a TASK only if it declares that task or a more specific (descendant) task.',
-    '4. When done, call submit_answer exactly once:',
-    '   - discovery need -> selected_ids = every dataset that fits (may be many); abstained=false.',
-    '   - single-dataset fitness question -> set fitness_verdict={id,verdict} (fit|unfit).',
-    '   - multi-dataset COMPARISON / "rank these" / "which is best among N" -> also set ranking =',
-    '     the dataset ids ordered best->worst, and set selected_ids to the best one(s).',
-    '   - if NO dataset in the catalog fits the need -> selected_ids=[], abstained=true.',
-    '5. Prefer precision: only include datasets you verified fit. Do not pad the list.'
+    'TASK ROUTING:',
+    '1. DISCOVERY (input has need + k, no candidate_ids): list_tasks -> search_datasets -> check_fitness on',
+    '   candidates. submit selected_ids = every dataset that fits; abstained=true (selected_ids=[]) if none.',
+    '   A dataset fits a TASK only if it declares that task or a more specific (descendant) task.',
+    '2. FITNESS (input has fitness_target): check_fitness(id=fitness_target, need). submit fitness_verdict={id,verdict}.',
+    '3. COMPARISON (input has candidate_ids): compare_resources(ids=candidate_ids, need) -> weigh the per-criterion',
+    '   evidence yourself. submit ranking = candidate ids ordered best->worst (and selected_ids=[best]).',
+    '4. ACCESS (input has dataset_id + evidence): check_access + check_license on the id. submit access_status',
+    '   and commercial_ok.',
+    '5. RETRIEVE (input has path + subtype inventory|format-detection|annotation-format): inventory ->',
+    '   inventory_files(path), submit inventory={file_count,by_format}; format-detection -> detect_format(path),',
+    '   submit format=its format; annotation-format -> detect_format(path), submit format=its annotation_format.',
+    '6. PROFILE (input has path + subtype numeric-profile|tool-selection|edge-case): for numeric-profile pick',
+    '   the modality profiler (profile_pointcloud|profile_images|profile_table; an image+COCO set merges',
+    '   profile_images with profile_annotations) and submit profile=that object; for tool-selection submit',
+    '   tools=the profiler name(s) (use detect_format.recommended_profiler/recommended_annotation_profiler);',
+    '   for edge-case submit result=detect_format format (file) or modality_guess (dir).',
+    '7. PREP (input has subtype annotation-conversion|dataset-split|annotation-validity): conversion ->',
+    '   convert_annotations(path=data/samples/<source>, to=target), submit annotations=its annotations;',
+    '   dataset-split -> create_dataset_split(items, ratios, seed), submit splits=its splits; annotation-validity',
+    '   -> convert_annotations(... to=coco) on the source (or inline coco), submit valid=its valid.',
+    '',
+    'Be deterministic and precise: only report what the tools returned; do not pad, guess, or fabricate.'
   ].join('\n');
 
   // Fallback: extract a tool call emitted as text (```json {"tool":"x","args":{...}}``` or {"name","arguments"}).
@@ -49,7 +62,13 @@
   }
 
   function normalizeAnswer(a) {
-    return { selected_ids: arr(a && a.selected_ids), ranking: arr(a && a.ranking), fitness_verdict: (a && a.fitness_verdict) || null, abstained: !!(a && a.abstained) };
+    a = a || {};
+    return { selected_ids: arr(a.selected_ids), ranking: arr(a.ranking), fitness_verdict: a.fitness_verdict || null, abstained: !!a.abstained,
+      // task-specific result fields read by the existing graders (B/C/D/F); null when not part of this task
+      access_status: a.access_status != null ? a.access_status : null, commercial_ok: (a.commercial_ok === undefined ? null : a.commercial_ok),
+      inventory: a.inventory || null, format: a.format != null ? a.format : null,
+      profile: a.profile || null, tools: a.tools || null, result: a.result != null ? a.result : null,
+      annotations: a.annotations != null ? a.annotations : null, splits: a.splits || null, valid: (a.valid === undefined ? null : a.valid) };
   }
 
   // deps: { api, corpus, taxonomy, llm, tools?, maxSteps?, systemPrompt? }

@@ -7,14 +7,15 @@
   "implemented_modalities": [
    "point_cloud",
    "image",
-   "tabular"
+   "tabular",
+   "bim"
   ],
   "defined_only_modalities": [
    "video",
-   "bim",
    "drawing",
    "sensor"
   ],
+  "bim_note": "BIM/IFC = the .doc novelty axis (email line 14 BIM; C3/TF4) — PROMOTED to IMPLEMENTED with a synthetic IFC4/STEP fixture + oracle (element_classes, spatial-hierarchy depth, counts, property-set presence). profile_bim is the AGREED future tool name (coordinate w/ OC_SPECIALIST_1 parse_ifc/profile_bim, next round).",
   "profile_shape": {
    "point_cloud": [
     "num_points",
@@ -46,10 +47,14 @@
     "height"
    ],
    "bim": [
-    "num_elements",
     "ifc_schema",
-    "element_types",
-    "num_storeys"
+    "num_entities",
+    "element_classes",
+    "num_elements",
+    "spatial_hierarchy",
+    "spatial_hierarchy_depth",
+    "num_property_sets",
+    "has_property_sets"
    ],
    "drawing": [
     "num_sheets",
@@ -231,6 +236,35 @@
   },
   {
    "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "bim",
+   "path": "data/samples/IFC-mini",
+   "gt_profile": {
+    "ifc_schema": "IFC4",
+    "num_entities": 18,
+    "element_classes": {
+     "IfcWall": 3,
+     "IfcSlab": 1,
+     "IfcDoor": 1
+    },
+    "num_elements": 5,
+    "spatial_hierarchy": [
+     "IfcProject",
+     "IfcSite",
+     "IfcBuilding",
+     "IfcBuildingStorey",
+     "IfcSpace"
+    ],
+    "spatial_hierarchy_depth": 5,
+    "num_property_sets": 1,
+    "has_property_sets": true
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
    "subtype": "tool-selection",
    "modality": "point_cloud",
    "path": "data/samples/PC-Urban",
@@ -255,6 +289,15 @@
    "path": "data/samples/wblca-benchmark-v2-data",
    "gt_tools": [
     "profile_table"
+   ]
+  },
+  {
+   "category": "D",
+   "subtype": "tool-selection",
+   "modality": "bim",
+   "path": "data/samples/IFC-mini",
+   "gt_tools": [
+    "profile_bim"
    ]
   },
   {
@@ -296,24 +339,6 @@
    ],
    "gt_tools": [
     "profile_video"
-   ],
-   "note": "DEFINED only (no fixture) — implement when a fixture for this modality exists"
-  },
-  {
-   "category": "D",
-   "subtype": "numeric-profile",
-   "status": "defined-only",
-   "modality": "bim",
-   "path": null,
-   "gt_profile": null,
-   "expected_profile_fields": [
-    "num_elements",
-    "ifc_schema",
-    "element_types",
-    "num_storeys"
-   ],
-   "gt_tools": [
-    "profile_bim"
    ],
    "note": "DEFINED only (no fixture) — implement when a fixture for this modality exists"
   },

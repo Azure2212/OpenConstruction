@@ -205,6 +205,7 @@ console.log('\n[10] TF4 UNDERSTAND — profilers graded by OC_DATA_1 benchmark-c
     var df = tk.dispatch('detect_format', { path: p }), which = agentTools.profilerForModality(df.modality_guess), prof = {};
     if (which === 'profile_pointcloud') prof = tk.dispatch('profile_pointcloud', { path: p });
     else if (which === 'profile_table') prof = tk.dispatch('profile_table', { path: p });
+    else if (which === 'profile_bim') prof = tk.dispatch('profile_bim', { path: p });
     else if (which === 'profile_images') { prof = tk.dispatch('profile_images', { path: p }); if (df.recommended_annotation_profiler) prof = Object.assign({}, prof, tk.dispatch('profile_annotations', { path: p })); }
     return prof;
   }

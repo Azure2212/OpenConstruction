@@ -54,7 +54,7 @@
     if (magic === 'json') { fmt = isCoco(buf) ? 'coco' : 'json'; }
     else if (EXT_SIG[ext]) { fmt = (magic === EXT_SIG[ext]) ? magic : 'corrupted'; }   // ext promises a signature -> must match
     else if (magic === 'png' || magic === 'jpeg' || magic === 'gif' || magic === 'pdf' || magic === 'zip' || magic === 'ply') { fmt = magic; } // real signature, ext didn't predict it
-    else if (magic === 'text') { fmt = (ext === 'csv' || ext === 'tsv') ? 'csv' : 'text'; }
+    else if (magic === 'text') { fmt = (ext === 'ifc') ? 'ifc' : ((ext === 'csv' || ext === 'tsv') ? 'csv' : 'text'); }
     else { fmt = 'binary'; }
     return { format: fmt, magic: fmt, ext: ext, size_bytes: size };
   }
@@ -244,9 +244,38 @@
       label_distribution: dist, invalid_refs: badImg + badCat,
       invalid_ref_detail: { bad_image_refs: badImg, bad_category_refs: badCat } };
   }
+  // BIM/IFC profiler (STEP/IFC text parse): schema · entity count · element classes · spatial hierarchy ·
+  // property sets. Reproduces OC_DATA_1's Category-D BIM oracle (IFC-mini). Deterministic, no LLM.
+  var IFC_CANON = { IFCPROJECT: 'IfcProject', IFCSITE: 'IfcSite', IFCBUILDING: 'IfcBuilding', IFCBUILDINGSTOREY: 'IfcBuildingStorey', IFCSPACE: 'IfcSpace',
+    IFCWALL: 'IfcWall', IFCSLAB: 'IfcSlab', IFCDOOR: 'IfcDoor', IFCWINDOW: 'IfcWindow', IFCCOLUMN: 'IfcColumn', IFCBEAM: 'IfcBeam', IFCROOF: 'IfcRoof', IFCSTAIR: 'IfcStair', IFCRAILING: 'IfcRailing', IFCPLATE: 'IfcPlate', IFCMEMBER: 'IfcMember', IFCCOVERING: 'IfcCovering', IFCFURNISHINGELEMENT: 'IfcFurnishingElement',
+    IFCPROPERTYSET: 'IfcPropertySet', IFCPROPERTYSINGLEVALUE: 'IfcPropertySingleValue',
+    IFCRELAGGREGATES: 'IfcRelAggregates', IFCRELCONTAINEDINSPATIALSTRUCTURE: 'IfcRelContainedInSpatialStructure', IFCRELDEFINESBYPROPERTIES: 'IfcRelDefinesByProperties' };
+  var IFC_ELEMENT_TYPES = { IfcWall: 1, IfcSlab: 1, IfcDoor: 1, IfcWindow: 1, IfcColumn: 1, IfcBeam: 1, IfcRoof: 1, IfcStair: 1, IfcRailing: 1, IfcPlate: 1, IfcMember: 1, IfcCovering: 1, IfcFurnishingElement: 1 };
+  var IFC_SPATIAL_ORDER = ['IfcProject', 'IfcSite', 'IfcBuilding', 'IfcBuildingStorey', 'IfcSpace'];
+  function _canonIfc(up) { return IFC_CANON[up] || ('Ifc' + up.charAt(3) + up.slice(4).toLowerCase()); }
+  function profileBim(abs) {
+    var isDir = false; try { isDir = _fs.statSync(abs).isDirectory(); } catch (e) {}
+    var file = isDir ? _findInDir(abs, function (n) { return /\.ifc$/i.test(n); }) : abs;
+    if (!file) return { error: 'no IFC file found', path: abs };
+    var text = _readText(file);
+    var sm = text.match(/FILE_SCHEMA\(\(?'([^']+)'/i), schema = sm ? sm[1] : null;
+    var di = text.indexOf('DATA;'), body = di >= 0 ? text.slice(di) : text;
+    var re = /#\d+\s*=\s*(IFC[A-Z0-9]+)\s*\(/gi, m, element_classes = {}, spatialPresent = {}, num_entities = 0, num_psets = 0;
+    while ((m = re.exec(body))) {
+      num_entities++; var c = _canonIfc(m[1].toUpperCase());
+      if (IFC_ELEMENT_TYPES[c]) element_classes[c] = (element_classes[c] || 0) + 1;
+      if (IFC_SPATIAL_ORDER.indexOf(c) >= 0) spatialPresent[c] = 1;
+      if (c === 'IfcPropertySet') num_psets++;
+    }
+    var spatial = IFC_SPATIAL_ORDER.filter(function (s) { return spatialPresent[s]; });
+    var num_elements = Object.keys(element_classes).reduce(function (s, k) { return s + element_classes[k]; }, 0);
+    return { modality: 'bim', ifc_schema: schema, num_entities: num_entities, element_classes: element_classes,
+      num_elements: num_elements, spatial_hierarchy: spatial, spatial_hierarchy_depth: spatial.length,
+      num_property_sets: num_psets, has_property_sets: num_psets > 0 };
+  }
   // Level-3 tool recall: the canonical profiler for a modality bucket (drives `recommended_profiler`).
   var PROFILER_FOR_MODALITY = { point_cloud: 'profile_pointcloud', ground_rgb: 'profile_images', aerial_rgb: 'profile_images',
-    satellite_rgb: 'profile_images', depth: 'profile_images', thermal: 'profile_images', tabular: 'profile_table' };
+    satellite_rgb: 'profile_images', depth: 'profile_images', thermal: 'profile_images', tabular: 'profile_table', bim: 'profile_bim' };
   function profilerForModality(m) { return PROFILER_FOR_MODALITY[m] || null; }
 
   // ============================================================ Cap-5 USE: training READINESS (TF5)
@@ -529,6 +558,11 @@
         parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO json file or a sample directory under data/samples' } }, required: ['path'] }
       }},
       { type: 'function', function: {
+        name: 'profile_bim',
+        description: 'Profile a BIM/IFC dataset (.ifc). Computes ifc_schema, num_entities, element_classes (counts per IfcWall/IfcSlab/…), num_elements, the spatial hierarchy (IfcProject→…→IfcSpace) + depth, and property-set counts. Select this ONLY for BIM/IFC data.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'IFC file or its sample directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
         name: 'convert_annotations',
         description: 'Convert a dataset\'s annotations to another standard format DETERMINISTICALLY (from COCO to "yolo", "voc"/"pascal_voc", or "coco" identity). Returns a flat `annotations` list (per-annotation, in the target schema), a per-image `files` view, and a validity check (invalid_count / valid). Preprocessing only — does not write to disk or train.',
         parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO file or sample directory under data/samples' }, to: { type: 'string', enum: ['yolo', 'voc', 'pascal_voc', 'coco'] }, coco: { type: 'object', description: 'optional inline COCO object (use instead of path)' } }, required: ['to'] }
@@ -557,13 +591,27 @@
       }},
       { type: 'function', function: {
         name: 'submit_answer',
-        description: 'Declare your final answer and finish. selected_ids = dataset ids that satisfy the need (empty if none). For a single-dataset fitness question, also set fitness_verdict. For a multi-dataset COMPARISON / "rank these" / "which is best among N" task, also set ranking = the dataset ids ordered best→worst. Set abstained=true when no dataset in the catalog fits.',
+        description: 'Declare your final answer and finish. Fill ONLY the fields the task needs (leave the rest unset): ' +
+          'DISCOVERY -> selected_ids (+ abstained); FITNESS -> fitness_verdict; COMPARISON -> ranking (best->worst); ' +
+          'ACCESS -> access_status + commercial_ok; RETRIEVE -> inventory {file_count,by_format} OR format; ' +
+          'PROFILE -> profile (object) OR tools (the profiler names you would use) OR result (a single format/modality string); ' +
+          'PREP -> annotations (converted list) OR splits {train,val,test} OR valid (boolean). Always include abstained.',
         parameters: { type: 'object', properties: {
           selected_ids: { type: 'array', items: { type: 'string' } },
-          ranking: { type: 'array', items: { type: 'string' }, description: 'ordered dataset ids best->worst (comparison/Category-E tasks)' },
+          ranking: { type: 'array', items: { type: 'string' }, description: 'ordered dataset ids best->worst (comparison/Category-E)' },
           fitness_verdict: { type: 'object', properties: { id: { type: 'string' }, verdict: { type: 'string', enum: ['fit', 'unfit'] } } },
-          abstained: { type: 'boolean' }
-        }, required: ['selected_ids', 'abstained'] }
+          abstained: { type: 'boolean' },
+          access_status: { type: 'string', description: 'open|gated|registration_required|restricted|unknown (Category-B)' },
+          commercial_ok: { type: 'boolean', description: 'is commercial reuse permitted (Category-B)' },
+          inventory: { type: 'object', description: '{file_count, by_format} for a sample dir (Category-C inventory)' },
+          format: { type: 'string', description: 'detected file/annotation format (Category-C format-detection)' },
+          profile: { type: 'object', description: 'modality profile (Category-D numeric-profile)' },
+          tools: { type: 'array', items: { type: 'string' }, description: 'profiler tool name(s) for the modality (Category-D tool-selection)' },
+          result: { type: 'string', description: 'single scalar result, e.g. an edge-case format/modality (Category-D edge-case)' },
+          annotations: { type: 'array', items: { type: 'object' }, description: 'converted per-annotation list (Category-F annotation-conversion)' },
+          splits: { type: 'object', description: '{train,val,test} id lists (Category-F dataset-split)' },
+          valid: { type: 'boolean', description: 'are the annotations valid (Category-F annotation-validity)' }
+        }, required: ['abstained'] }
       }}
     ];
 
@@ -697,7 +745,7 @@
                  recommended_annotation_profiler: (dann === 'coco' || dann === 'pascal_voc' || dann === 'yolo') ? 'profile_annotations' : null };
       }
       if (name === 'resolve_url') { return api.classifyUrl ? api.classifyUrl(args.url) : { error: 'classifyUrl unavailable (update data-agent.js)' }; }
-      if (name === 'profile_pointcloud' || name === 'profile_images' || name === 'profile_table' || name === 'profile_annotations') {
+      if (name === 'profile_pointcloud' || name === 'profile_images' || name === 'profile_table' || name === 'profile_annotations' || name === 'profile_bim') {
         if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
         var pp = resolveSamplePath(baseDir, samplesRoot, args.path);
         if (pp.error) return { error: pp.error, path: args.path };
@@ -705,6 +753,7 @@
         if (name === 'profile_pointcloud') return profilePointcloud(pp.abs);
         if (name === 'profile_images') return profileImages(pp.abs);
         if (name === 'profile_table') return profileTable(pp.abs);
+        if (name === 'profile_bim') return profileBim(pp.abs);
         return profileAnnotations(pp.abs);
       }
       if (name === 'convert_annotations') {
@@ -725,7 +774,12 @@
         return assessTrainingReadiness(ap.abs);
       }
       if (name === 'submit_answer') {
-        return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };
+        return { _final: true,
+          selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained,
+          access_status: args.access_status != null ? args.access_status : null, commercial_ok: (args.commercial_ok === undefined ? null : args.commercial_ok),
+          inventory: args.inventory || null, format: args.format != null ? args.format : null,
+          profile: args.profile || null, tools: (args.tools != null ? arr(args.tools) : null), result: (args.result != null ? args.result : null),
+          annotations: (args.annotations != null ? args.annotations : null), splits: args.splits || null, valid: (args.valid === undefined ? null : args.valid) };
       }
       return { error: 'unknown tool: ' + name };
     }

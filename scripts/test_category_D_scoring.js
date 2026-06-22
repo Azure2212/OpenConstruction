@@ -11,7 +11,7 @@ const fails = [], assert = (c, m) => { if (!c) fails.push(m); };
 // tool names from an independent modality map (NOT echoing gt_tools) — so production benchmarkProfile
 // (no alias) only scores 1.0 if the GT actually carries the canonical names. This is the regression
 // guard for the Critic G4.0 tool-name mismatch.
-const REAL_TOOLS = { point_cloud: ['profile_pointcloud'], image: ['profile_images', 'profile_annotations'], tabular: ['profile_table'] };
+const REAL_TOOLS = { point_cloud: ['profile_pointcloud'], image: ['profile_images', 'profile_annotations'], tabular: ['profile_table'], bim: ['profile_bim'] };
 const gt = {}; D.cases.filter(c => c.status !== 'defined-only').forEach(c => { gt[c.path + '|' + c.subtype] = c; });
 const perfect = input => { const c = gt[input.path + '|' + input.subtype] || {};
   if (input.subtype === 'numeric-profile') return { profile: c.gt_profile };
@@ -26,7 +26,12 @@ console.log('(1) perfect:', JSON.stringify({ profile: p.profileAccuracy, tool: p
 assert(p.profileAccuracy === 1.0, 'perfect profileAccuracy should be 1.0, got ' + p.profileAccuracy);
 assert(p.toolSelectionAccuracy === 1.0, 'perfect toolSelectionAccuracy should be 1.0, got ' + p.toolSelectionAccuracy);
 assert(p.edgeCaseAccuracy === 1.0, 'perfect edgeCaseAccuracy should be 1.0, got ' + p.edgeCaseAccuracy);
-assert(p.scoredCases === 10, 'should score 10 (4 profile + 3 tool + 3 edge), got ' + p.scoredCases);
+assert(p.scoredCases === 12, 'should score 12 (5 profile incl BIM + 4 tool + 3 edge), got ' + p.scoredCases);
+// BIM/IFC promoted to IMPLEMENTED: oracle profile present + scored
+const bimCase = D.cases.find(c => c.modality === 'bim' && c.subtype === 'numeric-profile' && c.status !== 'defined-only');
+assert(bimCase && bimCase.gt_profile && bimCase.gt_profile.ifc_schema === 'IFC4', 'BIM numeric-profile must be IMPLEMENTED with an IFC oracle');
+assert(JSON.stringify(bimCase.gt_profile.element_classes) === JSON.stringify({ IfcWall: 3, IfcSlab: 1, IfcDoor: 1 }), 'BIM element_classes oracle');
+assert(bimCase.gt_profile.spatial_hierarchy_depth === 5, 'BIM spatial-hierarchy depth oracle');
 
 // (2) wrong -> below 1.0 everywhere
 const w = API.benchmarkProfile(wrong, D);
@@ -50,7 +55,7 @@ assert(JSON.stringify(tcase('tabular').gt_tools) === JSON.stringify(['profile_ta
 // (4) defined-only modalities are present but NOT scored
 const defOnly = D.cases.filter(c => c.status === 'defined-only').map(c => c.modality);
 console.log('(4) defined-only (not scored):', JSON.stringify(defOnly));
-assert(defOnly.length === 4 && p.scoredCases === D.cases.length - 4, 'defined-only must be excluded from scoring');
+assert(defOnly.length === 3 && p.scoredCases === D.cases.length - 3, 'defined-only (video/drawing/sensor) must be excluded from scoring');
 
 if (fails.length) { console.error('\n✗ CATEGORY-D TEST FAILED:\n  - ' + fails.join('\n  - ')); process.exit(1); }
 console.log('\n✓ Category-D OK — oracle-profile/tool-selection/edge all deterministic; tolerance respected; defined-only skipped.');
