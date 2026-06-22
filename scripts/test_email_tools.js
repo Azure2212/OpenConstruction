@@ -239,18 +239,39 @@ console.log('\n[10] TF4 UNDERSTAND — profilers graded by OC_DATA_1 benchmark-c
   check('wrong profiler on a non-matching modality fails honestly (no fabricated rows)', wrong.error != null || wrong.num_rows === 0, wrong);
 })();
 
-console.log('\n[11] TF5 USE — training READINESS (Category-F: convert / split / config / assess). NO training (Cat-G deferred)');
+console.log('\n[11] TF5 USE — training READINESS (Category-F: convert / split / validity / config / assess). NO training (Cat-G deferred)');
 (function () {
-  // (a) convert_annotations COCO -> YOLO (deterministic normalized bboxes)
-  var y = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'yolo' });
-  check('convert COCO->YOLO valid + correct count + normalized bbox', y.valid === true && y.num_converted === 2 && y.invalid_count === 0
-    && JSON.stringify(y.files) === JSON.stringify([{ name: 'img_0001.txt', lines: ['0 0.25 0.25 0.5 0.5'] }, { name: 'img_0002.txt', lines: ['0 0.75 0.75 0.5 0.5'] }]), y);
-  // (b) convert COCO -> VOC (xmin,ymin,xmax,ymax)
-  var v = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'voc' });
-  check('convert COCO->VOC valid + correct bndbox (x,y,x+w,y+h)', v.valid === true && v.files.length === 2
-    && JSON.stringify(v.files[0].objects) === JSON.stringify([{ name: 'structure', bndbox: { xmin: 0, ymin: 0, xmax: 1, ymax: 1 } }])
-    && JSON.stringify(v.files[1].objects) === JSON.stringify([{ name: 'structure', bndbox: { xmin: 1, ymin: 1, xmax: 2, ymax: 2 } }]), v);
+  // ===== PRODUCTION integration (G5.0 fix): drive the REAL SHIPPED tools through OC_DATA_1's benchmarkPrep.
+  // No inline reference impls — every output comes from tk.dispatch(real tool). Confirms the tools satisfy
+  // the grader contract in production (conversion/split/validity all 1.0), not just in a bespoke harness.
+  var Fpath = path.join(ROOT, 'data/benchmark-category-F.json');
+  if (!fs.existsSync(Fpath) || typeof api.benchmarkPrep !== 'function') { check('benchmark-category-F.json + api.benchmarkPrep present', false, Fpath); }
+  else {
+    var F = JSON.parse(fs.readFileSync(Fpath, 'utf8'));
+    function srcPath(s) { return 'data/samples/' + s; }
+    var agentRunFn = function (input) {
+      if (input.subtype === 'annotation-conversion') return tk.dispatch('convert_annotations', { path: srcPath(input.source), to: input.target });
+      if (input.subtype === 'dataset-split') return tk.dispatch('create_dataset_split', { items: input.items, ratios: input.ratios, seed: input.seed });
+      if (input.subtype === 'annotation-validity') {
+        var out = input.source ? tk.dispatch('convert_annotations', { path: srcPath(input.source), to: 'coco' }) : tk.dispatch('convert_annotations', { coco: input.inline_source, to: 'coco' });
+        return { valid: out.valid === true };
+      }
+      return {};
+    };
+    var rep = api.benchmarkPrep(agentRunFn, F);
+    check('Category-F PRODUCTION conversionAccuracy === 1.0 (real convert_annotations: yolo/pascal_voc/coco)', rep.conversionAccuracy === 1.0, rep);
+    check('Category-F PRODUCTION splitCorrectness === 1.0 (real create_dataset_split: no-leakage + reproducible)', rep.splitCorrectness === 1.0, rep);
+    check('Category-F PRODUCTION annotationValidityAccuracy === 1.0 (real tool: path valid + inline out-of-bounds invalid)', rep.annotationValidityAccuracy === 1.0, rep);
+  }
+  // contract-lock asserts (the exact gaps Critic G5.0 found): pascal_voc accepted; .annotations + .splits emitted
+  var pv = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'pascal_voc' });
+  check('convert accepts "pascal_voc" (no error) + emits .annotations in GT shape', pv.error == null && Array.isArray(pv.annotations)
+    && JSON.stringify(pv.annotations) === JSON.stringify([{ image_id: 1, class_id: 0, xmin: 0, ymin: 0, xmax: 1, ymax: 1 }, { image_id: 2, class_id: 0, xmin: 1, ymin: 1, xmax: 2, ymax: 2 }]), pv);
+  var yo = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'yolo' });
+  check('convert COCO->YOLO .annotations normalized (cx,cy,w,h)', JSON.stringify(yo.annotations) === JSON.stringify([{ image_id: 1, class_id: 0, cx: 0.25, cy: 0.25, w: 0.5, h: 0.5 }, { image_id: 2, class_id: 0, cx: 0.75, cy: 0.75, w: 0.5, h: 0.5 }]), yo);
   check('convert: unknown target format -> honest error', tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'png' }).error != null);
+  var spc = tk.dispatch('create_dataset_split', { items: ['a', 'b', 'c', 'd'], ratios: { train: 0.5, val: 0.25, test: 0.25 }, seed: 1 });
+  check('create_dataset_split emits .splits.{train,val,test} (benchmarkPrep contract)', spc.splits && Array.isArray(spc.splits.train) && Array.isArray(spc.splits.val) && Array.isArray(spc.splits.test), spc);
 
   // (c) create_dataset_split — leakage-free, covers-all, reproducible by seed, order-independent, seed-sensitive
   var items = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
@@ -287,7 +308,7 @@ console.log('\n[11] TF5 USE — training READINESS (Category-F: convert / split 
   check('readiness: every result carries checks[] + blockers[] (auditable, deterministic)', ['PC-Urban', '_edgecases'].every(function (p) { return Array.isArray(R[p].checks) && Array.isArray(R[p].blockers); }) && JSON.stringify(R['PC-Urban']) === JSON.stringify(tk.dispatch('assess_training_readiness', { path: 'data/samples/PC-Urban' })));
 
   // Cat-G boundary: readiness tools are preprocessing only — no train/evaluate, no metric/score leak
-  var rj = JSON.stringify(R['PC-Urban']) + JSON.stringify(cfgDet) + JSON.stringify(y);
+  var rj = JSON.stringify(R['PC-Urban']) + JSON.stringify(cfgDet) + JSON.stringify(yo);
   check('TF5 stays in READINESS scope (no accuracy/mAP-result/loss/trained field)', rj.indexOf('"trained"') < 0 && rj.indexOf('"accuracy_result"') < 0 && rj.indexOf('"loss"') < 0 && tk.toolNames.indexOf('train_baseline_model') < 0);
 })();
 

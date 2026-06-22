@@ -292,17 +292,44 @@
     var files = Object.keys(byImage).sort().map(function (s) { return { name: s + '.xml', filename: byImage[s].filename, width: byImage[s].width, height: byImage[s].height, objects: byImage[s].objects }; });
     return { files: files, classes: k.cats.map(function (c) { return c.name; }), invalid: invalid };
   }
-  function convertAnnotations(abs, to) {
-    to = String(to || '').toLowerCase();
-    var loaded = _loadCoco(abs);
+  // annotation validity: invalid if it references a missing image/category, has a malformed/empty bbox,
+  // or the bbox falls outside the image bounds. (Drives the Category-F annotation-validity check.)
+  function _validateCocoAnns(coco) {
+    var k = _cocoCommon(coco), bad = 0, total = (coco.annotations || []).length;
+    (coco.annotations || []).forEach(function (a) {
+      var im = k.imgById[a.image_id];
+      if (!im || !(a.category_id in k.catIdx) || !Array.isArray(a.bbox) || a.bbox.length !== 4) { bad++; return; }
+      var x = a.bbox[0], y = a.bbox[1], w = a.bbox[2], h = a.bbox[3];
+      if (!(w > 0 && h > 0)) { bad++; return; }
+      if (im.width != null && im.height != null && (x < 0 || y < 0 || x + w > im.width || y + h > im.height)) { bad++; return; }
+    });
+    return { invalid_count: bad, total: total, valid: bad === 0 };
+  }
+  // Flat per-annotation list in the grader's target schema (GT-shape), sorted by (image_id, ann id).
+  function _annsForTarget(coco, target) {
+    var k = _cocoCommon(coco);
+    var anns = (coco.annotations || []).filter(function (a) { return k.imgById[a.image_id] && (a.category_id in k.catIdx) && Array.isArray(a.bbox) && a.bbox.length === 4; });
+    anns.sort(function (a, b) { return (a.image_id - b.image_id) || ((a.id || 0) - (b.id || 0)); });
+    return anns.map(function (a) {
+      var im = k.imgById[a.image_id], b = a.bbox, ci = k.catIdx[a.category_id];
+      if (target === 'yolo') { var W = im.width, H = im.height; return { image_id: a.image_id, class_id: ci, cx: +((b[0] + b[2] / 2) / W).toFixed(6), cy: +((b[1] + b[3] / 2) / H).toFixed(6), w: +(b[2] / W).toFixed(6), h: +(b[3] / H).toFixed(6) }; }
+      if (target === 'voc' || target === 'pascal_voc') return { image_id: a.image_id, class_id: ci, xmin: b[0], ymin: b[1], xmax: b[0] + b[2], ymax: b[1] + b[3] };
+      return { image_id: a.image_id, class_id: ci, bbox: [b[0], b[1], b[2], b[3]] };   // coco
+    });
+  }
+  // convert_annotations: path OR inline coco; targets yolo | voc | pascal_voc | coco. Emits the
+  // benchmarkPrep contract `.annotations` (flat, GT-shape) AND a `.files` view (ONE rulebook with the grader).
+  function convertAnnotations(abs, to, inlineCoco) {
+    var t = String(to || '').toLowerCase();
+    if (['yolo', 'voc', 'pascal_voc', 'coco'].indexOf(t) < 0) return { error: 'unsupported target format (use yolo | voc | pascal_voc | coco)', target_format: t };
+    var loaded = inlineCoco ? { file: null, coco: inlineCoco } : _loadCoco(abs);
     if (!loaded) return { error: 'no COCO annotation file found', path: abs };
-    var coco = loaded.coco;
-    var base = { source_format: 'coco', target_format: to, num_images: (coco.images || []).length, num_annotations: (coco.annotations || []).length, num_categories: (coco.categories || []).length };
-    function n_conv(files) { return files.reduce(function (s, f) { return s + (f.lines ? f.lines.length : (f.objects ? f.objects.length : 0)); }, 0); }
-    if (to === 'yolo') { var y = cocoToYolo(coco); return Object.assign(base, { files: y.files, classes: y.classes, category_map: y.category_map, num_converted: n_conv(y.files), invalid_count: y.invalid, valid: y.invalid === 0 }); }
-    if (to === 'voc') { var v = cocoToVoc(coco); return Object.assign(base, { files: v.files, classes: v.classes, num_converted: n_conv(v.files), invalid_count: v.invalid, valid: v.invalid === 0 }); }
-    if (to === 'coco') return Object.assign(base, { files: [{ name: _path.basename(loaded.file) }], num_converted: base.num_annotations, invalid_count: 0, valid: true, note: 'identity (already COCO)' });
-    return { error: 'unsupported target format (use yolo | voc | coco)', target_format: to };
+    var coco = loaded.coco, vv = _validateCocoAnns(coco), anns = _annsForTarget(coco, t);
+    var filesView = t === 'yolo' ? cocoToYolo(coco).files : ((t === 'voc' || t === 'pascal_voc') ? cocoToVoc(coco).files : [{ name: loaded.file ? _path.basename(loaded.file) : 'inline.json' }]);
+    return { source_format: 'coco', target_format: t, format: t,
+      num_images: (coco.images || []).length, num_annotations: anns.length, num_categories: (coco.categories || []).length,
+      annotations: anns, files: filesView, classes: _cocoCommon(coco).cats.map(function (c) { return c.name; }),
+      num_converted: anns.length, invalid_count: vv.invalid_count, valid: vv.valid };
   }
   // Leakage-free, seed-reproducible split. Dedupes items (a repeated item across splits IS leakage),
   // orders by hash(seed:item) (so the split is reproducible AND independent of input order), slices by ratio.
@@ -324,7 +351,8 @@
     var r = normalizeRatios(ratios), n = ordered.length;
     var nTr = Math.floor(n * r.train), nVa = Math.floor(n * r.val);
     var train = ordered.slice(0, nTr), val = ordered.slice(nTr, nTr + nVa), test = ordered.slice(nTr + nVa);
-    return { train: train, val: val, test: test, counts: { train: train.length, val: val.length, test: test.length },
+    return { splits: { train: train, val: val, test: test },                        // benchmarkPrep contract
+      train: train, val: val, test: test, counts: { train: train.length, val: val.length, test: test.length },
       total: n, seed: seed, ratios: r, duplicates_removed: dups, disjoint: true, covers_all: train.length + val.length + test.length === n,
       leakage_free: true, note: 'deterministic: same (items,ratios,seed) -> identical split; sets are disjoint and cover all unique items' };
   }
@@ -502,8 +530,8 @@
       }},
       { type: 'function', function: {
         name: 'convert_annotations',
-        description: 'Convert a dataset\'s annotations to another standard format DETERMINISTICALLY (currently from COCO to "yolo" or "voc", or "coco" identity). Returns the converted per-image files + a validity check (invalid_count). Preprocessing/readiness only — it does not write to disk or train anything.',
-        parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO file or sample directory under data/samples' }, to: { type: 'string', enum: ['yolo', 'voc', 'coco'] } }, required: ['path', 'to'] }
+        description: 'Convert a dataset\'s annotations to another standard format DETERMINISTICALLY (from COCO to "yolo", "voc"/"pascal_voc", or "coco" identity). Returns a flat `annotations` list (per-annotation, in the target schema), a per-image `files` view, and a validity check (invalid_count / valid). Preprocessing only — does not write to disk or train.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO file or sample directory under data/samples' }, to: { type: 'string', enum: ['yolo', 'voc', 'pascal_voc', 'coco'] }, coco: { type: 'object', description: 'optional inline COCO object (use instead of path)' } }, required: ['to'] }
       }},
       { type: 'function', function: {
         name: 'create_dataset_split',
@@ -680,11 +708,12 @@
         return profileAnnotations(pp.abs);
       }
       if (name === 'convert_annotations') {
+        if (args.coco && typeof args.coco === 'object') return convertAnnotations(null, args.to, args.coco);   // inline source
         if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
         var cp = resolveSamplePath(baseDir, samplesRoot, args.path);
         if (cp.error) return { error: cp.error, path: args.path };
         try { _fs.statSync(cp.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
-        return convertAnnotations(cp.abs, args.to);
+        return convertAnnotations(cp.abs, args.to, null);
       }
       if (name === 'create_dataset_split') { return createDatasetSplit(args.items, args.ratios, args.seed); }
       if (name === 'prepare_training_config') { return prepareTrainingConfig(args); }
