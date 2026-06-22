@@ -413,7 +413,7 @@
   function benchmarkOn(corpus, goldenSet, produce) {
     produce = produce || _engineProduce;
     const K = goldenSet.k || 5, cases = goldenSet.cases || [];
-    let pSum = 0, ndcgSum = 0, nDisc = 0, absT = 0, absC = 0, licT = 0, licC = 0, halluc = 0, hallucN = 0, fitT = 0, fitC = 0;
+    let pSum = 0, rSum = 0, ndcgSum = 0, nDisc = 0, absT = 0, absC = 0, licT = 0, licC = 0, halluc = 0, hallucN = 0, fitT = 0, fitC = 0;
     const perCase = [];
     for (const c of cases) {
       // hard constraints come ONLY from c.need; c.q is soft text used for ranking tie-breaks.
@@ -443,10 +443,11 @@
         const rels = selectedRecs.map(r => (r && matchExpected(r, expect)) ? 1 : 0);
         const hits = rels.reduce((a, b) => a + b, 0);
         const p = hits / Math.max(1, selIds.length);                   // selection precision
+        const recall = hits / Math.max(1, relevantCount);              // recall@k = relevant retrieved in top-k / |R|
         const idcg = dcg(Array.from({ length: Math.min(relevantCount, K) }, () => 1));
         const nd = idcg ? dcg(rels) / idcg : 0;
-        pSum += p; ndcgSum += nd; nDisc++;
-        rec = { p: +p.toFixed(3), ndcg: +nd.toFixed(3), selected: selIds.length, relevant: relevantCount, hits };
+        pSum += p; rSum += recall; ndcgSum += nd; nDisc++;
+        rec = { p: +p.toFixed(3), recall: +recall.toFixed(3), ndcg: +nd.toFixed(3), selected: selIds.length, relevant: relevantCount, hits };
       }
       absT++; if (!!out.abstained === wantAbstain) absC++;
       if (need.license && need.license !== 'any') { licT++; if (out.licenseCorrect) licC++; }
@@ -456,6 +457,7 @@
     return {
       cases: cases.length, k: K, scoredOn: 'C4-selected',
       precisionAtK: nDisc ? +(pSum / nDisc).toFixed(3) : null,
+      recallAtK: nDisc ? +(rSum / nDisc).toFixed(3) : null,
       ndcgAtK: nDisc ? +(ndcgSum / nDisc).toFixed(3) : null,
       abstentionCorrectness: absT ? +(absC / absT).toFixed(3) : null,
       licenseCorrectness: licT ? +(licC / licT).toFixed(3) : null,

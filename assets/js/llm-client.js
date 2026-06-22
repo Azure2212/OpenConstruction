@@ -75,7 +75,34 @@
         req.write(body); req.end();
       });
     }
-    return { chat: chat, cfg: cfg };
+    // OpenAI-compatible embeddings (POST /embeddings). For the RAG-dense baseline (LM Studio
+    // `text-embedding-nomic`). input = string | string[]; resolves to number[][] aligned to input order.
+    // model defaults to cfg.embedModel (fall back to cfg.model). Only invoked when the tunnel is up — never in CI.
+    function embed(input, modelOverride) {
+      var arrInput = Array.isArray(input) ? input : [input];
+      var ep = cfg.baseUrl.replace(/\/+$/, '') + '/embeddings';
+      return new Promise(function (resolve, reject) {
+        var body = JSON.stringify({ model: modelOverride || cfg.embedModel || cfg.model, input: arrInput });
+        var u = new URL(ep), lib = u.protocol === 'https:' ? https : http;
+        var headers = { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) };
+        if (cfg.apiKey) headers['Authorization'] = 'Bearer ' + cfg.apiKey;
+        var req = lib.request(
+          { hostname: u.hostname, port: u.port, path: u.pathname + u.search, method: 'POST', headers: headers, timeout: cfg.timeout_ms || 120000 },
+          function (res) {
+            var data = ''; res.on('data', function (c) { data += c; });
+            res.on('end', function () {
+              if (res.statusCode < 200 || res.statusCode >= 300) { reject(new Error('llm-client/embed HTTP ' + res.statusCode + ': ' + data.slice(0, 300))); return; }
+              try { var j = JSON.parse(data); resolve((j.data || []).map(function (d) { return d.embedding; })); }
+              catch (e) { reject(new Error('llm-client/embed parse error: ' + e.message + ' | body=' + data.slice(0, 300))); }
+            });
+          }
+        );
+        req.on('error', reject);
+        req.on('timeout', function () { req.destroy(new Error('llm-client/embed timeout after ' + (cfg.timeout_ms || 120000) + 'ms')); });
+        req.write(body); req.end();
+      });
+    }
+    return { chat: chat, embed: embed, cfg: cfg };
   }
 
   // Load a gitignored config file; throws a helpful message if absent (CI/stub never needs it).
