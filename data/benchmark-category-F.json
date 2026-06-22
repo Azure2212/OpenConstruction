@@ -1,0 +1,240 @@
+{
+ "_meta": {
+  "category": "F",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "anchor": ".doc Category-F: convert validity · no train/test leakage · reproducible split · annotation validity",
+  "implemented": [
+   "annotation-conversion (coco↔yolo↔pascal_voc)",
+   "dataset-split (leakage/ratio/reproducible)",
+   "annotation-validity"
+  ],
+  "format_names": "coco / yolo / pascal_voc (match OC_SPECIALIST_1 guessAnnotationFormat)",
+  "convert_output_contract": "{format, annotations:[{image_id, class_id, <bbox fields per format: yolo cx,cy,w,h | pascal_voc xmin,ymin,xmax,ymax | coco bbox[x,y,w,h]>}]}",
+  "split_output_contract": "{splits:{train:[ids], val:[ids], test:[ids]}, seed}",
+  "split_scoring": "INVARIANTS only (disjoint+complete+ratio) + reproducibility via double-call — NOT a fixed partition (tool/PRNG-agnostic, avoids the G4.0 coupling trap)",
+  "flags": [
+   "oracle grounds the SYNTHETIC COCO fixture, not real data",
+   "split scored by invariants + reproducibility, not exact membership (no PRNG coupling)",
+   "Category-G (training) + Category-H (end-to-end) are DEFINE-only deferred specs"
+  ]
+ },
+ "cases": [
+  {
+   "category": "F",
+   "subtype": "annotation-conversion",
+   "source": "Construction-Site-Segmentation/annotations.json",
+   "target": "yolo",
+   "tolerance": 1e-06,
+   "gt_conversion": {
+    "format": "yolo",
+    "num_annotations": 2,
+    "annotations": [
+     {
+      "image_id": 1,
+      "class_id": 0,
+      "cx": 0.25,
+      "cy": 0.25,
+      "w": 0.5,
+      "h": 0.5
+     },
+     {
+      "image_id": 2,
+      "class_id": 0,
+      "cx": 0.75,
+      "cy": 0.75,
+      "w": 0.5,
+      "h": 0.5
+     }
+    ]
+   }
+  },
+  {
+   "category": "F",
+   "subtype": "annotation-conversion",
+   "source": "Construction-Site-Segmentation/annotations.json",
+   "target": "pascal_voc",
+   "tolerance": 1e-06,
+   "gt_conversion": {
+    "format": "pascal_voc",
+    "num_annotations": 2,
+    "annotations": [
+     {
+      "image_id": 1,
+      "class_id": 0,
+      "xmin": 0,
+      "ymin": 0,
+      "xmax": 1,
+      "ymax": 1
+     },
+     {
+      "image_id": 2,
+      "class_id": 0,
+      "xmin": 1,
+      "ymin": 1,
+      "xmax": 2,
+      "ymax": 2
+     }
+    ]
+   }
+  },
+  {
+   "category": "F",
+   "subtype": "annotation-conversion",
+   "source": "Construction-Site-Segmentation/annotations.json",
+   "target": "coco",
+   "roundtrip": "coco->yolo->coco",
+   "tolerance": 1e-06,
+   "gt_conversion": {
+    "format": "coco",
+    "num_annotations": 2,
+    "annotations": [
+     {
+      "image_id": 1,
+      "class_id": 0,
+      "bbox": [
+       0,
+       0,
+       1,
+       1
+      ]
+     },
+     {
+      "image_id": 2,
+      "class_id": 0,
+      "bbox": [
+       1,
+       1,
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "category": "F",
+   "subtype": "annotation-validity",
+   "source": "Construction-Site-Segmentation/annotations.json",
+   "gt_valid": true,
+   "note": "well-formed COCO: every annotation refs a valid image_id + category_id; bbox within image bounds"
+  },
+  {
+   "category": "F",
+   "subtype": "annotation-validity",
+   "inline_source": {
+    "images": [
+     {
+      "id": 1,
+      "width": 2,
+      "height": 2,
+      "file_name": "x.png"
+     }
+    ],
+    "annotations": [
+     {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [
+       5,
+       5,
+       10,
+       10
+      ]
+     }
+    ],
+    "categories": [
+     {
+      "id": 1,
+      "name": "structure"
+     }
+    ]
+   },
+   "gt_valid": false,
+   "gt_error": "bbox [5,5,10,10] exceeds the 2x2 image bounds"
+  },
+  {
+   "category": "F",
+   "subtype": "dataset-split",
+   "items": [
+    "item_000",
+    "item_001",
+    "item_002",
+    "item_003",
+    "item_004",
+    "item_005",
+    "item_006",
+    "item_007",
+    "item_008",
+    "item_009",
+    "item_010",
+    "item_011",
+    "item_012",
+    "item_013",
+    "item_014",
+    "item_015",
+    "item_016",
+    "item_017",
+    "item_018",
+    "item_019"
+   ],
+   "ratios": {
+    "train": 0.6,
+    "val": 0.2,
+    "test": 0.2
+   },
+   "tolerance": 0.1,
+   "seed": 42,
+   "gt_invariants": [
+    "no-leakage (train/val/test pairwise disjoint, union==items)",
+    "ratio within tolerance",
+    "reproducible by seed (same seed => identical)"
+   ]
+  },
+  {
+   "category": "F",
+   "subtype": "dataset-split",
+   "items": [
+    "s_00",
+    "s_01",
+    "s_02",
+    "s_03",
+    "s_04",
+    "s_05",
+    "s_06",
+    "s_07",
+    "s_08",
+    "s_09"
+   ],
+   "ratios": {
+    "train": 0.8,
+    "val": 0.1,
+    "test": 0.1
+   },
+   "tolerance": 0.15,
+   "seed": 7,
+   "gt_invariants": [
+    "no-leakage",
+    "ratio within tolerance",
+    "reproducible by seed"
+   ]
+  },
+  {
+   "category": "F",
+   "subtype": "dataset-split",
+   "edge": "empty",
+   "items": [],
+   "ratios": {
+    "train": 0.6,
+    "val": 0.2,
+    "test": 0.2
+   },
+   "tolerance": 0.1,
+   "seed": 1,
+   "gt_invariants": [
+    "empty input => all splits empty, still valid (no crash)"
+   ]
+  }
+ ]
+}

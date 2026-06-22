@@ -239,5 +239,57 @@ console.log('\n[10] TF4 UNDERSTAND — profilers graded by OC_DATA_1 benchmark-c
   check('wrong profiler on a non-matching modality fails honestly (no fabricated rows)', wrong.error != null || wrong.num_rows === 0, wrong);
 })();
 
+console.log('\n[11] TF5 USE — training READINESS (Category-F: convert / split / config / assess). NO training (Cat-G deferred)');
+(function () {
+  // (a) convert_annotations COCO -> YOLO (deterministic normalized bboxes)
+  var y = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'yolo' });
+  check('convert COCO->YOLO valid + correct count + normalized bbox', y.valid === true && y.num_converted === 2 && y.invalid_count === 0
+    && JSON.stringify(y.files) === JSON.stringify([{ name: 'img_0001.txt', lines: ['0 0.25 0.25 0.5 0.5'] }, { name: 'img_0002.txt', lines: ['0 0.75 0.75 0.5 0.5'] }]), y);
+  // (b) convert COCO -> VOC (xmin,ymin,xmax,ymax)
+  var v = tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'voc' });
+  check('convert COCO->VOC valid + correct bndbox (x,y,x+w,y+h)', v.valid === true && v.files.length === 2
+    && JSON.stringify(v.files[0].objects) === JSON.stringify([{ name: 'structure', bndbox: { xmin: 0, ymin: 0, xmax: 1, ymax: 1 } }])
+    && JSON.stringify(v.files[1].objects) === JSON.stringify([{ name: 'structure', bndbox: { xmin: 1, ymin: 1, xmax: 2, ymax: 2 } }]), v);
+  check('convert: unknown target format -> honest error', tk.dispatch('convert_annotations', { path: 'data/samples/Construction-Site-Segmentation', to: 'png' }).error != null);
+
+  // (c) create_dataset_split — leakage-free, covers-all, reproducible by seed, order-independent, seed-sensitive
+  var items = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+  var s1 = tk.dispatch('create_dataset_split', { items: items, ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 42 });
+  var s2 = tk.dispatch('create_dataset_split', { items: items.slice().reverse(), ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 42 });
+  var s3 = tk.dispatch('create_dataset_split', { items: items, ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 7 });
+  var all = s1.train.concat(s1.val, s1.test), seen = {}, leak = false; all.forEach(function (x) { if (seen[x]) leak = true; seen[x] = 1; });
+  check('split: NO train/test leakage (disjoint, covers all unique items)', !leak && s1.covers_all && all.length === 10 && s1.total === 10, s1.counts);
+  check('split: reproducible by seed + INPUT-ORDER-INDEPENDENT', JSON.stringify(s1) === JSON.stringify(s2));
+  check('split: seed-sensitive (different seed -> different partition)', JSON.stringify(s1.train) !== JSON.stringify(s3.train));
+  check('split: ratios honored (10 -> 7/1/2)', JSON.stringify(s1.counts) === JSON.stringify({ train: 7, val: 1, test: 2 }));
+  var sdup = tk.dispatch('create_dataset_split', { items: ['a', 'a', 'b', 'c'], ratios: [0.5, 0.25, 0.25], seed: 1 });
+  check('split: duplicate items removed BEFORE splitting (leakage prevention)', sdup.duplicates_removed === 1 && sdup.total === 3);
+  // unnormalized ratios are normalized
+  var snorm = tk.dispatch('create_dataset_split', { items: items, ratios: { train: 7, val: 1.5, test: 1.5 }, seed: 42 });
+  check('split: ratios normalized if they do not sum to 1', JSON.stringify(snorm.counts) === JSON.stringify(s1.counts));
+
+  // (d) prepare_training_config — deterministic guidance (NOT a training run)
+  var cfgDet = tk.dispatch('prepare_training_config', { task: 'object detection', modality: 'ground_rgb', num_classes: 1 });
+  check('config: detection+image -> yolov8n, mAP, input 640, num_classes from arg', cfgDet.recommended_model === 'yolov8n' && cfgDet.metrics.indexOf('mAP') >= 0 && JSON.stringify(cfgDet.input_size) === JSON.stringify([640, 640]) && cfgDet.num_classes === 1);
+  var cfgPc = tk.dispatch('prepare_training_config', { task: 'semantic segmentation', modality: 'point_cloud' });
+  check('config: point-cloud seg -> pointnet2_seg, mIoU', cfgPc.recommended_model === 'pointnet2_seg' && cfgPc.metrics.indexOf('mIoU') >= 0);
+  var cfgTab = tk.dispatch('prepare_training_config', { profile: tk.dispatch('profile_table', { path: 'data/samples/wblca-benchmark-v2-data' }), task: 'cost regression' });
+  check('config: from a table profile -> lightgbm + leakage-free split + readiness note (not training)', cfgTab.recommended_model === 'lightgbm' && cfgTab.split.leakage_free === true && /not a training run/i.test(cfgTab.note));
+  check('config: deterministic (repeat-equal)', JSON.stringify(cfgDet) === JSON.stringify(tk.dispatch('prepare_training_config', { task: 'object detection', modality: 'ground_rgb', num_classes: 1 })));
+
+  // (e) assess_training_readiness — deterministic verdict per fixture (enough + valid + splittable)
+  var R = {};
+  ['PC-Urban', 'Construction-Site-Segmentation', 'wblca-benchmark-v2-data', 'DTCTP', '_edgecases'].forEach(function (p) { R[p] = tk.dispatch('assess_training_readiness', { path: 'data/samples/' + p }); });
+  check('readiness: PC-Urban READY (8 points, valid labels)', R['PC-Urban'].readiness === 'ready' && R['PC-Urban'].num_items === 8 && R['PC-Urban'].has_valid_annotations === true);
+  check('readiness: image set with COCO PARTIAL (valid but only 2 imgs < split min)', R['Construction-Site-Segmentation'].readiness === 'partial' && R['Construction-Site-Segmentation'].splittable === false && R['Construction-Site-Segmentation'].has_valid_annotations === true);
+  check('readiness: wblca READY (3 rows splittable)', R['wblca-benchmark-v2-data'].readiness === 'ready');
+  check('readiness: edge cases NOT_READY (corrupted/empty -> 0 valid items)', R['_edgecases'].readiness === 'not_ready' && R['_edgecases'].corrupted_count === 2 && R['_edgecases'].num_items === 0);
+  check('readiness: every result carries checks[] + blockers[] (auditable, deterministic)', ['PC-Urban', '_edgecases'].every(function (p) { return Array.isArray(R[p].checks) && Array.isArray(R[p].blockers); }) && JSON.stringify(R['PC-Urban']) === JSON.stringify(tk.dispatch('assess_training_readiness', { path: 'data/samples/PC-Urban' })));
+
+  // Cat-G boundary: readiness tools are preprocessing only — no train/evaluate, no metric/score leak
+  var rj = JSON.stringify(R['PC-Urban']) + JSON.stringify(cfgDet) + JSON.stringify(y);
+  check('TF5 stays in READINESS scope (no accuracy/mAP-result/loss/trained field)', rj.indexOf('"trained"') < 0 && rj.indexOf('"accuracy_result"') < 0 && rj.indexOf('"loss"') < 0 && tk.toolNames.indexOf('train_baseline_model') < 0);
+})();
+
 console.log('\n==== ' + pass + ' passed, ' + fail + ' failed ====');
 process.exit(fail ? 1 : 0);

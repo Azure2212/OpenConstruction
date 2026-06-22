@@ -42,10 +42,18 @@ console.log('\n[2] toolbox = PRIMITIVES ONLY (no oracle)');
 var tk = agentTools.createTools(api, corpus, taxonomy);
 (function () {
   var names = tk.toolNames.sort();
-  check('exposes exactly the primitive toolset (18)', JSON.stringify(names) === JSON.stringify(['check_access', 'check_fitness', 'check_license', 'compare_resources', 'detect_format', 'get_citation', 'get_dataset', 'inventory_files', 'list_tasks', 'profile_annotations', 'profile_images', 'profile_pointcloud', 'profile_table', 'recommend_benchmark', 'resolve_url', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
+  check('exposes exactly the primitive toolset (22)', JSON.stringify(names) === JSON.stringify(['assess_training_readiness', 'check_access', 'check_fitness', 'check_license', 'compare_resources', 'convert_annotations', 'create_dataset_split', 'detect_format', 'get_citation', 'get_dataset', 'inventory_files', 'list_tasks', 'prepare_training_config', 'profile_annotations', 'profile_images', 'profile_pointcloud', 'profile_table', 'recommend_benchmark', 'resolve_url', 'search_datasets', 'submit_answer', 'validate_metadata']), names);
   check('NO oracle/selector tool exposed', names.indexOf('compare_select') < 0 && names.indexOf('recommend') < 0 && names.indexOf('solve') < 0 && names.indexOf('c4CompareSelect') < 0 && names.indexOf('rank_best') < 0, names);
+  check('Category-G NOT implemented (no train_baseline_model/evaluate_model)', names.indexOf('train_baseline_model') < 0 && names.indexOf('evaluate_model') < 0, names);
   check('TF2 retrieve primitives present (inventory_files/detect_format/resolve_url)', ['inventory_files', 'detect_format', 'resolve_url'].every(function (n) { return names.indexOf(n) >= 0; }), names);
   check('TF4 modality profilers present (pointcloud/images/table/annotations)', ['profile_pointcloud', 'profile_images', 'profile_table', 'profile_annotations'].every(function (n) { return names.indexOf(n) >= 0; }), names);
+  check('TF5 readiness tools present (convert/split/config/assess)', ['convert_annotations', 'create_dataset_split', 'prepare_training_config', 'assess_training_readiness'].every(function (n) { return names.indexOf(n) >= 0; }), names);
+  // leakage-free + reproducible split (Category-F invariants)
+  var sp1 = tk.dispatch('create_dataset_split', { items: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 5 });
+  var sp2 = tk.dispatch('create_dataset_split', { items: ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'], ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 5 });
+  var allSp = sp1.train.concat(sp1.val, sp1.test), seenSp = {}, leak = false;
+  allSp.forEach(function (x) { if (seenSp[x]) leak = true; seenSp[x] = 1; });
+  check('create_dataset_split: leakage-free + covers all + reproducible by seed', !leak && sp1.covers_all && allSp.length === 8 && JSON.stringify(sp1) === JSON.stringify(sp2), { leak: leak, counts: sp1.counts });
   // fixture-path assertion: inventory_files reads the real local sample fixture under data/samples/<id>/
   var inv = tk.dispatch('inventory_files', { path: 'data/samples/PC-Urban' });
   check('inventory_files reads the data/samples/<id>/ fixture (excludes _FIXTURE.json)', inv.file_count === 2 && JSON.stringify(inv.by_format) === JSON.stringify({ text: 1, ply: 1 }) && inv.files.every(function (f) { return f.name !== '_FIXTURE.json' && f.type === f.format; }), inv);

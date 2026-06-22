@@ -709,6 +709,60 @@
       note: 'Deterministic. numeric-profile within tolerance (counts exact, floats rel 1%) + modality tool-selection + corrupted/empty/incomplete edge. defined-only skipped. No LLM-judge.', perCase: perCase };
   }
 
+  // ---------------------------------------------- CATEGORY-F: USE — data-prep/transform (OC_DATA_1)
+  // Deterministic, no LLM-judge. convert validity (#annotations + bbox preserved across coco/yolo/pascal_voc)
+  // · dataset-split correctness (no leakage + ratio-in-tol + reproducible-by-seed) · annotation validity.
+  function _bboxClose(a, b, tol) { return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every(function (x, i) { return typeof x === 'number' && typeof b[i] === 'number' && Math.abs(x - b[i]) <= tol; }); }
+  function scoreConversion(pred, gt, tol) {                 // generic per-field compare (format-agnostic)
+    tol = tol || 1e-6; pred = pred || {}; var pa = arr(pred.annotations), ga = (gt && gt.annotations) || [];
+    var numOk = pa.length === gt.num_annotations, matched = 0;
+    ga.forEach(function (g, i) {
+      var p = pa[i]; if (!p) return; var ok = true;
+      Object.keys(g).forEach(function (k) {
+        if (k === 'image_id') return;
+        var gv = g[k], pv = p[k];
+        if (k === 'class_id' || k === 'class') { if (pv !== gv) ok = false; }
+        else if (Array.isArray(gv)) { if (!_bboxClose(pv, gv, tol)) ok = false; }
+        else if (typeof gv === 'number') { if (typeof pv !== 'number' || Math.abs(pv - gv) > tol) ok = false; }
+        else { if (norm(pv) !== norm(gv)) ok = false; }
+      });
+      if (ok) matched++;
+    });
+    return { numAnnotationsOk: numOk, bboxPreserved: matched === ga.length, correct: numOk && matched === ga.length,
+      accuracy: +(((numOk ? 1 : 0) + (matched / Math.max(1, ga.length))) / 2).toFixed(3) };
+  }
+  function scoreSplit(out, spec) {                          // INVARIANTS only (tool/PRNG-agnostic)
+    out = out || {}; var s = out.splits || {}, tr = arr(s.train), va = arr(s.val), te = arr(s.test);
+    var all = (spec.items || []).map(String), setAll = {}; all.forEach(function (x) { setAll[x] = 1; });
+    var union = tr.concat(va, te).map(String), uniqUnion = uniq(union);
+    var noDup = union.length === uniqUnion.length;                                   // no item in 2 splits
+    var complete = uniqUnion.length === all.length && uniqUnion.every(function (x) { return setAll[x]; });
+    function ratioOk(part, target) { return all.length ? Math.abs(part.length / all.length - target) <= (spec.tolerance || 0.1) : part.length === 0; }
+    var ratiosOk = ratioOk(tr, spec.ratios.train) && ratioOk(va, spec.ratios.val) && ratioOk(te, spec.ratios.test);
+    return { noLeakage: noDup && complete, complete: complete, ratiosOk: ratiosOk, valid: noDup && complete && ratiosOk };
+  }
+  // benchmarkPrep(agentRunFn, categoryF) — agent gets { subtype, target, items, ratios, tolerance, seed,
+  // source/inline_source }; returns { annotations } | { splits } | { valid }. Split reproducibility tested
+  // by a DOUBLE call (same seed must yield identical splits). `deferred` cases skipped.
+  function benchmarkPrep(agentRunFn, categoryF) {
+    var cases = ((categoryF && categoryF.cases) || []).filter(function (c) { return c.status !== 'deferred'; });
+    var cT = 0, cAcc = 0, sT = 0, sC = 0, vT = 0, vC = 0, perCase = [];
+    cases.forEach(function (c) {
+      var input = { subtype: c.subtype, target: c.target, items: c.items, ratios: c.ratios, tolerance: c.tolerance, seed: c.seed, source: c.source, inline_source: c.inline_source };
+      var out = agentRunFn(input) || {}, row = { subtype: c.subtype, target: c.target };
+      if (c.subtype === 'annotation-conversion') { cT++; var s = scoreConversion(out, c.gt_conversion, c.tolerance); cAcc += s.accuracy; row.conversion = s; }
+      else if (c.subtype === 'dataset-split') { sT++; var inv = scoreSplit(out, c); var out2 = agentRunFn(input) || {};
+        var reproducible = JSON.stringify(out.splits || {}) === JSON.stringify(out2.splits || {});
+        if (inv.valid && reproducible) sC++; row.split = { noLeakage: inv.noLeakage, ratiosOk: inv.ratiosOk, reproducible: reproducible, correct: inv.valid && reproducible }; }
+      else if (c.subtype === 'annotation-validity') { vT++; var ok = (!!out.valid) === (!!c.gt_valid); if (ok) vC++; row.validity = { pred: !!out.valid, gt: !!c.gt_valid, correct: ok }; }
+      perCase.push(row);
+    });
+    return { category: 'F', scoredCases: cases.length,
+      conversionAccuracy: cT ? +(cAcc / cT).toFixed(4) : null, splitCorrectness: sT ? +(sC / sT).toFixed(4) : null,
+      annotationValidityAccuracy: vT ? +(vC / vT).toFixed(4) : null, counts: { conversion: cT, split: sT, validity: vT },
+      note: 'Deterministic. convert validity (#ann+bbox) + split correctness (no-leakage+ratio+reproducible double-call) + annotation validity. No LLM-judge. deferred skipped.', perCase: perCase };
+  }
+
   // ---------------------------------------------- exports
   const API = {
     parseNeed, c1Discovery, c2Understand, c3Fitness, c4CompareSelect, c5Reliability,
@@ -719,6 +773,7 @@
     scoreAccessStatus, reportCompleteness, citationScore, benchmarkAccessLicense, REPORT_REQUIRED_FIELDS,
     scoreFormatDetection, scoreInventory, benchmarkRetrieve,
     scoreProfile, benchmarkProfile,
+    scoreConversion, scoreSplit, benchmarkPrep,
     classifyAccess, classifyUrl, citation, assembleReport,
     LABEL: 'Capability Framework + Deterministic Benchmark (reference baseline)',
     FRAMEWORK: [

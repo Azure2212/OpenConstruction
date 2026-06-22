@@ -249,6 +249,132 @@
     satellite_rgb: 'profile_images', depth: 'profile_images', thermal: 'profile_images', tabular: 'profile_table' };
   function profilerForModality(m) { return PROFILER_FOR_MODALITY[m] || null; }
 
+  // ============================================================ Cap-5 USE: training READINESS (TF5)
+  // .doc Capability 5 / Tool Family 5 / Category F ("data preparation + transformation": correct output
+  // format · NO train/test leakage · annotation validity after conversion · reproducibility of split).
+  // READINESS ONLY — preprocessing guidance + can-this-train checks. NO actual training (train_baseline_model
+  // / evaluate_model = Category G, deferred per the email tool list). All deterministic, model-free.
+  function _loadCoco(abs) {
+    var isDir = false; try { isDir = _fs.statSync(abs).isDirectory(); } catch (e) {}
+    var file = isDir ? _findInDir(abs, function (n, a) { var b; try { b = _fs.readFileSync(a); } catch (e) { return false; } return classifyFileFormat(n, b).format === 'coco'; }) : abs;
+    if (!file) return null;
+    try { return { file: file, coco: JSON.parse(_readText(file)) }; } catch (e) { return null; }
+  }
+  function _cocoCommon(coco) {
+    var cats = (coco.categories || []).slice().sort(function (a, b) { return (a.id || 0) - (b.id || 0); });
+    var catIdx = {}; cats.forEach(function (c, i) { catIdx[c.id] = i; });
+    var imgById = {}; (coco.images || []).forEach(function (im) { imgById[im.id] = im; });
+    return { cats: cats, catIdx: catIdx, imgById: imgById };
+  }
+  function cocoToYolo(coco) {
+    var k = _cocoCommon(coco), byImage = {}, invalid = 0;
+    (coco.annotations || []).forEach(function (a) {
+      var im = k.imgById[a.image_id];
+      if (!im || !(a.category_id in k.catIdx) || !Array.isArray(a.bbox) || a.bbox.length !== 4 || !im.width || !im.height) { invalid++; return; }
+      var b = a.bbox, W = im.width, H = im.height;
+      var line = k.catIdx[a.category_id] + ' ' + [(b[0] + b[2] / 2) / W, (b[1] + b[3] / 2) / H, b[2] / W, b[3] / H].map(function (v) { return +v.toFixed(6); }).join(' ');
+      var stem = String(im.file_name || ('img' + im.id)).replace(/\.[^.]+$/, '');
+      (byImage[stem] = byImage[stem] || []).push(line);
+    });
+    var files = Object.keys(byImage).sort().map(function (s) { return { name: s + '.txt', lines: byImage[s] }; });
+    return { files: files, classes: k.cats.map(function (c) { return c.name; }), category_map: k.catIdx, invalid: invalid };
+  }
+  function cocoToVoc(coco) {
+    var k = _cocoCommon(coco), byImage = {}, invalid = 0;
+    (coco.annotations || []).forEach(function (a) {
+      var im = k.imgById[a.image_id];
+      if (!im || !(a.category_id in k.catIdx) || !Array.isArray(a.bbox) || a.bbox.length !== 4) { invalid++; return; }
+      var b = a.bbox, nm = k.cats[k.catIdx[a.category_id]].name;
+      var obj = { name: nm, bndbox: { xmin: b[0], ymin: b[1], xmax: b[0] + b[2], ymax: b[1] + b[3] } };
+      var stem = String(im.file_name || ('img' + im.id)).replace(/\.[^.]+$/, '');
+      (byImage[stem] = byImage[stem] || { filename: im.file_name || (stem + '.png'), width: im.width, height: im.height, objects: [] }).objects.push(obj);
+    });
+    var files = Object.keys(byImage).sort().map(function (s) { return { name: s + '.xml', filename: byImage[s].filename, width: byImage[s].width, height: byImage[s].height, objects: byImage[s].objects }; });
+    return { files: files, classes: k.cats.map(function (c) { return c.name; }), invalid: invalid };
+  }
+  function convertAnnotations(abs, to) {
+    to = String(to || '').toLowerCase();
+    var loaded = _loadCoco(abs);
+    if (!loaded) return { error: 'no COCO annotation file found', path: abs };
+    var coco = loaded.coco;
+    var base = { source_format: 'coco', target_format: to, num_images: (coco.images || []).length, num_annotations: (coco.annotations || []).length, num_categories: (coco.categories || []).length };
+    function n_conv(files) { return files.reduce(function (s, f) { return s + (f.lines ? f.lines.length : (f.objects ? f.objects.length : 0)); }, 0); }
+    if (to === 'yolo') { var y = cocoToYolo(coco); return Object.assign(base, { files: y.files, classes: y.classes, category_map: y.category_map, num_converted: n_conv(y.files), invalid_count: y.invalid, valid: y.invalid === 0 }); }
+    if (to === 'voc') { var v = cocoToVoc(coco); return Object.assign(base, { files: v.files, classes: v.classes, num_converted: n_conv(v.files), invalid_count: v.invalid, valid: v.invalid === 0 }); }
+    if (to === 'coco') return Object.assign(base, { files: [{ name: _path.basename(loaded.file) }], num_converted: base.num_annotations, invalid_count: 0, valid: true, note: 'identity (already COCO)' });
+    return { error: 'unsupported target format (use yolo | voc | coco)', target_format: to };
+  }
+  // Leakage-free, seed-reproducible split. Dedupes items (a repeated item across splits IS leakage),
+  // orders by hash(seed:item) (so the split is reproducible AND independent of input order), slices by ratio.
+  function _hash32(str) { var h = 2166136261 >>> 0; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  function normalizeRatios(ratios) {
+    var t, v, te;
+    if (Array.isArray(ratios)) { if (ratios.length >= 3) { t = ratios[0]; v = ratios[1]; te = ratios[2]; } else if (ratios.length === 2) { t = ratios[0]; v = 0; te = ratios[1]; } else { t = ratios[0] || 0.7; v = 0; te = 1 - t; } }
+    else if (ratios && typeof ratios === 'object') { t = ratios.train; v = (ratios.val != null ? ratios.val : (ratios.validation != null ? ratios.validation : 0)); te = ratios.test; if (t == null) t = 0.7; if (te == null) te = Math.max(0, 1 - t - v); }
+    else { t = 0.7; v = 0.15; te = 0.15; }
+    var s = t + v + te; if (!(s > 0)) { t = 0.7; v = 0.15; te = 0.15; s = 1; }
+    return { train: +(t / s).toFixed(6), val: +(v / s).toFixed(6), test: +(te / s).toFixed(6) };
+  }
+  function createDatasetSplit(items, ratios, seed) {
+    items = arr(items).map(String);
+    seed = (seed == null ? 0 : seed) | 0;
+    var seen = {}, uniq = []; items.forEach(function (it) { if (!seen[it]) { seen[it] = 1; uniq.push(it); } });
+    var dups = items.length - uniq.length;
+    var ordered = uniq.slice().sort(function (a, b) { var ha = _hash32(seed + ':' + a), hb = _hash32(seed + ':' + b); return ha - hb || (a < b ? -1 : a > b ? 1 : 0); });
+    var r = normalizeRatios(ratios), n = ordered.length;
+    var nTr = Math.floor(n * r.train), nVa = Math.floor(n * r.val);
+    var train = ordered.slice(0, nTr), val = ordered.slice(nTr, nTr + nVa), test = ordered.slice(nTr + nVa);
+    return { train: train, val: val, test: test, counts: { train: train.length, val: val.length, test: test.length },
+      total: n, seed: seed, ratios: r, duplicates_removed: dups, disjoint: true, covers_all: train.length + val.length + test.length === n,
+      leakage_free: true, note: 'deterministic: same (items,ratios,seed) -> identical split; sets are disjoint and cover all unique items' };
+  }
+  function prepareTrainingConfig(input) {
+    input = input || {};
+    var task = String(input.task || '').toLowerCase();
+    var prof = input.profile || {};
+    var modality = input.modality || prof.modality || null;
+    var num_classes = input.num_classes != null ? input.num_classes : (prof.num_categories != null ? prof.num_categories : (prof.num_classes != null ? prof.num_classes : null));
+    var fam = 'generic', model = null, metrics = [], input_size = null, framework = 'pytorch';
+    if (/detection|detect|\bbbox\b/.test(task)) { fam = 'detection'; model = 'yolov8n'; metrics = ['mAP', 'mAP50']; input_size = [640, 640]; }
+    else if (/segmentation/.test(task) && modality === 'point_cloud') { fam = 'pointcloud_segmentation'; model = 'pointnet2_seg'; metrics = ['mIoU', 'OA']; }
+    else if (/segmentation/.test(task)) { fam = 'segmentation'; model = 'deeplabv3_r50'; metrics = ['mIoU']; input_size = [512, 512]; }
+    else if (/classification|classify/.test(task) && modality === 'tabular') { fam = 'tabular_classification'; model = 'lightgbm'; metrics = ['accuracy', 'f1']; framework = 'lightgbm'; }
+    else if (/regression|forecast|cost|time/.test(task) && modality === 'tabular') { fam = 'tabular_regression'; model = 'lightgbm'; metrics = ['rmse', 'mae']; framework = 'lightgbm'; }
+    else if (modality === 'tabular') { fam = 'tabular'; model = 'lightgbm'; metrics = ['rmse', 'mae']; framework = 'lightgbm'; }
+    else if (modality === 'point_cloud') { fam = 'pointcloud'; model = 'pointnet2_cls'; metrics = ['accuracy']; }
+    else if (/classification|classify/.test(task) || modality === 'ground_rgb' || /image|rgb/.test(String(modality))) { fam = 'vision'; model = 'resnet18'; metrics = ['accuracy', 'f1']; input_size = [224, 224]; }
+    return { task: input.task || null, modality: modality || null, family: fam, recommended_model: model, num_classes: num_classes,
+      input_size: input_size, batch_size: 16, epochs: 50, optimizer: 'adamw', learning_rate: 0.001, metrics: metrics, framework: framework,
+      split: { ratios: { train: 0.7, val: 0.15, test: 0.15 }, seed: 42, leakage_free: true },
+      note: 'baseline READINESS config (deterministic preprocessing guidance) — not a training run (Category-G deferred)' };
+  }
+  var MIN_ITEMS_FOR_SPLIT = 3;   // design decision: need >=3 items to hold out a test set
+  function assessTrainingReadiness(absDir) {
+    var isDir = false; try { isDir = _fs.statSync(absDir).isDirectory(); } catch (e) {}
+    if (!isDir) return { error: 'assess_training_readiness expects a directory', path: absDir };
+    var files = walkFiles(absDir), fmts = [], corrupted = 0;
+    files.forEach(function (f) { var b; try { b = _fs.readFileSync(f.abs); } catch (e) { b = Buffer.alloc(0); } var c = classifyFileFormat(f.rel, b); fmts.push(c.format); if (c.format === 'corrupted' || c.format === 'empty') corrupted++; });
+    var modality = guessModality(fmts);
+    var num_items = 0, has_valid_annotations = null;
+    if (modality === 'point_cloud') { var pc = profilePointcloud(absDir); num_items = pc.num_points || 0; has_valid_annotations = pc.has_labels ? true : null; }
+    else if (modality === 'tabular') { var tb = profileTable(absDir); num_items = tb.num_rows || 0; }
+    else if (modality === 'ground_rgb' || profilerForModality(modality) === 'profile_images') {
+      var im = profileImages(absDir); num_items = im.num_images || 0;
+      if (fmts.indexOf('coco') >= 0) { var an = profileAnnotations(absDir); has_valid_annotations = an.invalid_refs === 0; }
+    } else { num_items = files.filter(function (f, i) { return fmts[i] !== 'corrupted' && fmts[i] !== 'empty'; }).length; }
+    var checks = [], blockers = [];
+    function chk(name, pass, detail) { checks.push({ name: name, pass: !!pass, detail: detail }); if (!pass) blockers.push(detail || name); }
+    chk('has_data', num_items > 0, num_items > 0 ? num_items + ' items' : 'no data items found');
+    chk('no_corrupted_files', corrupted === 0, corrupted === 0 ? 'all files parse' : corrupted + ' corrupted/empty file(s)');
+    chk('annotations_valid', has_valid_annotations !== false, has_valid_annotations === false ? 'annotations have invalid image/category refs' : (has_valid_annotations === true ? 'annotations valid' : 'no annotations (n/a)'));
+    var splittable = num_items >= MIN_ITEMS_FOR_SPLIT;
+    chk('enough_for_split', splittable, splittable ? num_items + ' >= ' + MIN_ITEMS_FOR_SPLIT : 'too few items (' + num_items + ') for a train/val/test split (min ' + MIN_ITEMS_FOR_SPLIT + ')');
+    var hard = num_items === 0 || corrupted > 0 || has_valid_annotations === false;
+    var readiness = blockers.length === 0 ? 'ready' : (hard ? 'not_ready' : 'partial');
+    return { path: absDir && _path.basename(absDir), modality: modality, num_items: num_items, readiness: readiness,
+      splittable: splittable, has_valid_annotations: has_valid_annotations, corrupted_count: corrupted, checks: checks, blockers: blockers };
+  }
+
   // api = window.OCDataAgent / require('data-agent.js'); corpus = api.buildCorpus(...); taxonomy = the loaded agent-taxonomy.json
   // opts = { benchmarkResults?: <parsed data/benchmark-results.json> } (for recommend_benchmark)
   function createTools(api, corpus, taxonomy, opts) {
@@ -373,6 +499,33 @@
         name: 'profile_annotations',
         description: 'Profile a COCO ANNOTATION file. Computes num_images / num_annotations / num_categories, the label_distribution (count per category), and invalid_refs (annotations pointing at a missing image_id or category_id). Select this for COCO annotation/label files.',
         parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO json file or a sample directory under data/samples' } }, required: ['path'] }
+      }},
+      { type: 'function', function: {
+        name: 'convert_annotations',
+        description: 'Convert a dataset\'s annotations to another standard format DETERMINISTICALLY (currently from COCO to "yolo" or "voc", or "coco" identity). Returns the converted per-image files + a validity check (invalid_count). Preprocessing/readiness only — it does not write to disk or train anything.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'COCO file or sample directory under data/samples' }, to: { type: 'string', enum: ['yolo', 'voc', 'coco'] } }, required: ['path', 'to'] }
+      }},
+      { type: 'function', function: {
+        name: 'create_dataset_split',
+        description: 'Create a reproducible, LEAKAGE-FREE train/val/test split of a list of item ids. Same (items, ratios, seed) always yields the same disjoint split (no item in two splits). Provide items (e.g. from inventory_files), ratios, and a seed.',
+        parameters: { type: 'object', properties: {
+          items: { type: 'array', items: { type: 'string' }, description: 'item ids to split (e.g. image/file names)' },
+          ratios: { type: 'object', description: '{train,val,test} fractions (default 0.7/0.15/0.15; normalized if they do not sum to 1)' },
+          seed: { type: 'integer', description: 'random seed for reproducibility (default 0)' }
+        }, required: ['items'] }
+      }},
+      { type: 'function', function: {
+        name: 'prepare_training_config',
+        description: 'Generate a DETERMINISTIC baseline training configuration (recommended model, num_classes, input size, batch/epochs/optimizer/lr, metrics, split) from a task and/or a dataset profile. This is preprocessing GUIDANCE / readiness — it does NOT run training (Category-G deferred).',
+        parameters: { type: 'object', properties: {
+          task: { type: 'string' }, modality: { type: 'string', enum: modalityIds }, num_classes: { type: 'integer' },
+          profile: { type: 'object', description: 'optional profile from a profile_* tool (modality, num_categories, …)' }
+        }, required: [] }
+      }},
+      { type: 'function', function: {
+        name: 'assess_training_readiness',
+        description: 'Deterministically assess whether a LOCAL dataset sample is ready for a baseline ML experiment: enough items, no corrupted/empty files, valid annotations, and splittable. Returns a readiness verdict (ready | partial | not_ready) + per-check pass/fail + blockers. Readiness only — no training.',
+        parameters: { type: 'object', properties: { path: { type: 'string', description: 'sample directory under data/samples' } }, required: ['path'] }
       }},
       { type: 'function', function: {
         name: 'submit_answer',
@@ -525,6 +678,22 @@
         if (name === 'profile_images') return profileImages(pp.abs);
         if (name === 'profile_table') return profileTable(pp.abs);
         return profileAnnotations(pp.abs);
+      }
+      if (name === 'convert_annotations') {
+        if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
+        var cp = resolveSamplePath(baseDir, samplesRoot, args.path);
+        if (cp.error) return { error: cp.error, path: args.path };
+        try { _fs.statSync(cp.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
+        return convertAnnotations(cp.abs, args.to);
+      }
+      if (name === 'create_dataset_split') { return createDatasetSplit(args.items, args.ratios, args.seed); }
+      if (name === 'prepare_training_config') { return prepareTrainingConfig(args); }
+      if (name === 'assess_training_readiness') {
+        if (!_fs) return { error: 'filesystem not available in this environment', path: args.path };
+        var ap = resolveSamplePath(baseDir, samplesRoot, args.path);
+        if (ap.error) return { error: ap.error, path: args.path };
+        try { _fs.statSync(ap.abs); } catch (e) { return { error: 'path not found', path: args.path }; }
+        return assessTrainingReadiness(ap.abs);
       }
       if (name === 'submit_answer') {
         return { _final: true, selected_ids: arr(args.selected_ids), ranking: arr(args.ranking), fitness_verdict: args.fitness_verdict || null, abstained: !!args.abstained };

@@ -1,0 +1,15 @@
+{
+ "_meta": {
+  "category": "G",
+  "owner": "OC_DATA_1",
+  "status": "deferred",
+  "date": "2026-06-20",
+  "title": "Baseline training",
+  "anchor": ".doc Category-G (ACTION_PLAN 5.3)",
+  "why_deferred": "actual model TRAINING is not in the email tool list + heavy compute vs $0; DEFINED in the benchmark spec, implemented later/optionally",
+  "spec_metric": "training completes without error · config valid · trained-model val metric within an expected range (deterministic seed); NO LLM-judge",
+  "spec_inputs": "a prepared (converted+split) dataset (from Category-F) + a training config",
+  "spec_outputs": "{trained: bool, val_metric: number, epochs: int, seed: int}"
+ },
+ "cases": []
+}
