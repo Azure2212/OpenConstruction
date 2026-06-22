@@ -44,22 +44,30 @@ console.log('\n[2] RAG-lexical as an agent-agnostic agentRunFn (same contract as
   check('abstains only on zero lexical overlap', ab.abstained === true && ab.selected_ids.length === 0, ab);
 })();
 
-console.log('\n[3] RAG-lexical scored by benchmarkAgent on Category-A (fair head-to-head vs tool-agent)');
+console.log('\n[3] 3-row head-to-head (Category-A): RAG-naive / RAG+license-filter / tool-agent — same grader');
 (function () {
-  var lex = RAG.makeLexicalRetriever(corpus);
-  var R = api.benchmarkAgent(lex, gs, corpus);
-  console.log('  RAG-lexical:', JSON.stringify({ precision: R.precisionAtK, recall: R.recallAtK, nDCG: R.ndcgAtK, fitness: R.fitnessAccuracy, license: R.licenseCorrectness, abstention: R.abstentionCorrectness, halluc: R.hallucinationRate }));
-  // tool-agent reference = the deterministic engine (benchmarkOn 2-arg = blessed baseline)
-  var T = api.benchmarkOn(corpus, gs);
-  console.log('  tool-agent  :', JSON.stringify({ precision: T.precisionAtK, recall: T.recallAtK, nDCG: T.ndcgAtK, fitness: T.fitnessAccuracy, license: T.licenseCorrectness, abstention: T.abstentionCorrectness, halluc: T.hallucinationRate }));
-  // lock the deterministic RAG-lexical numbers (regression guard)
-  check('RAG-lexical numbers locked (P 0.503 / R 0.751 / nDCG 0.799 / fit 0.864 / lic 0.083 / abs 0.79 / halluc 0)',
-    approx(R.precisionAtK, 0.503) && approx(R.recallAtK, 0.751) && approx(R.ndcgAtK, 0.799) && approx(R.fitnessAccuracy, 0.864) && approx(R.licenseCorrectness, 0.083) && approx(R.abstentionCorrectness, 0.79) && R.hallucinationRate === 0, R);
-  check('RAG-lexical is a FAIR baseline: competent retrieval (recall>=0.7, nDCG>=0.75) but no fabrication', R.recallAtK >= 0.7 && R.ndcgAtK >= 0.75 && R.hallucinationRate === 0);
-  // the experimental point: RAG is weaker than the tool-agent precisely where structured reasoning matters
-  check('tool-agent BEATS RAG on precision (structured fitness) and license (constraint enforcement)', T.precisionAtK > R.precisionAtK && T.licenseCorrectness > R.licenseCorrectness, { ragP: R.precisionAtK, toolP: T.precisionAtK, ragLic: R.licenseCorrectness, toolLic: T.licenseCorrectness });
-  check('RAG license-compliance collapses (ignores the license facet) — the weak-baseline finding', R.licenseCorrectness < 0.2 && T.licenseCorrectness >= 0.99);
-  check('deterministic (repeat-equal full report)', JSON.stringify(api.benchmarkAgent(RAG.makeLexicalRetriever(corpus), gs, corpus)) === JSON.stringify(R));
+  var N = api.benchmarkAgent(RAG.makeLexicalRetriever(corpus), gs, corpus);                       // RAG-naive (lower bound)
+  var Fl = api.benchmarkAgent(RAG.makeLexicalRetriever(corpus, { licenseFilter: true }), gs, corpus); // RAG + canonical license post-filter
+  var T = api.benchmarkOn(corpus, gs);                                                             // tool-agent (deterministic engine)
+  function row(name, r) { return '  ' + name.padEnd(12) + JSON.stringify({ P: r.precisionAtK, R: r.recallAtK, nDCG: r.ndcgAtK, fit: r.fitnessAccuracy, lic: r.licenseCorrectness, abs: r.abstentionCorrectness, halluc: r.hallucinationRate }); }
+  console.log(row('RAG-naive', N)); console.log(row('RAG+filter', Fl)); console.log(row('tool-agent', T));
+
+  // lock the deterministic numbers (regression guard)
+  check('RAG-naive locked (P .503 / R .751 / nDCG .799 / fit .864 / lic .083 / abs .79)', approx(N.precisionAtK, 0.503) && approx(N.recallAtK, 0.751) && approx(N.ndcgAtK, 0.799) && approx(N.fitnessAccuracy, 0.864) && approx(N.licenseCorrectness, 0.083) && approx(N.abstentionCorrectness, 0.79) && N.hallucinationRate === 0, N);
+  check('RAG+filter locked (P .545 / R .776 / nDCG .846 / fit .864 / lic 1.0 / abs .79)', approx(Fl.precisionAtK, 0.545) && approx(Fl.recallAtK, 0.776) && approx(Fl.ndcgAtK, 0.846) && approx(Fl.fitnessAccuracy, 0.864) && approx(Fl.licenseCorrectness, 1.0) && approx(Fl.abstentionCorrectness, 0.79) && Fl.hallucinationRate === 0, Fl);
+
+  // FAIRNESS FIX (Critic 🔴): the canonical license post-filter takes RAG license .083 -> 1.0 (NOT a tool-agent
+  // advantage), while precision/nDCG barely move -> license was a STRAWMAN differentiator.
+  check('license post-filter fixes RAG license (.083 -> 1.0); precision/nDCG barely move (license was a strawman)',
+    Fl.licenseCorrectness === 1.0 && Math.abs(Fl.precisionAtK - N.precisionAtK) < 0.06 && Math.abs(Fl.ndcgAtK - N.ndcgAtK) < 0.06);
+  check('RAG+filter MATCHES the tool-agent on license (both 1.0) — not a differentiator', Fl.licenseCorrectness === 1.0 && T.licenseCorrectness === 1.0);
+
+  // RE-ANCHORED "where the tool-agent earns its value" = the advantages that SURVIVE a fair filtered RAG:
+  // precision (structured task-graph fitness), nDCG, fitness-acc, abstention. NOT license.
+  check('tool-agent beats RAG+filter on PRECISION (structured task-graph fitness, not retrieval)', T.precisionAtK - Fl.precisionAtK > 0.3, { tool: T.precisionAtK, ragFilter: Fl.precisionAtK });
+  check('tool-agent beats RAG+filter on nDCG + fitness-acc + abstention (the surviving advantages)', T.ndcgAtK > Fl.ndcgAtK && T.fitnessAccuracy > Fl.fitnessAccuracy && T.abstentionCorrectness > Fl.abstentionCorrectness, { nDCG: [Fl.ndcgAtK, T.ndcgAtK], fit: [Fl.fitnessAccuracy, T.fitnessAccuracy], abs: [Fl.abstentionCorrectness, T.abstentionCorrectness] });
+  check('all three are FAIR baselines: competent retrieval + 0 hallucination', N.recallAtK >= 0.7 && Fl.recallAtK >= 0.7 && N.hallucinationRate === 0 && Fl.hallucinationRate === 0 && T.hallucinationRate === 0);
+  check('deterministic (repeat-equal full reports)', JSON.stringify(api.benchmarkAgent(RAG.makeLexicalRetriever(corpus), gs, corpus)) === JSON.stringify(N) && JSON.stringify(api.benchmarkAgent(RAG.makeLexicalRetriever(corpus, { licenseFilter: true }), gs, corpus)) === JSON.stringify(Fl));
 })();
 
 console.log('\n[4] RAG-dense — cosine/rank math + end-to-end via a FAKE embedder (no network; proves the wiring)');

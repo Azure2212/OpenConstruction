@@ -33,6 +33,15 @@
     var n = (input && input.need) || {};
     return [input && input.q, n.task, n.modality, n.annotation].filter(function (x) { return x && String(x).trim(); }).join(' ');
   }
+  // corpus.byId is keyed by the engine's norm (lowercase + non-alnum->space + trim) — match it for lookups.
+  function ckey(id) { return String(id == null ? '' : id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function needRequiresCommercial(input) { var l = input && input.need && input.need.license; return !!(l && norm(l) !== 'any'); }
+  // Canonical RAG metadata post-filter: when the need requires commercial use, drop non-commercial_ok records
+  // from the ranked list (the corpus carries `rights.commercial_ok`). This is what any real RAG pipeline does.
+  function applyLicenseFilter(ranked, corpus, input) {
+    if (!needRequiresCommercial(input)) return ranked;
+    return ranked.filter(function (r) { var rec = corpus.byId.get(ckey(r.id)); return !!(rec && rec.rights && rec.rights.commercial_ok === true); });
+  }
 
   // ---------------------------------------------------------------- BM25 (real, Lucene-style)
   function buildBM25Index(corpus, opts) {
@@ -63,12 +72,15 @@
   }
 
   // ---------------------------------------------------------------- RAG-lexical agentRunFn (BM25)
+  // opts.licenseFilter (bool): apply the canonical license post-filter. false => RAG-naive (honest lower bound);
+  // true => RAG+filter (the FAIR comparison — a real RAG pipeline would post-filter on the commercial_ok facet).
   function makeLexicalRetriever(corpus, opts) {
     opts = opts || {};
     var index = buildBM25Index(corpus, opts);
     function run(input) {
       var k = (input && input.k) || opts.k || 5;
       var ranked = bm25Rank(index, queryText(input));
+      if (opts.licenseFilter) ranked = applyLicenseFilter(ranked, corpus, input);
       if (input && input.fitness_target) {                                  // RAG fitness = target in top-k for the need
         var topk = ranked.slice(0, k), tgt = norm(input.fitness_target);
         var fit = topk.some(function (r) { return norm(r.id) === tgt; });
@@ -78,7 +90,7 @@
       var abstain = top.length === 0, ids = top.map(function (r) { return r.id; });  // abstain ONLY on zero overlap
       return { selected_ids: abstain ? [] : ids, ranking: ids, abstained: abstain };
     }
-    run.index = index; run.kind = 'rag-lexical-bm25';
+    run.index = index; run.kind = opts.licenseFilter ? 'rag-lexical-bm25+license-filter' : 'rag-lexical-bm25';
     return run;
   }
 
@@ -102,6 +114,7 @@
       var qv = queryVecOf(queryText(input));
       if (!qv) return { selected_ids: [], ranking: [], abstained: true, _no_query_vec: true };
       var ranked = denseRank(denseIndex, qv);
+      if (opts.licenseFilter) ranked = applyLicenseFilter(ranked, corpus, input);   // same fair filter as lexical
       if (input && input.fitness_target) {
         var topk = ranked.slice(0, k), tgt = norm(input.fitness_target);
         return { selected_ids: [], ranking: [], fitness_verdict: { id: input.fitness_target, verdict: topk.some(function (r) { return norm(r.id) === tgt; }) ? 'fit' : 'unfit' }, abstained: false };
