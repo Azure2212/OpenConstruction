@@ -189,10 +189,15 @@
     function modeLabel(m) { return (window.OCMethods && window.OCMethods.LABELS && window.OCMethods.LABELS[m]) || m; }
     function rowCard(r) {
       var href = r.href ? fixHref({ href: r.href }) : '#';
+      var ev = r.evidence ? [r.evidence.license ? ('License: ' + r.evidence.license) : '', r.evidence.scale, r.evidence.source].filter(Boolean).join(' · ') : '';
+      var warn = (r.warnings && r.warnings.length) ? r.warnings.map(function (w) { return '⚠ ' + w.type; }).join('  ') : '';
       return '<a class="ocbot-card" href="' + esc(href) + '">' +
         '<span class="ocbot-ctype dataset">Dataset</span>' +
         '<div class="ocbot-ctitle">' + esc(r.name) + '</div>' +
-        '<div class="ocbot-ccite">' + esc(r.id) + (r.meta ? (' · ' + esc(r.meta)) : '') + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div></a>';
+        '<div class="ocbot-ccite">' + esc(r.id) + (r.meta ? (' · ' + esc(r.meta)) : '') + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div>' +
+        (ev ? '<div class="ocbot-ccite">' + esc(ev) + '</div>' : '') +
+        (warn ? '<div class="ocbot-ccite" style="color:#b45309">' + esc(warn) + '</div>' : '') +
+        '</a>';
     }
     async function answerMethod(q, mode) {
       var thinking = addBot('<span class="ocbot-typing"><i></i><i></i><i></i></span>');

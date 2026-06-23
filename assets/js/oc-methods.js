@@ -33,13 +33,46 @@
 
   function ckey(id) { return String(id == null ? '' : id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function recOf(id) { return recById[ckey(id)] || null; }
+
+  // --- Capability-1 §4 enrichment (ADDITIVE, display-only; data already in datasetRecord). The deterministic
+  //     ranking/selection is unchanged — these are computed AFTER ranking and never re-order results. ---
+  var _lastNeed = null;     // structured need parsed from the query, for fitness-based warnings/criteria
+  // §4 "metadata evidence: modality, task, annotation, license, scale, source, citation"
+  function evidenceOf(r) {
+    if (!r) return null;
+    var scale = (r.numImages != null) ? (r.numImages + ' images') : (r.numClasses != null ? (r.numClasses + ' classes') : null);
+    var src = [r.authors, r.doi ? ('DOI ' + r.doi) : null, r.paper ? 'paper' : null].filter(Boolean).join(' · ') || null;
+    return { license: r.license || 'Not specified', scale: scale, source: src, annotation: (r.annotationRaw || []).join(', ') || null };
+  }
+  // §4 warnings: missing metadata · unclear license · restricted access · domain mismatch (all deterministic)
+  function warningsOf(r, need) {
+    if (!r) return [];
+    var w = [];
+    if (!r.license || /not specified|unknown|unclear|n\/a/i.test(r.license)) w.push({ type: 'unclear-license', msg: 'License not specified' });
+    if (!(r.annotationRaw && r.annotationRaw.length) || (r.numImages == null && r.numClasses == null)) w.push({ type: 'missing-metadata', msg: 'Missing annotation/scale metadata' });
+    try { if (window.OCDataAgent.classifyAccess && window.OCDataAgent.classifyAccess(r) !== 'open') w.push({ type: 'restricted-access', msg: 'Access not groundable from metadata' }); } catch (e) {}
+    if (need) { try { var f = window.OCDataAgent.c3Fitness(r, need); if (f && f.verdict === 'unfit') { var miss = (f.criteria || []).filter(function (c) { return c.required && !c.pass; }).map(function (c) { return c.key; }); w.push({ type: 'domain-mismatch', msg: 'Does not satisfy: ' + (miss.join(', ') || 'the request') }); } } catch (e) {} }
+    return w;
+  }
+  // §4 "explanation of why each dataset matches or does not match" — per-criterion fitness (reuses C3, display only)
+  function criteriaOf(r, need) {
+    if (!r || !need) return [];
+    try { var f = window.OCDataAgent.c3Fitness(r, need); return (f && f.criteria || []).filter(function (c) { return c.required; }).map(function (c) { return { key: c.key, pass: !!c.pass, evidence: c.evidence }; }); } catch (e) { return []; }
+  }
+  // NOTE (scope-out, honest): §4 also lists `geographic coverage` and `construction context` facets — the
+  // OpenConstruction catalog metadata does NOT carry these fields, so they are intentionally NOT surfaced
+  // (no fabricated geo/context). Adding them needs new corpus fields (OC_DATA_1), out of this additive change.
+
   function rowOf(id, extra) {
     var r = recOf(id);
     return {
       id: id, name: r ? r.name : id, href: r && r.href ? r.href : null,
       meta: r ? [r.modalityRaw, (r.tasksRaw || []).slice(0, 2).join(', ')].filter(Boolean).join(' · ') : '',
       score: (extra && extra.score != null) ? extra.score : null,
-      reason: (extra && extra.reason) || ''
+      reason: (extra && extra.reason) || '',
+      evidence: evidenceOf(r),                 // C1 §4: metadata evidence (license/scale/source/annotation)
+      warnings: warningsOf(r, _lastNeed),      // C1 §4: per-candidate warnings
+      criteria: criteriaOf(r, _lastNeed)       // C1 §4: why match / not-match (per-criterion)
     };
   }
   function ensureCorpus() {
@@ -227,6 +260,7 @@
     window.OCMethods._onProg = opts.onProgress || function () {};
     var q = String(query == null ? '' : query).trim();
     if (!q) return Promise.resolve({ rows: [], note: '' });
+    try { _lastNeed = (window.OCDataAgent && window.OCDataAgent.parseNeed) ? window.OCDataAgent.parseNeed(q) : null; } catch (e) { _lastNeed = null; }  // C1 §4: structured need for warnings/criteria (display only)
     return ensureCorpus().then(function () {
       if (mode === 'dense') return runDense(q, onStatus);
       if (mode === 'hybrid') return runHybrid(q, onStatus);
