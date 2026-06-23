@@ -1415,19 +1415,11 @@
                 <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               </svg>
             </span>
-            <label class="visually-hidden" for="homeSearchScope">Filter search by resource type</label>
-            <select id="homeSearchScope" class="hero-search-scope" aria-label="Filter search by resource type">
-              <option value="all">All resources</option>
-              <option value="dataset">Datasets</option>
-              <option value="model">Models</option>
-              <option value="workflow">Workflows</option>
-              <option value="oer">OERs</option>
-            </select>
             <label class="visually-hidden" for="heroSearchMode">Retrieval method</label>
             <select id="heroSearchMode" class="hero-search-scope" aria-label="Choose retrieval method">
-              <option value="assistant" selected>Ask assistant</option>
+              <option value="assistant">Ask assistant</option>
               <option value="bm25">BM25 (lexical)</option>
-              <option value="dense">RAG-dense (bge-small)</option>
+              <option value="dense" selected>RAG-dense (bge-small)</option>
               <option value="agent">LLM-agent (Qwen2.5-1.5B)</option>
             </select>
             <input
@@ -2337,48 +2329,36 @@
 </div>
 
 <script src="assets/js/assistant.js?v=5"></script>
-<script src="assets/js/chatbox.js?v=6"></script>
+<script src="assets/js/chatbox.js?v=7"></script>
 
-<!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / LLM-agent). assistant.js is UNTOUCHED;
-     when the method selector = "Ask assistant" (default) this script stays out of the way. Reuses the real
-     retrieval modules (data-agent.js corpus + rag-baseline.js BM25/cosine) + transformers.js ONNX in-browser. -->
+<!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / LLM-agent) via window.OCMethods.
+     assistant.js is UNTOUCHED; this only acts when the method selector != "Ask assistant". -->
 <script src="assets/js/data-agent.js"></script>
 <script src="assets/js/rag-baseline.js"></script>
+<script src="assets/js/oc-methods.js"></script>
 <script>
 (function () {
   var $ = function (id){ return document.getElementById(id); };
   var form = $('homeSearchForm'), input = $('homeSearchInput'), modeSel = $('heroSearchMode');
-  if (!form || !input || !modeSel || !window.OCDataAgent || !window.OCRagBaseline) return;
+  if (!form || !input || !modeSel) return;
   var panel = $('heroMethodPanel'), noteEl = $('heroMethodNote'), statusEl = $('heroMethodStatus'),
       resEl = $('heroMethodResults'), progWrap = $('heroMethodProgressWrap'),
       progBar = $('heroMethodProgressBar'), progText = $('heroMethodProgressText');
-  var K = 8, AGENT_LABEL = 'Qwen2.5-1.5B';
-  var TJS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2';
-  var BGE_MODEL = 'Xenova/bge-small-en-v1.5', GEN_MODEL = 'onnx-community/Qwen2.5-1.5B-Instruct';
-  var DEVICE = (typeof navigator !== 'undefined' && navigator.gpu) ? 'webgpu' : 'wasm';
-  var corpusP = null, recById = {}, lexIndex = null, tjsP = null, embedderP = null, generatorP = null, docvecP = null;
 
-  function ckey(id){ return String(id == null ? '' : id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function esc(s){ var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
   function status(msg, kind){ statusEl.textContent = msg || ''; statusEl.className = 'hero-method-status' + (kind === 'err' ? ' is-err' : kind === 'ok' ? ' is-ok' : ''); }
   function showProgress(on){ progWrap.hidden = !on; if (!on){ progBar.style.width = '0%'; progText.textContent = ''; } }
-  function onProgress(p){ if (!p) return; if (p.status === 'progress' && p.total){ var pct = Math.round((p.loaded / p.total) * 100); progBar.style.width = pct + '%'; progText.textContent = 'Downloading ' + (p.file || '') + ' — ' + pct + '%'; } else if (p.status === 'done'){ progText.textContent = 'Loaded ' + (p.file || ''); } else if (p.status === 'ready'){ progBar.style.width = '100%'; progText.textContent = 'Model ready'; } }
-
-  function ensureCorpus(){ if (corpusP) return corpusP; corpusP = window.OCDataAgent.loadCorpus().then(function (corpus){ corpus.datasets.forEach(function (d){ recById[ckey(d.id)] = d; }); lexIndex = window.OCRagBaseline.buildBM25Index(corpus, {}); return corpus; }); return corpusP; }
-  function loadTJS(){ if (!tjsP) tjsP = import(TJS_URL).then(function (m){ m.env.allowLocalModels = false; return m; }); return tjsP; }
-  function nameOf(id){ var r = recById[ckey(id)]; return r ? r.name : id; }
-  function metaOf(id){ var r = recById[ckey(id)]; if (!r) return ''; return [r.modalityRaw, (r.tasksRaw || []).slice(0, 2).join(', ')].filter(Boolean).join(' · '); }
-  function hrefOf(id){ var r = recById[ckey(id)]; return r && r.href ? r.href : null; }
+  function onProgress(p){ if (!p) return; if (p.status === 'progress' && p.total){ showProgress(true); var pct = Math.round((p.loaded / p.total) * 100); progBar.style.width = pct + '%'; progText.textContent = 'Downloading ' + (p.file || '') + ' — ' + pct + '%'; } else if (p.status === 'done'){ progText.textContent = 'Loaded ' + (p.file || ''); } else if (p.status === 'ready'){ progBar.style.width = '100%'; progText.textContent = 'Model ready'; } }
 
   function render(rows, note){
     if (!rows || !rows.length){ resEl.innerHTML = '<div class="hero-method-empty">No matches.</div>'; return; }
     var html = '<ol class="hero-method-list">';
     rows.forEach(function (r){
-      var href = hrefOf(r.id), nm = esc(nameOf(r.id));
+      var nm = esc(r.name);
       html += '<li class="hero-method-item"><div class="hero-method-item-main">' +
-        '<div class="hero-method-item-title">' + (href ? ('<a href="' + esc(href) + '">' + nm + '</a>') : nm) +
+        '<div class="hero-method-item-title">' + (r.href ? ('<a href="' + esc(r.href) + '">' + nm + '</a>') : nm) +
         ' <span class="hero-method-id">' + esc(r.id) + '</span></div>' +
-        '<div class="hero-method-item-meta">' + esc(metaOf(r.id)) + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div></div>' +
+        '<div class="hero-method-item-meta">' + esc(r.meta) + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div></div>' +
         (r.score != null ? '<span class="hero-method-score">' + (+r.score).toFixed(3) + '</span>' : '') + '</li>';
     });
     html += '</ol>';
@@ -2386,60 +2366,36 @@
     resEl.innerHTML = html;
   }
 
-  function runBM25(q){ return ensureCorpus().then(function (){ var ranked = window.OCRagBaseline.bm25Rank(lexIndex, q).filter(function (r){ return r.score > 0; }).slice(0, K); render(ranked, 'BM25 lexical · ' + ranked.length + ' hits · native JS, fully offline'); status('BM25 done (' + ranked.length + ' hits).', 'ok'); }); }
-
-  function getEmbedder(){ if (embedderP) return embedderP; embedderP = loadTJS().then(function (TJS){ status('Loading bge-small embedder (' + DEVICE + ') — first time ~130 MB, then cached…'); showProgress(true); return TJS.pipeline('feature-extraction', BGE_MODEL, { device: DEVICE, dtype: 'fp32', progress_callback: onProgress }).catch(function (){ return TJS.pipeline('feature-extraction', BGE_MODEL, { device: 'wasm', dtype: 'fp32', progress_callback: onProgress }); }); }); return embedderP; }
-  function runDense(q){
-    if (!docvecP) docvecP = fetch('data/dense-docvecs-bge-small.json', { cache: 'force-cache' }).then(function (r){ if (!r.ok) throw new Error('docvecs ' + r.status); return r.json(); });
-    return Promise.all([ensureCorpus(), docvecP, getEmbedder()]).then(function (a){ var bundle = a[1], embedder = a[2], meta = bundle._meta || {}; showProgress(false); status('Embedding query in-browser (' + meta.model + ', ' + DEVICE + ')…'); return embedder((meta.query_prefix || '') + q, { pooling: meta.pooling || 'cls', normalize: true }).then(function (out){ var qv = Array.prototype.slice.call(out.data); var di = window.OCRagBaseline.buildDenseIndex(bundle.doc_ids, bundle.doc_vecs); var ranked = window.OCRagBaseline.denseRank(di, qv).slice(0, K); render(ranked, 'RAG-dense · ' + meta.model + ' (ONNX, in-browser, ' + DEVICE + ') · cosine over ' + bundle.doc_ids.length + ' bundled doc-vectors'); status('RAG-dense done.', 'ok'); }); }).catch(function (e){ showProgress(false); status('RAG-dense unavailable: ' + e.message, 'err'); });
-  }
-
-  function getGenerator(){ if (generatorP) return generatorP; generatorP = loadTJS().then(function (TJS){ status('Loading ' + AGENT_LABEL + ' (' + DEVICE + ') — first time ~1.7 GB, then cached. Small demo model.'); showProgress(true); return TJS.pipeline('text-generation', GEN_MODEL, { device: DEVICE, dtype: 'q4', progress_callback: onProgress }).catch(function (){ return TJS.pipeline('text-generation', GEN_MODEL, { device: 'wasm', dtype: 'q4', progress_callback: onProgress }); }); }); return generatorP; }
-  function runAgent(q){
-    return Promise.all([ensureCorpus(), getGenerator()]).then(function (a){ var generator = a[1]; showProgress(false);
-      var shortlist = window.OCRagBaseline.bm25Rank(lexIndex, q).slice(0, 12).map(function (r){ var rec = recById[ckey(r.id)]; return { id: r.id, name: rec && rec.name, modality: rec && rec.modalityRaw, tasks: (rec && rec.tasksRaw || []).slice(0, 3).join(', ') }; });
-      var messages = [
-        { role: 'system', content: 'You help engineers find AEC datasets. From the CANDIDATES (real catalog ids), pick the best matches for the QUERY. Reply ONLY with compact JSON {"ranking":[{"id":"<exact id from candidates>","reason":"<short>"}]}. Use only ids present in the candidates; never invent ids.' },
-        { role: 'user', content: 'QUERY: ' + q + '\n\nCANDIDATES:\n' + shortlist.map(function (c){ return '- ' + c.id + ' | ' + c.name + ' | ' + c.modality + ' | ' + c.tasks; }).join('\n') }
-      ];
-      status('Running ' + AGENT_LABEL + ' in-browser (' + DEVICE + ')… (small model, may take a moment)');
-      return generator(messages, { max_new_tokens: 256, do_sample: false, return_full_text: false }).then(function (out){
-        var txt = (out && out[0] && out[0].generated_text) || ''; if (Array.isArray(txt)){ var last = txt[txt.length - 1]; txt = (last && last.content) || ''; }
-        var rank = []; try { var mm = String(txt).match(/\{[\s\S]*\}/); var pj = JSON.parse(mm ? mm[0] : txt); if (pj && pj.ranking) rank = pj.ranking; } catch (e) {}
-        if (!rank.length){ var re = /"id"\s*:\s*"([^"]+)"(?:\s*,\s*"reason"\s*:\s*"([^"]*)")?/g, x; while ((x = re.exec(String(txt)))) rank.push({ id: x[1], reason: x[2] || '' }); }
-        var seen = {}, valid = []; rank.forEach(function (r){ var k = ckey(r && r.id); if (recById[k] && !seen[k]){ seen[k] = 1; valid.push({ id: r.id, reason: r.reason }); } }); valid = valid.slice(0, K);
-        if (!valid.length){ status(AGENT_LABEL + ' returned no valid/parseable ids. Raw: ' + String(txt).slice(0, 160), 'err'); render([]); return; }
-        render(valid, 'LLM-agent · Qwen2.5-1.5B-Instruct (ONNX, in-browser, ' + DEVICE + ') · re-rank of a BM25 shortlist · ' + valid.length + ' picks (invalid ids dropped). ⚠ small demo model, NOT the 7B/14B benchmark models.');
-        status('LLM-agent done.', 'ok');
-      });
-    }).catch(function (e){ showProgress(false); status('LLM-agent unavailable: ' + e.message, 'err'); });
-  }
-
   var NOTES = {
     bm25: 'BM25 lexical match over 136 datasets — native JS, fully offline. Type a query and press Enter.',
-    dense: 'Embeds your query with bge-small-en-v1.5 (ONNX, ~130 MB first load, cached) + cosine over 136 pre-computed vectors. ' + (DEVICE === 'webgpu' ? 'WebGPU.' : 'CPU/WASM.') + ' Type a query and press Enter.',
-    agent: '⚠ Small Qwen2.5-1.5B (ONNX, ~1.7 GB first load, cached) re-ranks a shortlist in your browser — small DEMO model, NOT the 7B/14B benchmark models. ' + (DEVICE === 'webgpu' ? 'WebGPU (faster).' : 'CPU/WASM (slower).') + ' Type a query and press Enter.'
+    dense: 'Embeds your query with bge-small-en-v1.5 (ONNX, ~130 MB first load, cached) + cosine over 136 pre-computed vectors. Type a query and press Enter.',
+    agent: '⚠ Small Qwen2.5-1.5B (ONNX, ~1.7 GB first load, cached) re-ranks a shortlist in your browser — small DEMO model, NOT the 7B/14B benchmark models. Type a query and press Enter.'
   };
   function isMethod(){ return modeSel.value !== 'assistant'; }
   function syncMode(){
     var m = modeSel.value;
-    // hide assistant's own affordances while a retrieval method is active (assistant.js still OWNS them)
     document.querySelectorAll('.oc-ask-examples').forEach(function (el){ el.style.display = (m === 'assistant') ? '' : 'none'; });
     var ap = document.getElementById('ocAssistant'); if (ap && m !== 'assistant') ap.hidden = true;
     if (m === 'assistant'){ panel.hidden = true; resEl.innerHTML = ''; status(''); showProgress(false); noteEl.textContent = ''; }
-    else { panel.hidden = false; noteEl.textContent = NOTES[m] || ''; ensureCorpus(); }
+    else { panel.hidden = false; noteEl.textContent = NOTES[m] || ''; if (window.OCMethods) window.OCMethods.ensureCorpus().catch(function () {}); }
   }
-  function runCurrent(){ var q = (input.value || '').trim(); if (!q){ status('Type a query above.', 'err'); return; } resEl.innerHTML = ''; status('Working…'); var m = modeSel.value; if (m === 'dense') runDense(q); else if (m === 'agent') runAgent(q); else runBM25(q); }
-
+  function runCurrent(){
+    var q = (input.value || '').trim(); if (!q){ status('Type a query above.', 'err'); return; }
+    if (!window.OCMethods){ status('Retrieval module not loaded.', 'err'); return; }
+    resEl.innerHTML = ''; status('Working…'); showProgress(false);
+    window.OCMethods.run(modeSel.value, q, { onProgress: onProgress, onStatus: function (s){ status(s); } }).then(function (out){
+      showProgress(false); render(out.rows, out.note);
+      status(out.rows && out.rows.length ? ('Done (' + out.rows.length + ').') : 'No results.', 'ok');
+    }).catch(function (e){ showProgress(false); status('Error: ' + (e && e.message || e), 'err'); });
+  }
   modeSel.addEventListener('change', function (){ syncMode(); if (isMethod() && input.value.trim()) runCurrent(); });
-  // Capture phase: registered at parse-time (before assistant.js's DOMContentLoaded binding) so these fire FIRST.
-  // Only act when a retrieval method ≠ assistant is selected → suppress assistant's handlers; otherwise no-op.
+  // Capture phase (registered at parse-time, before assistant.js DOMContentLoaded): act only when method != assistant.
   form.addEventListener('submit', function (e){ if (isMethod()){ e.preventDefault(); e.stopImmediatePropagation(); runCurrent(); } }, true);
   input.addEventListener('input', function (e){ if (isMethod()){ e.stopImmediatePropagation(); } }, true);
-
   syncMode();
 })();
 </script>
 </body>
+
 
 </html>
