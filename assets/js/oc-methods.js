@@ -1,3 +1,4 @@
+/* OC_BUILD=20260622-agentfix3 */
 // Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -11,6 +12,7 @@
 // bar and the floating chatbox.
 (function () {
   'use strict';
+  try { console.log('[OC] build 20260622-agentfix3'); } catch (e) {}
   if (window.OCMethods) return;
   var K = 8;
   var TJS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2';
@@ -208,13 +210,13 @@
   }
 
   // Agent dispatcher: hosted proxy first (free-text, no local model needed) → fall back to in-browser.
+  // Agent = hosted proxy ONLY (no silent in-browser fallback, which was misread as a WebGPU model).
+  // runAgentLocal() is kept above for reference/debugging but is no longer auto-invoked.
   function runAgent(q, onStatus) {
     return runAgentProxy(q, onStatus).catch(function (e) {
-      if (e && e.proxyError) throw e;   // a real hosted-agent error → SHOW it, never silently fall back
-      // Only fall back when there is genuinely no proxy here (404/501/network — e.g. GitHub Pages).
-      if (typeof console !== 'undefined' && console.warn) console.warn('[OCMethods] no hosted proxy, using in-browser:', e && e.message || e);
-      onStatus('No hosted agent here — running a small model in your browser instead…');
-      return runAgentLocal(q, onStatus);
+      if (e && e.proxyError) throw e;   // real hosted-agent error → show "Hosted agent error (HTTP xxx): …"
+      // No proxy here (404/501/network — e.g. GitHub Pages static host): do NOT run a local model.
+      throw new Error('The LLM-agent runs on the hosted (Vercel) deployment. Open the Vercel app to use it — BM25 / RAG-dense / Hybrid work here in-browser.');
     });
   }
 
