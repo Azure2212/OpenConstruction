@@ -1417,7 +1417,6 @@
             </span>
             <label class="visually-hidden" for="heroSearchMode">Retrieval method</label>
             <select id="heroSearchMode" class="hero-search-scope" aria-label="Choose retrieval method">
-              <option value="assistant">Ask assistant</option>
               <option value="bm25">BM25 (lexical)</option>
               <option value="dense" selected>RAG-dense (bge-small)</option>
               <option value="hybrid">Hybrid (BM25 + RAG-dense)</option>
@@ -2329,11 +2328,13 @@
   </div>
 </div>
 
-<script src="assets/js/assistant.js?v=5"></script>
+<!-- assistant.js (the old hero "Ask assistant" engine) is intentionally NOT loaded on the home page:
+     the hero search now offers only the in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent).
+     Removing it disables the old live-search + #ocAssistant panel so it can't overlay the method results.
+     assistant.js itself is unchanged and still used on other pages. -->
 <script src="assets/js/chatbox.js?v=9"></script>
 
-<!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / LLM-agent) via window.OCMethods.
-     assistant.js is UNTOUCHED; this only acts when the method selector != "Ask assistant". -->
+<!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent) via window.OCMethods. -->
 <script src="assets/js/data-agent.js"></script>
 <script src="assets/js/rag-baseline.js"></script>
 <script src="assets/js/oc-methods.js?v=3"></script>
@@ -2395,6 +2396,8 @@
   form.addEventListener('submit', function (e){ if (isMethod()){ e.preventDefault(); e.stopImmediatePropagation(); runCurrent(); } }, true);
   input.addEventListener('input', function (e){ if (isMethod()){ e.stopImmediatePropagation(); } }, true);
   syncMode();
+  // Deep link: index.html?q=... prefills + runs the current method (replaces the old assistant ?q handler).
+  try { var pq = new URLSearchParams(location.search).get('q'); if (pq && isMethod()) { input.value = pq; runCurrent(); } } catch (e) {}
 })();
 </script>
 </body>
