@@ -2337,7 +2337,7 @@
 <!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent) via window.OCMethods. -->
 <script src="assets/js/data-agent.js"></script>
 <script src="assets/js/rag-baseline.js"></script>
-<script src="assets/js/oc-methods.js?v=3"></script>
+<script src="assets/js/oc-methods.js?v=4"></script>
 <script>
 (function () {
   var $ = function (id){ return document.getElementById(id); };
@@ -2372,7 +2372,7 @@
     bm25: 'BM25 lexical match over 136 datasets — native JS, fully offline. Type a query and press Enter.',
     dense: 'Embeds your query with bge-small-en-v1.5 (ONNX, ~130 MB first load, cached) + cosine over 136 pre-computed vectors. Type a query and press Enter.',
     hybrid: 'Fuses BM25 (lexical) + RAG-dense (bge-small ONNX) with a weighted α=0.7·BM25 + 0.3·dense blend (min-max normalized). Needs the embedding model (~130 MB first load, cached). Type a query and press Enter.',
-    agent: '⚠ Runs a small Qwen2.5 model in your browser to re-rank a shortlist — Qwen2.5-1.5B on WebGPU, or Qwen2.5-0.5B on plain CPU/WASM. Small DEMO model, NOT the 7B/14B benchmark models. Type a query and press Enter.'
+    agent: '⚠ Re-ranks a shortlist with an LLM. On the Vercel deployment it uses a hosted Qwen2.5-7B (via HF API); elsewhere (e.g. GitHub Pages) it falls back to a small in-browser model (1.5B on WebGPU / 0.5B on WASM). Type a query and press Enter.'
   };
   function isMethod(){ return modeSel.value !== 'assistant'; }
   function syncMode(){

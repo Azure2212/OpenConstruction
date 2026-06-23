@@ -24,6 +24,9 @@
   var AGENT_MODEL_USED = null, AGENT_DEVICE_USED = null;   // resolved when the generator loads
   function agentModelShort(m) { return /1\.5B/.test(m || '') ? 'Qwen2.5-1.5B' : 'Qwen2.5-0.5B'; }
   var FRIENDLY_AGENT = 'The in-browser language model could not run on this device — it likely lacks WebGPU or enough memory. Try BM25 or RAG-dense (both run fine here), or open this page in Chrome/Edge with WebGPU enabled for the agent.';
+  // Hosted-agent proxy (Vercel serverless). Same-origin by default → works on Vercel, 404s on GitHub Pages
+  // (then we fall back to the in-browser model). Override with window.OC_AGENT_PROXY = 'https://<app>.vercel.app/api/agent'.
+  var PROXY_URL = (typeof window !== 'undefined' && window.OC_AGENT_PROXY) || '/api/agent';
   var corpusP = null, recById = {}, lexIndex = null, tjsP = null, embedderP = null, generatorP = null, docvecP = null;
 
   function ckey(id) { return String(id == null ? '' : id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -137,11 +140,35 @@
       throw new Error('Hybrid needs the in-browser embedding model, which could not run on this device (likely no WebGPU / memory). Try BM25 — it runs fully offline.');
     });
   }
-  function runAgent(q, onStatus) {
-    return getGenerator(onStatus).then(function (generator) {
-      var shortlist = window.OCRagBaseline.bm25Rank(lexIndex, q).slice(0, 12).map(function (r) {
-        var rec = recOf(r.id); return { id: r.id, name: rec && rec.name, modality: rec && rec.modalityRaw, tasks: (rec && rec.tasksRaw || []).slice(0, 3).join(', ') };
+  // Shared BM25 shortlist of REAL candidates for the agent (proxy + in-browser both use it).
+  function agentShortlist(q) {
+    return window.OCRagBaseline.bm25Rank(lexIndex, q).slice(0, 12).map(function (r) {
+      var rec = recOf(r.id); return { id: r.id, name: rec && rec.name, modality: rec && rec.modalityRaw, tasks: (rec && rec.tasksRaw || []).slice(0, 3).join(', ') };
+    });
+  }
+
+  // Hosted agent via the Vercel proxy (HF · Qwen2.5-7B): key stays server-side, accepts free-text query.
+  // Rejects (→ caller falls back to in-browser) when the proxy is unreachable (e.g. /api/agent 404s on
+  // GitHub Pages) or errors/times out.
+  function runAgentProxy(q, onStatus) {
+    var cands = agentShortlist(q);
+    onStatus('Asking the hosted agent (HF · Qwen2.5-7B)…');
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 30000);
+    return fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, candidates: cands }), signal: ctrl ? ctrl.signal : undefined })
+      .then(function (res) { return res.text().then(function (t) { clearTimeout(timer); if (!res.ok) throw new Error('proxy HTTP ' + res.status); return JSON.parse(t); }); }, function (e) { clearTimeout(timer); throw e; })
+      .then(function (j) {
+        var seen = {}, rows = [];
+        (j.rows || []).forEach(function (r) { var k = ckey(r && r.id); if (recById[k] && !seen[k]) { seen[k] = 1; rows.push(rowOf(r.id, { reason: r.reason })); } });
+        rows = rows.slice(0, K);
+        return { rows: rows, note: 'LLM-agent · ' + (j.model || 'Qwen2.5-7B-Instruct') + ' (via hosted HF API) · re-rank of a BM25 shortlist · ' + rows.length + ' picks (invalid ids dropped).' };
       });
+  }
+
+  // In-browser fallback (transformers.js ONNX, device-adaptive 1.5B on WebGPU / 0.5B on WASM).
+  function runAgentLocal(q, onStatus) {
+    return getGenerator(onStatus).then(function (generator) {
+      var shortlist = agentShortlist(q);
       var messages = [
         { role: 'system', content: 'You help engineers find AEC datasets. From the CANDIDATES (real catalog ids), pick the best matches for the QUERY. Reply ONLY with compact JSON {"ranking":[{"id":"<exact id from candidates>","reason":"<short>"}]}. Use only ids present in the candidates; never invent ids.' },
         { role: 'user', content: 'QUERY: ' + q + '\n\nCANDIDATES:\n' + shortlist.map(function (c) { return '- ' + c.id + ' | ' + c.name + ' | ' + c.modality + ' | ' + c.tasks; }).join('\n') }
@@ -159,9 +186,17 @@
           note: 'LLM-agent · ' + agentModelShort(AGENT_MODEL_USED) + '-Instruct (ONNX, in-browser, ' + (AGENT_DEVICE_USED === 'webgpu' ? 'WebGPU' : 'WASM') + ') · re-rank of a BM25 shortlist · ' + rows.length + ' picks (invalid ids dropped). ⚠ small demo model, NOT the 7B/14B benchmark models.' };
       });
     }).catch(function (e) {
-      // Surface a human-readable message instead of a raw WASM abort code (e.g. an OOM pointer like "3587054648").
-      if (typeof console !== 'undefined' && console.error) console.error('[OCMethods] agent run failed:', e);
+      if (typeof console !== 'undefined' && console.error) console.error('[OCMethods] in-browser agent failed:', e);
       throw new Error(FRIENDLY_AGENT);
+    });
+  }
+
+  // Agent dispatcher: hosted proxy first (free-text, no local model needed) → fall back to in-browser.
+  function runAgent(q, onStatus) {
+    return runAgentProxy(q, onStatus).catch(function (e) {
+      if (typeof console !== 'undefined' && console.warn) console.warn('[OCMethods] hosted agent unavailable, falling back to in-browser:', e && e.message || e);
+      onStatus('Hosted agent unavailable — running a small model in your browser instead…');
+      return runAgentLocal(q, onStatus);
     });
   }
 
