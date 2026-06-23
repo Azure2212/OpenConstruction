@@ -127,6 +127,7 @@
         '<select class="ocbot-mode" id="ocbotMode" aria-label="Retrieval method">' +
           '<option value="bm25">BM25 (lexical)</option>' +
           '<option value="dense" selected>RAG-dense (bge-small)</option>' +
+          '<option value="hybrid">Hybrid (BM25 + RAG-dense)</option>' +
           '<option value="agent">LLM-agent (Qwen2.5)</option>' +
         '</select>';
       if (foot) foot.insertBefore(modeRow, foot.firstChild);

@@ -103,6 +103,40 @@
       throw new Error('The in-browser embedding model could not run on this device (likely no WebGPU / memory or a network issue loading the model). Try BM25 — it runs fully offline.');
     });
   }
+  // Hybrid = weighted fusion of BM25 (lexical) + RAG-dense (bge-small). Min-max normalize each score
+  // list to [0,1], then fuse alpha*BM25 + (1-alpha)*dense with alpha=0.7 (BM25-heavy, best benchmark variant).
+  function runHybrid(q, onStatus) {
+    var ALPHA = 0.7;
+    if (!docvecP) docvecP = fetch('data/dense-docvecs-bge-small.json', { cache: 'force-cache' }).then(function (r) { if (!r.ok) throw new Error('docvecs ' + r.status); return r.json(); });
+    return Promise.all([docvecP, getEmbedder(onStatus)]).then(function (a) {
+      var bundle = a[0], embedder = a[1], meta = bundle._meta || {};
+      var bm = window.OCRagBaseline.bm25Rank(lexIndex, q);            // all docs, lexical score
+      onStatus('Embedding query (hybrid) in-browser (' + meta.model + ', ' + DEVICE + ')…');
+      return embedder((meta.query_prefix || '') + q, { pooling: meta.pooling || 'cls', normalize: true }).then(function (out) {
+        var qv = Array.prototype.slice.call(out.data);
+        var di = window.OCRagBaseline.buildDenseIndex(bundle.doc_ids, bundle.doc_vecs);
+        var dn = window.OCRagBaseline.denseRank(di, qv);              // all docs, cosine
+        function minmax(list) {
+          var mn = Infinity, mx = -Infinity;
+          list.forEach(function (r) { if (r.score < mn) mn = r.score; if (r.score > mx) mx = r.score; });
+          var rng = (mx - mn) || 1, m = {};
+          list.forEach(function (r) { m[ckey(r.id)] = (r.score - mn) / rng; });
+          return m;
+        }
+        var bmN = minmax(bm), dnN = minmax(dn), ids = {};
+        bm.forEach(function (r) { ids[ckey(r.id)] = r.id; });
+        dn.forEach(function (r) { ids[ckey(r.id)] = r.id; });
+        var fused = Object.keys(ids).map(function (k) { return { id: ids[k], score: ALPHA * (bmN[k] || 0) + (1 - ALPHA) * (dnN[k] || 0) }; });
+        fused.sort(function (a, b) { return b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+        var top = fused.slice(0, K);
+        return { rows: top.map(function (r) { return rowOf(r.id, { score: r.score }); }),
+          note: 'Hybrid · weighted α=0.7·BM25 + 0.3·RAG-dense (' + meta.model + '), min-max normalized fusion over ' + bundle.doc_ids.length + ' datasets' };
+      });
+    }).catch(function (e) {
+      if (typeof console !== 'undefined' && console.error) console.error('[OCMethods] hybrid run failed:', e);
+      throw new Error('Hybrid needs the in-browser embedding model, which could not run on this device (likely no WebGPU / memory). Try BM25 — it runs fully offline.');
+    });
+  }
   function runAgent(q, onStatus) {
     return getGenerator(onStatus).then(function (generator) {
       var shortlist = window.OCRagBaseline.bm25Rank(lexIndex, q).slice(0, 12).map(function (r) {
@@ -140,6 +174,7 @@
     if (!q) return Promise.resolve({ rows: [], note: '' });
     return ensureCorpus().then(function () {
       if (mode === 'dense') return runDense(q, onStatus);
+      if (mode === 'hybrid') return runHybrid(q, onStatus);
       if (mode === 'agent') return runAgent(q, onStatus);
       return runBM25(q);
     });
@@ -147,7 +182,7 @@
 
   window.OCMethods = {
     run: run, ensureCorpus: ensureCorpus, device: DEVICE,
-    LABELS: { bm25: 'BM25 (lexical)', dense: 'RAG-dense (bge-small)', agent: 'LLM-agent (Qwen2.5)' },
+    LABELS: { bm25: 'BM25 (lexical)', dense: 'RAG-dense (bge-small)', hybrid: 'Hybrid (BM25 + RAG-dense)', agent: 'LLM-agent (Qwen2.5)' },
     _onProg: function () {}
   };
 })();

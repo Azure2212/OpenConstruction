@@ -1420,6 +1420,7 @@
               <option value="assistant">Ask assistant</option>
               <option value="bm25">BM25 (lexical)</option>
               <option value="dense" selected>RAG-dense (bge-small)</option>
+              <option value="hybrid">Hybrid (BM25 + RAG-dense)</option>
               <option value="agent">LLM-agent (Qwen2.5)</option>
             </select>
             <input
@@ -2329,13 +2330,13 @@
 </div>
 
 <script src="assets/js/assistant.js?v=5"></script>
-<script src="assets/js/chatbox.js?v=8"></script>
+<script src="assets/js/chatbox.js?v=9"></script>
 
 <!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / LLM-agent) via window.OCMethods.
      assistant.js is UNTOUCHED; this only acts when the method selector != "Ask assistant". -->
 <script src="assets/js/data-agent.js"></script>
 <script src="assets/js/rag-baseline.js"></script>
-<script src="assets/js/oc-methods.js?v=2"></script>
+<script src="assets/js/oc-methods.js?v=3"></script>
 <script>
 (function () {
   var $ = function (id){ return document.getElementById(id); };
@@ -2369,6 +2370,7 @@
   var NOTES = {
     bm25: 'BM25 lexical match over 136 datasets — native JS, fully offline. Type a query and press Enter.',
     dense: 'Embeds your query with bge-small-en-v1.5 (ONNX, ~130 MB first load, cached) + cosine over 136 pre-computed vectors. Type a query and press Enter.',
+    hybrid: 'Fuses BM25 (lexical) + RAG-dense (bge-small ONNX) with a weighted α=0.7·BM25 + 0.3·dense blend (min-max normalized). Needs the embedding model (~130 MB first load, cached). Type a query and press Enter.',
     agent: '⚠ Runs a small Qwen2.5 model in your browser to re-rank a shortlist — Qwen2.5-1.5B on WebGPU, or Qwen2.5-0.5B on plain CPU/WASM. Small DEMO model, NOT the 7B/14B benchmark models. Type a query and press Enter.'
   };
   function isMethod(){ return modeSel.value !== 'assistant'; }
