@@ -14,8 +14,16 @@
   if (window.OCMethods) return;
   var K = 8;
   var TJS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2';
-  var BGE_MODEL = 'Xenova/bge-small-en-v1.5', GEN_MODEL = 'onnx-community/Qwen2.5-1.5B-Instruct';
-  var DEVICE = (typeof navigator !== 'undefined' && navigator.gpu) ? 'webgpu' : 'wasm';
+  var BGE_MODEL = 'Xenova/bge-small-en-v1.5';
+  // Device-adaptive agent model: WebGPU can handle 1.5B; plain WASM/CPU OOMs on 1.5B (~1.7 GB),
+  // so fall back to the smaller 0.5B (~0.5 GB, fits WASM, already verified).
+  var GEN_MODEL_GPU = 'onnx-community/Qwen2.5-1.5B-Instruct';
+  var GEN_MODEL_CPU = 'onnx-community/Qwen2.5-0.5B-Instruct';
+  var HAS_WEBGPU = (typeof navigator !== 'undefined' && !!navigator.gpu);
+  var DEVICE = HAS_WEBGPU ? 'webgpu' : 'wasm';
+  var AGENT_MODEL_USED = null, AGENT_DEVICE_USED = null;   // resolved when the generator loads
+  function agentModelShort(m) { return /1\.5B/.test(m || '') ? 'Qwen2.5-1.5B' : 'Qwen2.5-0.5B'; }
+  var FRIENDLY_AGENT = 'The in-browser language model could not run on this device — it likely lacks WebGPU or enough memory. Try BM25 or RAG-dense (both run fine here), or open this page in Chrome/Edge with WebGPU enabled for the agent.';
   var corpusP = null, recById = {}, lexIndex = null, tjsP = null, embedderP = null, generatorP = null, docvecP = null;
 
   function ckey(id) { return String(id == null ? '' : id).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -53,9 +61,22 @@
   function getGenerator(onStatus) {
     if (generatorP) return generatorP;
     generatorP = loadTJS().then(function (TJS) {
-      onStatus('Loading Qwen2.5-1.5B (' + DEVICE + ') — first time ~1.7 GB, then cached. Small demo model.');
-      return TJS.pipeline('text-generation', GEN_MODEL, { device: DEVICE, dtype: 'q4', progress_callback: window.OCMethods._onProg })
-        .catch(function () { return TJS.pipeline('text-generation', GEN_MODEL, { device: 'wasm', dtype: 'q4', progress_callback: window.OCMethods._onProg }); });
+      var useGpu = HAS_WEBGPU;
+      var model = useGpu ? GEN_MODEL_GPU : GEN_MODEL_CPU;
+      onStatus(useGpu
+        ? 'WebGPU ✓ — loading Qwen2.5-1.5B (~1.7 GB first load, then cached)…'
+        : 'WASM (no WebGPU) — loading Qwen2.5-0.5B (~0.5 GB first load, then cached)…');
+      return TJS.pipeline('text-generation', model, { device: useGpu ? 'webgpu' : 'wasm', dtype: 'q4', progress_callback: window.OCMethods._onProg })
+        .then(function (p) { AGENT_MODEL_USED = model; AGENT_DEVICE_USED = useGpu ? 'webgpu' : 'wasm'; return p; })
+        .catch(function (e) {
+          // WebGPU attempt failed → fall back to the SMALL model on WASM (don't retry 1.5B on WASM = OOM).
+          if (useGpu) {
+            onStatus('WebGPU init failed — falling back to Qwen2.5-0.5B on WASM…');
+            return TJS.pipeline('text-generation', GEN_MODEL_CPU, { device: 'wasm', dtype: 'q4', progress_callback: window.OCMethods._onProg })
+              .then(function (p) { AGENT_MODEL_USED = GEN_MODEL_CPU; AGENT_DEVICE_USED = 'wasm'; return p; });
+          }
+          throw e;
+        });
     });
     return generatorP;
   }
@@ -77,6 +98,9 @@
         return { rows: ranked.map(function (r) { return rowOf(r.id, { score: r.score }); }),
           note: 'RAG-dense · ' + meta.model + ' (ONNX, in-browser, ' + DEVICE + ') · cosine over ' + bundle.doc_ids.length + ' bundled doc-vectors' };
       });
+    }).catch(function (e) {
+      if (typeof console !== 'undefined' && console.error) console.error('[OCMethods] dense run failed:', e);
+      throw new Error('The in-browser embedding model could not run on this device (likely no WebGPU / memory or a network issue loading the model). Try BM25 — it runs fully offline.');
     });
   }
   function runAgent(q, onStatus) {
@@ -88,7 +112,8 @@
         { role: 'system', content: 'You help engineers find AEC datasets. From the CANDIDATES (real catalog ids), pick the best matches for the QUERY. Reply ONLY with compact JSON {"ranking":[{"id":"<exact id from candidates>","reason":"<short>"}]}. Use only ids present in the candidates; never invent ids.' },
         { role: 'user', content: 'QUERY: ' + q + '\n\nCANDIDATES:\n' + shortlist.map(function (c) { return '- ' + c.id + ' | ' + c.name + ' | ' + c.modality + ' | ' + c.tasks; }).join('\n') }
       ];
-      onStatus('Running Qwen2.5-1.5B in-browser (' + DEVICE + ')… (small model, may take a moment)');
+      var shortName = agentModelShort(AGENT_MODEL_USED);
+      onStatus('Running ' + shortName + ' in-browser (' + (AGENT_DEVICE_USED === 'webgpu' ? 'WebGPU' : 'WASM') + ')… (small model, may take a moment)');
       return generator(messages, { max_new_tokens: 256, do_sample: false, return_full_text: false }).then(function (out) {
         var txt = (out && out[0] && out[0].generated_text) || ''; if (Array.isArray(txt)) { var last = txt[txt.length - 1]; txt = (last && last.content) || ''; }
         var rank = []; try { var mm = String(txt).match(/\{[\s\S]*\}/); var pj = JSON.parse(mm ? mm[0] : txt); if (pj && pj.ranking) rank = pj.ranking; } catch (e) {}
@@ -97,8 +122,12 @@
         rank.forEach(function (r) { var k = ckey(r && r.id); if (recById[k] && !seen[k]) { seen[k] = 1; rows.push(rowOf(r.id, { reason: r.reason })); } });
         rows = rows.slice(0, K);
         return { rows: rows,
-          note: 'LLM-agent · Qwen2.5-1.5B-Instruct (ONNX, in-browser, ' + DEVICE + ') · re-rank of a BM25 shortlist · ' + rows.length + ' picks (invalid ids dropped). ⚠ small demo model, NOT the 7B/14B benchmark models.' };
+          note: 'LLM-agent · ' + agentModelShort(AGENT_MODEL_USED) + '-Instruct (ONNX, in-browser, ' + (AGENT_DEVICE_USED === 'webgpu' ? 'WebGPU' : 'WASM') + ') · re-rank of a BM25 shortlist · ' + rows.length + ' picks (invalid ids dropped). ⚠ small demo model, NOT the 7B/14B benchmark models.' };
       });
+    }).catch(function (e) {
+      // Surface a human-readable message instead of a raw WASM abort code (e.g. an OOM pointer like "3587054648").
+      if (typeof console !== 'undefined' && console.error) console.error('[OCMethods] agent run failed:', e);
+      throw new Error(FRIENDLY_AGENT);
     });
   }
 
@@ -118,7 +147,7 @@
 
   window.OCMethods = {
     run: run, ensureCorpus: ensureCorpus, device: DEVICE,
-    LABELS: { bm25: 'BM25 (lexical)', dense: 'RAG-dense (bge-small)', agent: 'LLM-agent (Qwen2.5-1.5B)' },
+    LABELS: { bm25: 'BM25 (lexical)', dense: 'RAG-dense (bge-small)', agent: 'LLM-agent (Qwen2.5)' },
     _onProg: function () {}
   };
 })();

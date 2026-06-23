@@ -127,7 +127,7 @@
         '<select class="ocbot-mode" id="ocbotMode" aria-label="Retrieval method">' +
           '<option value="bm25">BM25 (lexical)</option>' +
           '<option value="dense" selected>RAG-dense (bge-small)</option>' +
-          '<option value="agent">LLM-agent (Qwen2.5-1.5B)</option>' +
+          '<option value="agent">LLM-agent (Qwen2.5)</option>' +
         '</select>';
       if (foot) foot.insertBefore(modeRow, foot.firstChild);
       if (window.OCMethods.ensureCorpus) window.OCMethods.ensureCorpus().catch(function () {});
@@ -209,7 +209,7 @@
           '<div class="ocbot-cards">' + out.rows.map(rowCard).join('') + '</div>' +
           (out.note ? '<div class="ocbot-foot-note">' + esc(out.note) + '</div>' : '');
         scroll();
-      } catch (e) { thinking.innerHTML = 'Error: ' + esc(e && e.message || e); scroll(); }
+      } catch (e) { thinking.innerHTML = esc((e && e.message) || String(e)); scroll(); }
     }
     function answer(q) {
       var modeSel = document.getElementById('ocbotMode');
