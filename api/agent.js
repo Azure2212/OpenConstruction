@@ -73,7 +73,20 @@ module.exports = async function handler(req, res) {
     return { id: String(c && c.id || ''), name: c && c.name, modality: c && c.modality, tasks: c && c.tasks };
   }).filter(function (c) { return c.id; });
   if (!query || !cands.length) { return send(res, 400, { error: 'query and candidates must be non-empty.' }); }
-  var validIds = {}; cands.forEach(function (c) { validIds[ckey(c.id)] = c.id; });
+  // Map BOTH the id and the name to the canonical id, so a model that echoes a dataset's TITLE
+  // (e.g. "SODA: Site Object Detection Dataset" instead of the id "SODA") still resolves.
+  var validIds = {}; cands.forEach(function (c) { validIds[ckey(c.id)] = c.id; if (c.name) validIds[ckey(c.name)] = c.id; });
+  function tokMatch(hay, needle) { return needle && (' ' + hay + ' ').indexOf(' ' + needle + ' ') >= 0; }
+  function resolveId(s) {                                         // model string -> canonical candidate id (or null)
+    var k = ckey(s); if (!k) return null;
+    if (validIds[k]) return validIds[k];                          // exact id OR exact name
+    for (var ci = 0; ci < cands.length; ci++) {                   // else token-run substring vs id/name
+      var c = cands[ci], ik = ckey(c.id), nk = ckey(c.name || '');
+      if (tokMatch(k, ik) || tokMatch(ik, k)) return c.id;
+      if (nk && (tokMatch(k, nk) || tokMatch(nk, k))) return c.id;
+    }
+    return null;
+  }
 
   var messages = [
     { role: 'system', content: 'You help engineers find AEC (architecture/engineering/construction) datasets. From the CANDIDATES (real catalog ids), pick the best matches for the QUERY, most relevant first. Reply ONLY with compact JSON {"ranking":[{"id":"<exact id from candidates>","reason":"<short>"}]}. Use only ids present in the candidates; never invent ids.' },
@@ -107,8 +120,15 @@ module.exports = async function handler(req, res) {
     var content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '';
     var rank = parseRanking(content);
     var seen = {}, rows = [];
-    rank.forEach(function (it) { var k = ckey(it && it.id); if (validIds[k] && !seen[k]) { seen[k] = 1; rows.push({ id: validIds[k], reason: (it.reason || '').slice(0, 200) }); } });
-    return send(res, 200, { rows: rows, model: PROVIDER.model, provider: PROVIDER.name });
+    rank.forEach(function (it) {
+      var id = resolveId(it && it.id);                            // name-tolerant -> canonical id
+      if (id) { var k = ckey(id); if (!seen[k]) { seen[k] = 1; rows.push({ id: id, reason: (it.reason || '').slice(0, 200) }); } }
+    });
+    // Floor: the model returned nothing that maps to a candidate, but we DO have a shortlist -> return it in
+    // its received (BM25) order rather than an empty result. Every row is a canonical candidate id.
+    var fallback = null;
+    if (!rows.length && cands.length) { fallback = 'lexical-order'; rows = cands.slice(0, 8).map(function (c) { return { id: c.id, reason: '' }; }); }
+    return send(res, 200, { rows: rows, model: PROVIDER.model, provider: PROVIDER.name, fallback: fallback });
   } catch (e) {
     clearTimeout(timer);
     var aborted = e && (e.name === 'AbortError');
