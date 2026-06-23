@@ -59,7 +59,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { return send(res, 405, { error: 'Method not allowed — use POST.' }); }
 
   var apiKey = process.env[PROVIDER.apiKeyEnv];
-  if (!apiKey) { return send(res, 500, { error: 'Server is missing the ' + PROVIDER.apiKeyEnv + ' environment variable.' }); }
+  if (!apiKey) { return send(res, 500, { error: PROVIDER.apiKeyEnv + ' not set on the server. Add it in Vercel → Project → Settings → Environment Variables (then redeploy).' }); }
 
   // body may already be parsed (Vercel) or a raw string.
   var body = req.body;
@@ -91,7 +91,18 @@ module.exports = async function handler(req, res) {
     });
     var text = await r.text();
     clearTimeout(timer);
-    if (!r.ok) { return send(res, 502, { error: 'Upstream model error (' + r.status + ').', detail: text.slice(0, 300) }); }
+    if (!r.ok) {
+      // Pull a human message out of the HF error body ({error:"..."} or {error:{message:"..."}}).
+      var um = text;
+      try { var ej = JSON.parse(text); um = (ej.error && (ej.error.message || ej.error)) || ej.message || text; } catch (e) {}
+      var friendly;
+      if (r.status === 401 || r.status === 403) friendly = 'HF authentication/permission failed — the ' + PROVIDER.apiKeyEnv + ' token needs the "Inference Providers" permission (Make calls to Inference Providers) and access to the model.';
+      else if (r.status === 404) friendly = 'Model unavailable on the HF router — check the model id "' + PROVIDER.model + '".';
+      else if (r.status === 429) friendly = 'Rate-limited by the hosted model — please wait a moment and try again.';
+      else if (r.status === 503) friendly = 'The hosted model is cold-starting (503) — please try again in a few seconds.';
+      else friendly = 'Upstream model error.';
+      return send(res, 502, { error: friendly, upstream_status: r.status, detail: String(um).slice(0, 300), model: PROVIDER.model });
+    }
     var data; try { data = JSON.parse(text); } catch (e) { return send(res, 502, { error: 'Upstream returned non-JSON.' }); }
     var content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '';
     var rank = parseRanking(content);
@@ -101,6 +112,6 @@ module.exports = async function handler(req, res) {
   } catch (e) {
     clearTimeout(timer);
     var aborted = e && (e.name === 'AbortError');
-    return send(res, aborted ? 504 : 502, { error: aborted ? 'Upstream model timed out.' : 'Proxy request failed.', detail: String(e && e.message || e).slice(0, 200) });
+    return send(res, aborted ? 504 : 502, { error: aborted ? 'HF request timed out (possible cold-start) — please try again.' : 'Proxy could not reach the model provider.', detail: String(e && e.message || e).slice(0, 200), model: PROVIDER.model });
   }
 };

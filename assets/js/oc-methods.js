@@ -154,9 +154,25 @@
     var cands = agentShortlist(q);
     onStatus('Asking the hosted agent (HF · Qwen2.5-7B)…');
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 30000);
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 40000);
     return fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, candidates: cands }), signal: ctrl ? ctrl.signal : undefined })
-      .then(function (res) { return res.text().then(function (t) { clearTimeout(timer); if (!res.ok) throw new Error('proxy HTTP ' + res.status); return JSON.parse(t); }); }, function (e) { clearTimeout(timer); throw e; })
+      .then(function (res) {
+        return res.text().then(function (t) {
+          clearTimeout(timer);
+          // 404/501 = there is NO proxy here (static host, e.g. GitHub Pages) → caller may fall back in-browser.
+          if (res.status === 404 || res.status === 501) { var ne = new Error('no hosted proxy (HTTP ' + res.status + ')'); ne.noProxy = true; throw ne; }
+          if (!res.ok) {
+            // The proxy IS here but returned an error → surface the REAL message; do NOT hide it behind in-browser.
+            var msg = t; try { var j = JSON.parse(t); msg = j.error || j.detail || t; if (j.upstream_status) msg += ' (upstream ' + j.upstream_status + ')'; } catch (e) {}
+            var pe = new Error('Hosted agent error (HTTP ' + res.status + '): ' + String(msg).slice(0, 240)); pe.proxyError = true; throw pe;
+          }
+          return JSON.parse(t);
+        });
+      }, function (netErr) {
+        clearTimeout(timer);
+        if (netErr && netErr.name === 'AbortError') { var te = new Error('Hosted agent timed out (no response in 40s) — the serverless function or HF may be cold-starting. Try again.'); te.proxyError = true; throw te; }
+        var e = new Error('no-proxy-network'); e.noProxy = true; throw e;   // connection refused / DNS / CORS → no usable proxy
+      })
       .then(function (j) {
         var seen = {}, rows = [];
         (j.rows || []).forEach(function (r) { var k = ckey(r && r.id); if (recById[k] && !seen[k]) { seen[k] = 1; rows.push(rowOf(r.id, { reason: r.reason })); } });
@@ -194,8 +210,10 @@
   // Agent dispatcher: hosted proxy first (free-text, no local model needed) → fall back to in-browser.
   function runAgent(q, onStatus) {
     return runAgentProxy(q, onStatus).catch(function (e) {
-      if (typeof console !== 'undefined' && console.warn) console.warn('[OCMethods] hosted agent unavailable, falling back to in-browser:', e && e.message || e);
-      onStatus('Hosted agent unavailable — running a small model in your browser instead…');
+      if (e && e.proxyError) throw e;   // a real hosted-agent error → SHOW it, never silently fall back
+      // Only fall back when there is genuinely no proxy here (404/501/network — e.g. GitHub Pages).
+      if (typeof console !== 'undefined' && console.warn) console.warn('[OCMethods] no hosted proxy, using in-browser:', e && e.message || e);
+      onStatus('No hosted agent here — running a small model in your browser instead…');
       return runAgentLocal(q, onStatus);
     });
   }
