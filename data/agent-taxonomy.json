@@ -1,0 +1,1145 @@
+{
+  "schema_version": "1.0",
+  "title": "OpenConstruction Data Agent — canonical taxonomy (importable)",
+  "owner": "OC_DATA_1",
+  "purpose": "Single source of truth for canonicalization the engine IMPORTS, so CI (Node) == product (browser). Replaces in-code MODALITY_BUCKETS, licenseClass, and window-dependent canonTask in assets/js/data-agent.js.",
+  "provenance": {
+    "derived_from": [
+      "data/datasets.json",
+      "data/task-vocabulary.json"
+    ],
+    "generator": "workingGroup/specialists/OC_DATA_1/outputs/gen_agent_taxonomy.py",
+    "date": "2026-06-19"
+  },
+  "modality_buckets": {
+    "match_rule": "split raw data_modality on [,;/]; per token, FIRST bucket whose keyword is a substring wins (array order = priority).",
+    "buckets": [
+      {
+        "id": "point_cloud",
+        "label": "Point cloud",
+        "keywords": [
+          "point cloud",
+          "pointcloud",
+          "point clouds",
+          "lidar",
+          "laser scan",
+          "3d mesh",
+          "meshes",
+          "pcd"
+        ],
+        "dataset_count": 14
+      },
+      {
+        "id": "bim",
+        "label": "BIM / IFC",
+        "keywords": [
+          "bim",
+          "ifc",
+          "revit",
+          "building model",
+          "lod2 building",
+          "lod building"
+        ],
+        "dataset_count": 6
+      },
+      {
+        "id": "drawing",
+        "label": "Drawing / CAD",
+        "keywords": [
+          "cad",
+          "drawing",
+          "2d drawing",
+          "blueprint",
+          "floor plan",
+          "floorplan",
+          "schematic",
+          "document image",
+          "vector"
+        ],
+        "dataset_count": 10
+      },
+      {
+        "id": "satellite_rgb",
+        "label": "Satellite RGB",
+        "keywords": [
+          "satellite",
+          "remote sensing",
+          "orthomosaic"
+        ],
+        "dataset_count": 6
+      },
+      {
+        "id": "aerial_rgb",
+        "label": "Aerial RGB",
+        "keywords": [
+          "aerial",
+          "uav",
+          "drone"
+        ],
+        "dataset_count": 15
+      },
+      {
+        "id": "depth",
+        "label": "Depth / RGB-D",
+        "keywords": [
+          "rgb-d",
+          "rgbd",
+          "depth"
+        ],
+        "dataset_count": 5
+      },
+      {
+        "id": "thermal",
+        "label": "Thermal / IR",
+        "keywords": [
+          "thermal",
+          "infrared"
+        ],
+        "dataset_count": 3
+      },
+      {
+        "id": "hyperspectral",
+        "label": "Hyperspectral",
+        "keywords": [
+          "hyperspectral"
+        ],
+        "dataset_count": 1
+      },
+      {
+        "id": "gpr",
+        "label": "GPR radargram",
+        "keywords": [
+          "gpr",
+          "radargram"
+        ],
+        "dataset_count": 3
+      },
+      {
+        "id": "video",
+        "label": "Video",
+        "keywords": [
+          "video"
+        ],
+        "dataset_count": 4
+      },
+      {
+        "id": "text",
+        "label": "Text",
+        "keywords": [
+          "text",
+          "caption",
+          "question-answer",
+          "question answer",
+          "qa pairs",
+          "nlp",
+          "report"
+        ],
+        "dataset_count": 12
+      },
+      {
+        "id": "tabular",
+        "label": "Tabular",
+        "keywords": [
+          "tabular",
+          "table",
+          "spreadsheet",
+          "csv"
+        ],
+        "dataset_count": 10
+      },
+      {
+        "id": "sensor",
+        "label": "Sensor / IMU",
+        "keywords": [
+          "imu",
+          "accelerometer",
+          "sensor",
+          "inertial"
+        ],
+        "dataset_count": 4
+      },
+      {
+        "id": "geospatial",
+        "label": "Geospatial / GPS",
+        "keywords": [
+          "geospatial",
+          "gps",
+          "trajectory",
+          "gis",
+          "geographic"
+        ],
+        "dataset_count": 4
+      },
+      {
+        "id": "ground_rgb",
+        "label": "Ground RGB",
+        "keywords": [
+          "ground rgb",
+          "street view",
+          "rgb",
+          "image",
+          "photo",
+          "photograph"
+        ],
+        "dataset_count": 81
+      }
+    ]
+  },
+  "license_rights": {
+    "axes": [
+      "commercial_ok",
+      "derivatives_ok",
+      "share_alike",
+      "attribution"
+    ],
+    "note": "commercial_ok is INDEPENDENT of copyleft: GPL/AGPL/ODC-By/CC-BY-SA are commercial_ok=true (share-alike, but commercial use allowed). The engine's old licenseCl='permissive' gate wrongly failed these 5 datasets.",
+    "by_license": {
+      "cc by 4 0": {
+        "cls": "permissive",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 45,
+        "raw": [
+          "CC BY 4.0"
+        ]
+      },
+      "cc0": {
+        "cls": "public-domain",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": false,
+        "count": 6,
+        "raw": [
+          "CC0"
+        ]
+      },
+      "mit": {
+        "cls": "permissive",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 16,
+        "raw": [
+          "MIT"
+        ]
+      },
+      "apache 2 0": {
+        "cls": "permissive",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 4,
+        "raw": [
+          "Apache-2.0"
+        ]
+      },
+      "cc by sa 4 0": {
+        "cls": "copyleft",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": true,
+        "attribution": true,
+        "count": 2,
+        "raw": [
+          "CC BY-SA 4.0"
+        ]
+      },
+      "odc by": {
+        "cls": "permissive",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 2,
+        "raw": [
+          "ODC-By"
+        ]
+      },
+      "gpl 3 0": {
+        "cls": "copyleft",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": true,
+        "attribution": true,
+        "count": 2,
+        "raw": [
+          "GPL-3.0"
+        ]
+      },
+      "agpl 3 0": {
+        "cls": "copyleft",
+        "commercial_ok": true,
+        "derivatives_ok": true,
+        "share_alike": true,
+        "attribution": true,
+        "count": 1,
+        "raw": [
+          "AGPL 3.0"
+        ]
+      },
+      "cc by nc 4 0": {
+        "cls": "noncommercial",
+        "commercial_ok": false,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 24,
+        "raw": [
+          "CC BY-NC 4.0"
+        ]
+      },
+      "cc by nc sa 4 0": {
+        "cls": "noncommercial",
+        "commercial_ok": false,
+        "derivatives_ok": true,
+        "share_alike": true,
+        "attribution": true,
+        "count": 4,
+        "raw": [
+          "CC BY-NC-SA 4.0"
+        ]
+      },
+      "cc by nc nd 3 0": {
+        "cls": "noncommercial",
+        "commercial_ok": false,
+        "derivatives_ok": false,
+        "share_alike": false,
+        "attribution": true,
+        "count": 1,
+        "raw": [
+          "CC BY-NC-ND 3.0"
+        ]
+      },
+      "cc by nc nd 4 0": {
+        "cls": "noncommercial",
+        "commercial_ok": false,
+        "derivatives_ok": false,
+        "share_alike": false,
+        "attribution": true,
+        "count": 1,
+        "raw": [
+          "CC BY-NC-ND 4.0"
+        ]
+      },
+      "academic use only": {
+        "cls": "restrictive",
+        "commercial_ok": false,
+        "derivatives_ok": true,
+        "share_alike": false,
+        "attribution": true,
+        "count": 1,
+        "raw": [
+          "Academic Use Only"
+        ]
+      },
+      "not specified": {
+        "cls": "unknown",
+        "commercial_ok": null,
+        "derivatives_ok": null,
+        "share_alike": null,
+        "attribution": null,
+        "count": 26,
+        "raw": [
+          "Not Specified"
+        ]
+      }
+    },
+    "unknown": {
+      "cls": "unknown",
+      "commercial_ok": null,
+      "count": 1,
+      "raw": [
+        "Mixed License, see https://xview2.org/terms"
+      ]
+    },
+    "fallback_keyword_rules": [
+      {
+        "if_contains": [
+          "mixed",
+          "not specified",
+          "request"
+        ],
+        "class": "unknown"
+      },
+      {
+        "if_contains": [
+          "nc",
+          "non-commercial",
+          "noncommercial",
+          "academic use only",
+          "research only"
+        ],
+        "commercial_ok": false
+      },
+      {
+        "else": "commercial_ok=true"
+      }
+    ],
+    "summary": {
+      "commercial_ok": 78,
+      "unknown": 27,
+      "noncommercial": 31
+    }
+  },
+  "task_canon": {
+    "alias_count_current_vocab": 53,
+    "match_rule": "norm(label)=lowercase, non-alnum->space, trim; lookup over canonical_key+preferred_label+id+aliases of task-vocabulary.json, then alias-add / split / proposed.",
+    "map": {
+      "image classification": {
+        "canonical_id": "task.image-classification",
+        "preferred_label": "Image classification",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 3
+      },
+      "object detection": {
+        "canonical_id": "task.object-detection",
+        "preferred_label": "Object detection",
+        "broader": null,
+        "related": [
+          "task.3d-object-detection",
+          "task.building-detection",
+          "task.human-object-interaction-detection"
+        ],
+        "source": "vocab",
+        "count": 2
+      },
+      "semantic segmentation": {
+        "canonical_id": "task.semantic-segmentation",
+        "preferred_label": "Semantic segmentation",
+        "broader": null,
+        "related": [
+          "task.3d-semantic-segmentation",
+          "task.instance-segmentation",
+          "task.object-segmentation"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "object tracking": {
+        "canonical_id": "task.object-tracking",
+        "preferred_label": "Object tracking",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 3
+      },
+      "activity recognition": {
+        "canonical_id": "task.action-recognition",
+        "preferred_label": "Action recognition",
+        "broader": null,
+        "related": [],
+        "source": "alias-add",
+        "count": 2
+      },
+      "image captioning": {
+        "canonical_id": "task.image-captioning",
+        "preferred_label": "Image captioning",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "pose estimation": {
+        "canonical_id": "task.pose-estimation",
+        "preferred_label": "Pose estimation",
+        "broader": null,
+        "related": [
+          "task.6-dof-pose-estimation",
+          "task.robot-grasp-pose-estimation"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "simultaneous localization and mapping": {
+        "canonical_id": "task.simultaneous-localization-and-mapping",
+        "preferred_label": "Simultaneous localization and mapping",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "action recognition": {
+        "canonical_id": "task.action-recognition",
+        "preferred_label": "Action recognition",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "depth estimation": {
+        "canonical_id": "task.depth-estimation",
+        "preferred_label": "Depth estimation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "pathway prediction": {
+        "canonical_id": "task.pathway-prediction",
+        "preferred_label": "Pathway prediction",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "visual question answering": {
+        "canonical_id": "task.visual-question-answering",
+        "preferred_label": "Visual question answering",
+        "broader": "task.question-answering",
+        "related": [
+          "task.video-question-answering",
+          "task.vision-language-reasoning"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "visual grounding": {
+        "canonical_id": "task.visual-grounding",
+        "preferred_label": "Visual grounding",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "point cloud segmentation": {
+        "canonical_id": "task.point-cloud-segmentation",
+        "preferred_label": "Point cloud segmentation",
+        "broader": null,
+        "related": [
+          "task.3d-semantic-segmentation"
+        ],
+        "source": "vocab",
+        "count": 3
+      },
+      "image to image translation": {
+        "canonical_id": "task.image-to-image-translation",
+        "preferred_label": "Image-to-image translation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "layout synthesis": {
+        "canonical_id": "task.layout-synthesis",
+        "preferred_label": "Layout synthesis",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "image inpainting": {
+        "canonical_id": "task.image-inpainting",
+        "preferred_label": "Image inpainting",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "2d to bim reconstruction": {
+        "canonical_id": "task.2d-to-bim-reconstruction",
+        "preferred_label": "2D-to-BIM reconstruction",
+        "broader": "task.bim-reconstruction",
+        "related": [
+          "task.floorplan-to-bim",
+          "task.scan-to-bim",
+          "task.text-to-bim"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "knowledge graph reasoning": {
+        "canonical_id": "task.knowledge-graph-reasoning",
+        "preferred_label": "Knowledge graph reasoning",
+        "broader": null,
+        "related": [
+          "task.knowledge-graph-construction",
+          "task.ontology-search",
+          "task.question-answering",
+          "task.information-retrieval"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "case based retrieval": {
+        "canonical_id": "task.case-based-retrieval",
+        "preferred_label": "Case-based retrieval",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "question answering": {
+        "canonical_id": "task.question-answering",
+        "preferred_label": "Question answering",
+        "broader": null,
+        "related": [
+          "task.visual-question-answering",
+          "task.video-question-answering",
+          "task.vision-language-reasoning"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "change detection": {
+        "canonical_id": "task.change-detection",
+        "preferred_label": "Change detection",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "bim reconstruction": {
+        "canonical_id": "task.bim-reconstruction",
+        "preferred_label": "BIM reconstruction",
+        "broader": null,
+        "related": [
+          "task.2d-to-bim-reconstruction",
+          "task.floorplan-to-bim",
+          "task.scan-to-bim",
+          "task.text-to-bim",
+          "task.3d-reconstruction"
+        ],
+        "source": "vocab",
+        "count": 2
+      },
+      "crack detection": {
+        "canonical_id": "task.crack-detection",
+        "preferred_label": "Crack detection",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "named entity recognition": {
+        "canonical_id": "task.named-entity-recognition",
+        "preferred_label": "Named entity recognition",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "relation extraction": {
+        "canonical_id": "task.relation-extraction",
+        "preferred_label": "Relation extraction",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "automatic compliance checking": {
+        "canonical_id": "task.automatic-compliance-checking",
+        "preferred_label": "Automatic compliance checking",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "digital twin generation": {
+        "canonical_id": "task.digital-twin-generation",
+        "preferred_label": "Digital twin generation",
+        "broader": "task.scene-generation",
+        "related": [
+          "task.3d-reconstruction",
+          "task.bim-reconstruction"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "defect detection": {
+        "canonical_id": "task.defect-detection",
+        "preferred_label": "Defect detection",
+        "broader": null,
+        "related": [
+          "task.structural-defect-detection",
+          "task.crack-detection"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "floorplan segmentation": {
+        "canonical_id": "task.floorplan-segmentation",
+        "preferred_label": "Floorplan segmentation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "structure from motion": {
+        "canonical_id": "task.structure-from-motion",
+        "preferred_label": "Structure from motion",
+        "broader": "task.3d-reconstruction",
+        "related": [
+          "task.3d-registration"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "lod4 building model generation": {
+        "canonical_id": "task.lod4-building-model-generation",
+        "preferred_label": "LOD4 building model generation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "cad generation": {
+        "canonical_id": "task.cad-generation",
+        "preferred_label": "CAD generation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "text classification": {
+        "canonical_id": "task.text-classification",
+        "preferred_label": "Text classification",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "risk assessment": {
+        "canonical_id": "task.risk-assessment",
+        "preferred_label": "Risk assessment",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "geospatial analysis": {
+        "canonical_id": "task.geospatial-analysis",
+        "preferred_label": "Geospatial analysis",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "3d object detection": {
+        "canonical_id": "task.3d-object-detection",
+        "preferred_label": "3D object detection",
+        "broader": "task.object-detection",
+        "related": [
+          "task.point-cloud-segmentation"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "cost optimization": {
+        "canonical_id": "task.cost-optimization",
+        "preferred_label": "Cost optimization",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "material flow analysis": {
+        "canonical_id": "task.material-flow-analysis",
+        "preferred_label": "Material flow analysis",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "disaster recognition": {
+        "canonical_id": "task.disaster-recognition",
+        "preferred_label": "Disaster recognition",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "damage classification": {
+        "canonical_id": "task.damage-classification",
+        "preferred_label": "Damage classification",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "building detection": {
+        "canonical_id": "task.building-detection",
+        "preferred_label": "Building detection",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "object segmentation": {
+        "canonical_id": "task.object-segmentation",
+        "preferred_label": "Object segmentation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "instance segmentation": {
+        "canonical_id": "task.instance-segmentation",
+        "preferred_label": "Instance segmentation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 3
+      },
+      "material counting": {
+        "canonical_id": "task.material-counting",
+        "preferred_label": "Material counting",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "trajectory prediction": {
+        "canonical_id": "task.trajectory-prediction",
+        "preferred_label": "Trajectory prediction",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "structural defect detection": {
+        "canonical_id": "task.structural-defect-detection",
+        "preferred_label": "Structural defect detection",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "bim querying": {
+        "canonical_id": "task.bim-querying",
+        "preferred_label": "BIM querying",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "change segmentation": {
+        "canonical_id": "task.change-segmentation",
+        "preferred_label": "Change segmentation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "6 dof pose estimation": {
+        "canonical_id": "task.6-dof-pose-estimation",
+        "preferred_label": "6-DoF pose estimation",
+        "broader": "task.pose-estimation",
+        "related": [
+          "task.robot-grasp-pose-estimation"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "robot grasp pose estimation": {
+        "canonical_id": "task.robot-grasp-pose-estimation",
+        "preferred_label": "Robot grasp pose estimation",
+        "broader": "task.pose-estimation",
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "embodied carbon estimation": {
+        "canonical_id": "task.embodied-carbon-estimation",
+        "preferred_label": "Embodied carbon estimation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "life cycle assessment modeling": {
+        "canonical_id": "task.life-cycle-assessment-modeling",
+        "preferred_label": "Life cycle assessment modeling",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "layout retrieval": {
+        "canonical_id": "task.layout-retrieval",
+        "preferred_label": "Layout retrieval",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "3d semantic segmentation": {
+        "canonical_id": "task.3d-semantic-segmentation",
+        "preferred_label": "3D semantic segmentation",
+        "broader": "task.semantic-segmentation",
+        "related": [
+          "task.point-cloud-segmentation"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "bim automation": {
+        "canonical_id": "task.bim-automation",
+        "preferred_label": "BIM automation",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "3d reconstruction": {
+        "canonical_id": "task.3d-reconstruction",
+        "preferred_label": "3D reconstruction",
+        "broader": null,
+        "related": [
+          "task.structure-from-motion",
+          "task.3d-registration",
+          "task.bim-reconstruction"
+        ],
+        "source": "vocab",
+        "count": 3
+      },
+      "agentic blueprint reading": {
+        "canonical_id": "task.agentic-blueprint-reading",
+        "preferred_label": "Agentic blueprint reading",
+        "broader": null,
+        "related": [
+          "task.visual-question-answering",
+          "task.vision-language-reasoning"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "blueprint understanding": {
+        "canonical_id": "task.agentic-blueprint-reading",
+        "preferred_label": "Agentic blueprint reading",
+        "broader": null,
+        "related": [
+          "task.visual-question-answering",
+          "task.vision-language-reasoning"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "semantic and instance segmentation": {
+        "split": [
+          "task.semantic-segmentation",
+          "task.instance-segmentation"
+        ],
+        "source": "split-rule",
+        "count": 1
+      },
+      "roof structure segmentation": {
+        "canonical_id": "task.semantic-segmentation",
+        "preferred_label": "Semantic segmentation",
+        "broader": null,
+        "related": [
+          "task.3d-semantic-segmentation",
+          "task.instance-segmentation",
+          "task.object-segmentation"
+        ],
+        "source": "alias-add",
+        "count": 1
+      },
+      "retrieval augmented generation": {
+        "canonical_id": "task.retrieval-augmented-generation",
+        "preferred_label": "Retrieval-augmented generation",
+        "broader": null,
+        "related": [
+          "task.information-retrieval",
+          "task.question-answering",
+          "task.vision-language-reasoning"
+        ],
+        "source": "vocab",
+        "count": 1
+      },
+      "information retrieval": {
+        "canonical_id": "task.information-retrieval",
+        "preferred_label": "Information retrieval",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 2
+      },
+      "design recommendations": {
+        "canonical_id": "task.architecture-design-assistance",
+        "preferred_label": "Architecture design assistance",
+        "broader": null,
+        "related": [
+          "task.case-based-retrieval",
+          "task.layout-retrieval",
+          "task.vision-language-reasoning"
+        ],
+        "source": "alias-add",
+        "count": 1
+      },
+      "building performance analysis": {
+        "canonical_id": "task.building-performance-analysis",
+        "preferred_label": "Building performance analysis",
+        "broader": null,
+        "related": [],
+        "status": "proposed",
+        "category": "analysis-assessment",
+        "source": "proposed-new-task",
+        "count": 1
+      },
+      "building function classification": {
+        "canonical_id": "task.building-function-classification",
+        "preferred_label": "Building function classification",
+        "broader": "task.image-classification",
+        "related": [],
+        "status": "proposed",
+        "category": "recognition-classification",
+        "source": "proposed-new-task",
+        "count": 1
+      },
+      "bim object classification": {
+        "canonical_id": "task.bim-object-classification",
+        "preferred_label": "BIM object classification",
+        "broader": null,
+        "related": [],
+        "source": "vocab",
+        "count": 1
+      },
+      "drawing revisions": {
+        "canonical_id": "task.change-detection",
+        "preferred_label": "Change detection",
+        "broader": null,
+        "related": [],
+        "source": "alias-add",
+        "count": 1
+      },
+      "building energy prediction": {
+        "canonical_id": "task.building-energy-modeling",
+        "preferred_label": "Building energy modeling",
+        "broader": null,
+        "related": [],
+        "source": "alias-add",
+        "count": 1
+      },
+      "generative design": {
+        "canonical_id": "task.generative-design",
+        "preferred_label": "Generative design",
+        "broader": null,
+        "related": [],
+        "status": "proposed",
+        "category": "generation-synthesis",
+        "source": "proposed-new-task",
+        "count": 1
+      },
+      "photovoltaic power forecasting": {
+        "out_of_scope": true,
+        "reason": "non-AEC-core (solar PV power forecasting); 1 dataset NYSolarForecastLab. Dropped per OC reconcile of round-4 (Critic). Not a task axis in the benchmark.",
+        "source": "out-of-scope",
+        "count": 1
+      },
+      "architectural simulation": {
+        "canonical_id": "task.simulation-model-generation",
+        "preferred_label": "Simulation model generation",
+        "broader": null,
+        "related": [],
+        "source": "alias-add",
+        "count": 1
+      },
+      "road damage detection": {
+        "canonical_id": "task.defect-detection",
+        "preferred_label": "Defect detection",
+        "broader": null,
+        "related": [
+          "task.structural-defect-detection",
+          "task.crack-detection"
+        ],
+        "source": "alias-add",
+        "count": 1
+      },
+      "table structure recognition": {
+        "canonical_id": "task.table-structure-recognition",
+        "preferred_label": "Table Structure Recognition",
+        "broader": null,
+        "related": [],
+        "status": "proposed",
+        "category": "reasoning-qa-ie",
+        "source": "proposed-new-task",
+        "count": 1
+      },
+      "table detection": {
+        "canonical_id": "task.table-detection",
+        "preferred_label": "Table Detection",
+        "broader": "task.object-detection",
+        "related": [],
+        "status": "proposed",
+        "category": "detection-localization",
+        "source": "proposed-new-task",
+        "count": 1
+      }
+    },
+    "alias_additions": [
+      {
+        "raw": "activity recognition",
+        "to": "task.action-recognition"
+      },
+      {
+        "raw": "roof structure segmentation",
+        "to": "task.semantic-segmentation"
+      },
+      {
+        "raw": "design recommendations",
+        "to": "task.architecture-design-assistance"
+      },
+      {
+        "raw": "building energy prediction",
+        "to": "task.building-energy-modeling"
+      },
+      {
+        "raw": "architectural simulation",
+        "to": "task.simulation-model-generation"
+      },
+      {
+        "raw": "road damage detection",
+        "to": "task.defect-detection"
+      },
+      {
+        "raw": "drawing revisions",
+        "to": "task.change-detection"
+      }
+    ],
+    "split_rules": {
+      "semantic and instance segmentation": [
+        "task.semantic-segmentation",
+        "task.instance-segmentation"
+      ]
+    },
+    "proposed_new_tasks": [
+      {
+        "raw": "building performance analysis",
+        "id": "task.building-performance-analysis",
+        "category": "analysis-assessment",
+        "broader": null
+      },
+      {
+        "raw": "building function classification",
+        "id": "task.building-function-classification",
+        "category": "recognition-classification",
+        "broader": "task.image-classification"
+      },
+      {
+        "raw": "generative design",
+        "id": "task.generative-design",
+        "category": "generation-synthesis",
+        "broader": null
+      },
+      {
+        "raw": "table detection",
+        "id": "task.table-detection",
+        "category": "detection-localization",
+        "broader": "task.object-detection"
+      },
+      {
+        "raw": "table structure recognition",
+        "id": "task.table-structure-recognition",
+        "category": "reasoning-qa-ie",
+        "broader": null
+      }
+    ]
+  }
+}
