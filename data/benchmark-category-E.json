@@ -1,0 +1,1282 @@
+{
+ "_meta": {
+  "category": "E",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "id_keyed": true,
+  "gt_rule": "gt_ranking = rankBySuitability (transparent reference instrument; 10 criteria, exact+descendant task_align). Agent sees per-criterion EVIDENCE only (compare_resources) and must weigh itself.",
+  "scoring": "agent must reproduce gt_ranking; tools expose primitives only (not the rubric/oracle).",
+  "shared_rulebook": "data-agent-compare.js suitabilityScore/rankBySuitability",
+  "note_human_expert": "GT is the deterministic suitability instrument (operationalized expert judgment), NOT hand-labeled human ranks; human-expert rank validation = Phase-2 deepening.",
+  "gt_nature": "AGREEMENT WITH A TRANSPARENT REFERENCE INSTRUMENT — NOT hand-labeled human expert ranks. The instrument operationalizes the .doc suitability criteria deterministically.",
+  "scoring_policy": {
+   "top1": "correct if pick ∈ gt_top1_set (within margin EPS=0.02 of the max)",
+   "ranking": "Kendall-τ vs gt_ranking, with gt_ties groups treated as either-order-correct",
+   "margin_tolerance": 0.02
+  },
+  "weight_status": "The 10 criteria weights are a DESIGN DECISION (pending Critic sign-off). Sensitivity reported per case (gt_weight_sensitivity).",
+  "LIMITATION_phase2": "HUMAN-EXPERT validation of the rankings is NOT done — explicitly a Phase-2 limitation. Current GT trusts the transparent instrument.",
+  "modality_control": "4 of 11 compare-sets constrained to a single modality (>=3 candidates share it); rest are mixed-modality (flagged per case).",
+  "instrument_commit": "data-agent-compare.js v13 (num() K/M/B fix)"
+ },
+ "cases": [
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL 3d reconstruction project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "3D reconstruction",
+    "modality": "ground_rgb",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "DamCrack",
+    "HBD",
+    "LOD4-Building-Image-Modeling",
+    "Opening-Segmentation"
+   ],
+   "candidate_modalities": [
+    "aerial_rgb",
+    "bim",
+    "ground_rgb",
+    "point_cloud"
+   ],
+   "gt_ranking": [
+    "HBD",
+    "Opening-Segmentation",
+    "DamCrack",
+    "LOD4-Building-Image-Modeling"
+   ],
+   "gt_best": "HBD",
+   "rationale": {
+    "BuildingWorld": "CC BY-NC-SA 4.0 | imgs=5 | 2 annot types | 6 classes | mods=['bim', 'point_cloud']",
+    "DamCrack": "CC BY-NC 4.0 | imgs=11288 | 3 annot types | 3 classes | mods=['aerial_rgb', 'ground_rgb']",
+    "HBD": "MIT | imgs=3378 | 1 annot types | 11 classes | mods=['ground_rgb']",
+    "LOD4-Building-Image-Modeling": "CC BY 4.0 | imgs=995 | 0 annot types | None classes | mods=['aerial_rgb', 'ground_rgb']",
+    "Opening-Segmentation": "CC BY 4.0 | imgs=270 | 3 annot types | 3 classes | mods=['ground_rgb']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "HBD",
+     "total": 0.9544
+    },
+    {
+     "id": "Opening-Segmentation",
+     "total": 0.8911
+    },
+    {
+     "id": "DamCrack",
+     "total": 0.8133
+    },
+    {
+     "id": "LOD4-Building-Image-Modeling",
+     "total": 0.8011
+    }
+   ],
+   "gt_breakdown": {
+    "HBD": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.8,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "Opening-Segmentation": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.5,
+     "class_coverage": 0.4,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "DamCrack": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.4,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "LOD4-Building-Image-Modeling": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.5,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    }
+   },
+   "modality_controlled": true,
+   "gt_margin": 0.0633,
+   "gt_top1_set": [
+    "HBD"
+   ],
+   "gt_ties": [
+    [
+     "DamCrack",
+     "LOD4-Building-Image-Modeling"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL action recognition project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Action recognition",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "CMA",
+    "Earthmoving-Equipment",
+    "SMART",
+    "SWIT-Dataset",
+    "vtt-coniot"
+   ],
+   "candidate_modalities": [
+    "ground_rgb",
+    "satellite_rgb",
+    "sensor",
+    "video"
+   ],
+   "gt_ranking": [
+    "CMA",
+    "SMART",
+    "Earthmoving-Equipment",
+    "vtt-coniot",
+    "SWIT-Dataset"
+   ],
+   "gt_best": "CMA",
+   "rationale": {
+    "CMA": "MIT | imgs=1595 | 1 annot types | 7 classes | mods=['video']",
+    "Earthmoving-Equipment": "CC BY 4.0 | imgs=10 | 1 annot types | 7 classes | mods=['video']",
+    "SMART": "MIT | imgs=13000 | 2 annot types | 5 classes | mods=['satellite_rgb']",
+    "SWIT-Dataset": "CC BY-NC 4.0 | imgs=24340 | 2 annot types | 10 classes | mods=['ground_rgb', 'sensor']",
+    "vtt-coniot": "CC BY 4.0 | imgs=13 | 1 annot types | 16 classes | mods=['sensor']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "CMA",
+     "total": 0.908
+    },
+    {
+     "id": "SMART",
+     "total": 0.892
+    },
+    {
+     "id": "Earthmoving-Equipment",
+     "total": 0.8413
+    },
+    {
+     "id": "vtt-coniot",
+     "total": 0.8093
+    },
+    {
+     "id": "SWIT-Dataset",
+     "total": 0.8027
+    }
+   ],
+   "gt_breakdown": {
+    "CMA": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "SMART": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "Earthmoving-Equipment": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "vtt-coniot": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.8,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "SWIT-Dataset": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.8,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.016,
+   "gt_top1_set": [
+    "CMA",
+    "SMART"
+   ],
+   "gt_ties": [
+    [
+     "CMA",
+     "SMART"
+    ],
+    [
+     "vtt-coniot",
+     "SWIT-Dataset"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL instance segmentation project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Instance segmentation",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BuildingWorld",
+    "CUBIT-InSeg",
+    "HBD",
+    "MACO",
+    "UrbanTwin"
+   ],
+   "candidate_modalities": [
+    "aerial_rgb",
+    "bim",
+    "ground_rgb",
+    "point_cloud"
+   ],
+   "gt_ranking": [
+    "HBD",
+    "UrbanTwin",
+    "MACO",
+    "BuildingWorld",
+    "CUBIT-InSeg"
+   ],
+   "gt_best": "HBD",
+   "rationale": {
+    "BuildingWorld": "CC BY-NC-SA 4.0 | imgs=5 | 2 annot types | 6 classes | mods=['bim', 'point_cloud']",
+    "CUBIT-InSeg": "CC BY-NC 4.0 | imgs=6996 | 1 annot types | 2 classes | mods=['aerial_rgb']",
+    "HBD": "MIT | imgs=3378 | 1 annot types | 11 classes | mods=['ground_rgb']",
+    "MACO": "CC BY 4.0 | imgs=4426 | 3 annot types | 7 classes | mods=['ground_rgb']",
+    "UrbanTwin": "CC0 | imgs=10000 | 4 annot types | 6 classes | mods=['point_cloud']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "HBD",
+     "total": 0.9453
+    },
+    {
+     "id": "UrbanTwin",
+     "total": 0.9333
+    },
+    {
+     "id": "MACO",
+     "total": 0.924
+    },
+    {
+     "id": "BuildingWorld",
+     "total": 0.7733
+    },
+    {
+     "id": "CUBIT-InSeg",
+     "total": 0.7427
+    }
+   ],
+   "gt_breakdown": {
+    "HBD": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.8,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "UrbanTwin": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "MACO": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "BuildingWorld": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "CUBIT-InSeg": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.75,
+     "class_coverage": 0.4,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.012,
+   "gt_top1_set": [
+    "HBD",
+    "UrbanTwin"
+   ],
+   "gt_ties": [
+    [
+     "HBD",
+     "UrbanTwin"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL question answering project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Question answering",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BDAChat",
+    "BMKG",
+    "ConstructionSite-10k",
+    "VideoCAD",
+    "VizArQA"
+   ],
+   "candidate_modalities": [
+    "ground_rgb",
+    "satellite_rgb",
+    "text",
+    "video"
+   ],
+   "gt_ranking": [
+    "VideoCAD",
+    "BMKG",
+    "ConstructionSite-10k",
+    "BDAChat",
+    "VizArQA"
+   ],
+   "gt_best": "VideoCAD",
+   "rationale": {
+    "BDAChat": "CC BY-NC-SA 4.0 | imgs=22068 | 2 annot types | 10 classes | mods=['satellite_rgb']",
+    "BMKG": "AGPL 3.0 | imgs=200 | 3 annot types | None classes | mods=['text']",
+    "ConstructionSite-10k": "CC BY-NC 4.0 | imgs=10013 | 3 annot types | 3 classes | mods=['ground_rgb']",
+    "VideoCAD": "CC0 | imgs=41000 | 1 annot types | 7 classes | mods=['video']",
+    "VizArQA": "CC BY-NC 4.0 | imgs=121 | 1 annot types | 5 classes | mods=['ground_rgb', 'text']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "VideoCAD",
+     "total": 0.888
+    },
+    {
+     "id": "BMKG",
+     "total": 0.8267
+    },
+    {
+     "id": "ConstructionSite-10k",
+     "total": 0.776
+    },
+    {
+     "id": "BDAChat",
+     "total": 0.7533
+    },
+    {
+     "id": "VizArQA",
+     "total": 0.7307
+    }
+   ],
+   "gt_breakdown": {
+    "VideoCAD": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "BMKG": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.5,
+     "class_coverage": 0,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "ConstructionSite-10k": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.4,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "BDAChat": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.8,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "VizArQA": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.5,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.0613,
+   "gt_top1_set": [
+    "VideoCAD"
+   ],
+   "gt_ties": [],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL pose estimation project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Pose estimation",
+    "modality": "ground_rgb",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "CML",
+    "Construction-Equipment-Pose",
+    "VPM",
+    "wfcdataset"
+   ],
+   "candidate_modalities": [
+    "depth",
+    "ground_rgb",
+    "point_cloud"
+   ],
+   "gt_ranking": [
+    "CML",
+    "Construction-Equipment-Pose",
+    "VPM",
+    "wfcdataset"
+   ],
+   "gt_best": "CML",
+   "rationale": {
+    "CML": "CC BY 4.0 | imgs=146480 | 1 annot types | 225 classes | mods=['depth', 'ground_rgb']",
+    "Construction-Equipment-Pose": "CC BY 4.0 | imgs=1281 | 1 annot types | 6 classes | mods=['ground_rgb']",
+    "VPM": "Not Specified | imgs=14000 | 1 annot types | None classes | mods=['ground_rgb']",
+    "wfcdataset": "CC BY-NC 4.0 | imgs=288 | 1 annot types | 1 classes | mods=['depth', 'ground_rgb', 'point_cloud']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "CML",
+     "total": 0.9456
+    },
+    {
+     "id": "Construction-Equipment-Pose",
+     "total": 0.9367
+    },
+    {
+     "id": "VPM",
+     "total": 0.79
+    },
+    {
+     "id": "wfcdataset",
+     "total": 0.74
+    }
+   ],
+   "gt_breakdown": {
+    "CML": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 1,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "Construction-Equipment-Pose": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "VPM": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 0.5,
+     "volume": 1,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "wfcdataset": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.5,
+     "class_coverage": 0.2,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    }
+   },
+   "modality_controlled": true,
+   "gt_margin": 0.0089,
+   "gt_top1_set": [
+    "CML",
+    "Construction-Equipment-Pose"
+   ],
+   "gt_ties": [
+    [
+     "CML",
+     "Construction-Equipment-Pose"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL visual question answering project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Visual question answering",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BDAChat",
+    "ConstructionSite-10k",
+    "VideoCAD",
+    "VizArQA"
+   ],
+   "candidate_modalities": [
+    "ground_rgb",
+    "satellite_rgb",
+    "text",
+    "video"
+   ],
+   "gt_ranking": [
+    "VideoCAD",
+    "ConstructionSite-10k",
+    "BDAChat",
+    "VizArQA"
+   ],
+   "gt_best": "VideoCAD",
+   "rationale": {
+    "BDAChat": "CC BY-NC-SA 4.0 | imgs=22068 | 2 annot types | 10 classes | mods=['satellite_rgb']",
+    "ConstructionSite-10k": "CC BY-NC 4.0 | imgs=10013 | 3 annot types | 3 classes | mods=['ground_rgb']",
+    "VideoCAD": "CC0 | imgs=41000 | 1 annot types | 7 classes | mods=['video']",
+    "VizArQA": "CC BY-NC 4.0 | imgs=121 | 1 annot types | 5 classes | mods=['ground_rgb', 'text']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "VideoCAD",
+     "total": 0.888
+    },
+    {
+     "id": "ConstructionSite-10k",
+     "total": 0.776
+    },
+    {
+     "id": "BDAChat",
+     "total": 0.7533
+    },
+    {
+     "id": "VizArQA",
+     "total": 0.7307
+    }
+   ],
+   "gt_breakdown": {
+    "VideoCAD": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "ConstructionSite-10k": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.4,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "BDAChat": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.8,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "VizArQA": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.5,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.112,
+   "gt_top1_set": [
+    "VideoCAD"
+   ],
+   "gt_ties": [],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL bim reconstruction project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "BIM reconstruction",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BIMNet",
+    "LOD4-Building-Image-Modeling",
+    "ResBIM"
+   ],
+   "candidate_modalities": [
+    "aerial_rgb",
+    "bim",
+    "drawing",
+    "ground_rgb",
+    "point_cloud"
+   ],
+   "gt_ranking": [
+    "BIMNet",
+    "ResBIM",
+    "LOD4-Building-Image-Modeling"
+   ],
+   "gt_best": "BIMNet",
+   "rationale": {
+    "BIMNet": "MIT | imgs=25 | 2 annot types | 14 classes | mods=['point_cloud']",
+    "LOD4-Building-Image-Modeling": "CC BY 4.0 | imgs=995 | 0 annot types | None classes | mods=['aerial_rgb', 'ground_rgb']",
+    "ResBIM": "MIT | imgs=1029 | 2 annot types | None classes | mods=['bim', 'drawing']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "BIMNet",
+     "total": 0.8013
+    },
+    {
+     "id": "ResBIM",
+     "total": 0.7827
+    },
+    {
+     "id": "LOD4-Building-Image-Modeling",
+     "total": 0.7613
+    }
+   ],
+   "gt_breakdown": {
+    "BIMNet": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.8,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "ResBIM": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "LOD4-Building-Image-Modeling": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.5,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.0186,
+   "gt_top1_set": [
+    "BIMNet",
+    "ResBIM"
+   ],
+   "gt_ties": [
+    [
+     "BIMNet",
+     "ResBIM"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 2,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL change detection project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Change detection",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BIM_updating",
+    "CSeg",
+    "DrafterBench"
+   ],
+   "candidate_modalities": [
+    "aerial_rgb",
+    "drawing",
+    "ground_rgb",
+    "point_cloud",
+    "tabular",
+    "text"
+   ],
+   "gt_ranking": [
+    "CSeg",
+    "DrafterBench",
+    "BIM_updating"
+   ],
+   "gt_best": "CSeg",
+   "rationale": {
+    "BIM_updating": "MIT | imgs=3 | 2 annot types | 1 classes | mods=['point_cloud']",
+    "CSeg": "MIT | imgs=501153 | 1 annot types | 31583 classes | mods=['aerial_rgb', 'ground_rgb', 'text']",
+    "DrafterBench": "MIT | imgs=1920 | 3 annot types | 4 classes | mods=['drawing', 'tabular', 'text']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "CSeg",
+     "total": 1
+    },
+    {
+     "id": "DrafterBench",
+     "total": 0.8373
+    },
+    {
+     "id": "BIM_updating",
+     "total": 0.7907
+    }
+   ],
+   "gt_breakdown": {
+    "CSeg": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 1,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "DrafterBench": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.75,
+     "class_coverage": 0.4,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "BIM_updating": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.2,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.1627,
+   "gt_top1_set": [
+    "CSeg"
+   ],
+   "gt_ties": [],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL object tracking project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Object tracking",
+    "modality": "",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "CMOT",
+    "Earthmoving-Equipment",
+    "UrbanTwin"
+   ],
+   "candidate_modalities": [
+    "ground_rgb",
+    "point_cloud",
+    "video"
+   ],
+   "gt_ranking": [
+    "UrbanTwin",
+    "Earthmoving-Equipment",
+    "CMOT"
+   ],
+   "gt_best": "UrbanTwin",
+   "rationale": {
+    "CMOT": "CC BY-NC 4.0 | imgs=77000 | 1 annot types | 10 classes | mods=['ground_rgb', 'video']",
+    "Earthmoving-Equipment": "CC BY 4.0 | imgs=10 | 1 annot types | 7 classes | mods=['video']",
+    "UrbanTwin": "CC0 | imgs=10000 | 4 annot types | 6 classes | mods=['point_cloud']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "UrbanTwin",
+     "total": 0.9333
+    },
+    {
+     "id": "Earthmoving-Equipment",
+     "total": 0.8413
+    },
+    {
+     "id": "CMOT",
+     "total": 0.8187
+    }
+   ],
+   "gt_breakdown": {
+    "UrbanTwin": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "Earthmoving-Equipment": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.6,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.6
+    },
+    "CMOT": {
+     "task_align": 1,
+     "modality_match": null,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 1,
+     "class_coverage": 0.8,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    }
+   },
+   "modality_controlled": false,
+   "gt_margin": 0.092,
+   "gt_top1_set": [
+    "UrbanTwin"
+   ],
+   "gt_ties": [],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL point cloud segmentation project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Point cloud segmentation",
+    "modality": "point_cloud",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "BIMNet",
+    "BIM_updating",
+    "UGD"
+   ],
+   "candidate_modalities": [
+    "point_cloud"
+   ],
+   "gt_ranking": [
+    "UGD",
+    "BIMNet",
+    "BIM_updating"
+   ],
+   "gt_best": "UGD",
+   "rationale": {
+    "BIMNet": "MIT | imgs=25 | 2 annot types | 14 classes | mods=['point_cloud']",
+    "BIM_updating": "MIT | imgs=3 | 2 annot types | 1 classes | mods=['point_cloud']",
+    "UGD": "CC BY 4.0 | imgs=443 | 1 annot types | 10 classes | mods=['point_cloud']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "UGD",
+     "total": 0.9622
+    },
+    {
+     "id": "BIMNet",
+     "total": 0.8344
+    },
+    {
+     "id": "BIM_updating",
+     "total": 0.8256
+    }
+   ],
+   "gt_breakdown": {
+    "UGD": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 1,
+     "class_coverage": 0.8,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "BIMNet": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.8,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    },
+    "BIM_updating": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0.25,
+     "class_coverage": 0.2,
+     "quality": 1,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.4
+    }
+   },
+   "modality_controlled": true,
+   "gt_margin": 0.1278,
+   "gt_top1_set": [
+    "UGD"
+   ],
+   "gt_ties": [
+    [
+     "BIMNet",
+     "BIM_updating"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  },
+  {
+   "family": "compare-select",
+   "category": "E",
+   "q": "For a COMMERCIAL simultaneous localization and mapping project, compare these candidate datasets and pick the best; justify.",
+   "need": {
+    "task": "Simultaneous localization and mapping",
+    "modality": "ground_rgb",
+    "license": "commercial"
+   },
+   "candidate_ids": [
+    "ConPR",
+    "ConSLAM",
+    "Kenki-Posi"
+   ],
+   "candidate_modalities": [
+    "geospatial",
+    "ground_rgb",
+    "point_cloud",
+    "sensor"
+   ],
+   "gt_ranking": [
+    "Kenki-Posi",
+    "ConPR",
+    "ConSLAM"
+   ],
+   "gt_best": "Kenki-Posi",
+   "rationale": {
+    "ConPR": "CC BY-NC 4.0 | imgs=12 | 1 annot types | None classes | mods=['geospatial', 'ground_rgb', 'point_cloud', 'sensor']",
+    "ConSLAM": "Academic Use Only | imgs=5 | 1 annot types | None classes | mods=['ground_rgb', 'point_cloud', 'sensor']",
+    "Kenki-Posi": "GPL-3.0 | imgs=None | 1 annot types | None classes | mods=['ground_rgb']"
+   },
+   "_gt_method": "rankBySuitability (data-agent-compare.js, 10 .doc criteria, exact+descendant task_align). GT = agreement with this TRANSPARENT REFERENCE INSTRUMENT, not human-labeled ranks.",
+   "gt_scores": [
+    {
+     "id": "Kenki-Posi",
+     "total": 0.7556
+    },
+    {
+     "id": "ConPR",
+     "total": 0.64
+    },
+    {
+     "id": "ConSLAM",
+     "total": 0.64
+    }
+   ],
+   "gt_breakdown": {
+    "Kenki-Posi": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 1,
+     "volume": 0,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 1
+    },
+    "ConPR": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.25,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    },
+    "ConSLAM": {
+     "task_align": 1,
+     "modality_match": 1,
+     "annotation_match": null,
+     "license": 0,
+     "volume": 0.25,
+     "class_coverage": 0,
+     "quality": 0.5,
+     "docs": 1,
+     "access": 1,
+     "prep_cost": 0.7
+    }
+   },
+   "modality_controlled": true,
+   "gt_margin": 0.1156,
+   "gt_top1_set": [
+    "Kenki-Posi"
+   ],
+   "gt_ties": [
+    [
+     "ConPR",
+     "ConSLAM"
+    ]
+   ],
+   "gt_weight_sensitivity": {
+    "top1_flips_under_single_weight_pm50": 0,
+    "of_perturbations": 20
+   }
+  }
+ ]
+}

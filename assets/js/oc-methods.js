@@ -67,6 +67,7 @@
     var r = recOf(id);
     return {
       id: id, name: r ? r.name : id, href: r && r.href ? r.href : null,
+      analyzeHref: 'data-agent.html?id=' + encodeURIComponent(id),  // bridge → chat-workspace (real id reused)
       meta: r ? [r.modalityRaw, (r.tasksRaw || []).slice(0, 2).join(', ')].filter(Boolean).join(' · ') : '',
       score: (extra && extra.score != null) ? extra.score : null,
       reason: (extra && extra.reason) || '',

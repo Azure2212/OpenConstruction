@@ -1,0 +1,60 @@
+/* Copyright (c) 2024-2026 OpenConstruction Open Science Initiative
+   SPDX-License-Identifier: Apache-2.0
+   data-agent.css — styling for the Data Agent page. Uses --oc-* tokens from shared-site.css. */
+
+.da-framework{ display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin-top:1rem; }
+.da-cap{ display:flex; flex-direction:column; gap:.1rem; background:#fff; border:1px solid var(--oc-border,#e7edf3); border-radius:12px; padding:.5rem .7rem; max-width:200px; text-align:left; }
+.da-cap-id{ font-weight:800; color:#1f6f54; font-size:.72rem; letter-spacing:.04em; }
+.da-cap strong{ color:#0f2e4b; font-size:.84rem; }
+.da-cap span:last-child{ color:#4f5d6c; font-size:.74rem; }
+
+.da-result{ min-height:200px; }
+.da-muted{ color:#8a97a4; }
+.da-need{ background:#f6f9fc; border:1px solid #e7edf3; border-radius:10px; padding:.5rem .7rem; font-size:.85rem; color:#4f5d6c; margin-bottom:.8rem; }
+.da-chip{ display:inline-block; font-size:.74rem; font-weight:600; padding:.08rem .5rem; border-radius:999px; background:#eef6f2; color:#1f6f54; border:1px solid #cfe7dd; margin:.1rem .2rem; }
+
+.da-abstain{ background:#fff6e9; border:1px solid #f3d9a8; border-radius:12px; padding:.8rem 1rem; color:#7a5310; margin-bottom:1rem; }
+.da-abstain .da-near{ font-size:.85rem; margin-top:.4rem; }
+.da-reliable{ background:#eef6f2; border:1px solid #cfe7dd; border-radius:12px; padding:.6rem 1rem; color:#1f6f54; font-size:.88rem; margin-bottom:1rem; }
+.da-flag{ color:#b4232a; margin-top:.3rem; }
+
+.da-grid{ display:grid; grid-template-columns:1fr; gap:1rem; }
+.da-panel{ border:1px solid var(--oc-border,#e7edf3); border-radius:14px; background:#fff; padding:.9rem 1.1rem; }
+.da-panel h3{ font-size:1rem; font-weight:700; color:#0f2e4b; margin:0 0 .6rem; }
+.da-panel h3 small{ color:#8a97a4; font-weight:500; font-size:.8rem; }
+
+.da-list{ list-style:none; margin:0; padding:0; }
+.da-list li{ padding:.3rem 0; border-bottom:1px dashed #eef2f6; font-size:.9rem; }
+.da-list li:last-child{ border-bottom:0; }
+.da-score{ font-size:.72rem; color:#8a97a4; margin-left:.4rem; }
+.da-matched{ margin-left:.4rem; }
+.da-tag{ font-size:.68rem; background:#f6f9fc; border:1px solid #e7edf3; border-radius:999px; padding:0 .4rem; margin-left:.2rem; color:#123c62; }
+
+.da-understand{ padding:.4rem 0; border-bottom:1px dashed #eef2f6; }
+.da-understand:last-child{ border-bottom:0; }
+.da-sum{ font-size:.82rem; color:#4f5d6c; }
+.da-prov{ font-size:.74rem; color:#8a97a4; }
+
+.da-fitness{ border:1px solid #eef2f6; border-radius:10px; padding:.5rem .7rem; margin-bottom:.6rem; }
+.da-fhead{ font-weight:700; color:#0f2e4b; font-size:.88rem; margin-bottom:.3rem; }
+.da-fitness ul{ list-style:none; margin:0; padding:0; }
+.da-fitness li{ font-size:.82rem; padding:.12rem 0; }
+.da-fitness li.da-pass{ color:#1f6f54; }
+.da-fitness li.da-fail{ color:#b4232a; }
+.da-fitness li.da-soft{ color:#8a97a4; }
+.da-ev{ display:block; color:#8a97a4; font-size:.74rem; margin-left:1.1rem; }
+
+.da-badge{ font-size:.68rem; font-weight:700; padding:.05rem .45rem; border-radius:999px; }
+.da-badge.da-ok{ background:#eef6f2; color:#1f6f54; border:1px solid #cfe7dd; }
+.da-badge.da-no{ background:#fdecec; color:#b4232a; border:1px solid #f3c9c9; }
+.da-badge.da-muted{ background:#f6f9fc; color:#8a97a4; border:1px solid #e7edf3; }
+
+.da-cmp th{ font-size:.74rem; color:#8a97a4; text-transform:uppercase; letter-spacing:.03em; }
+.da-cmp td{ font-size:.82rem; vertical-align:middle; }
+
+.da-metrics{ display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; }
+.da-metric{ background:#fff; border:1px solid #e7edf3; border-radius:10px; padding:.5rem; text-align:center; }
+.da-mv{ font-weight:800; color:#0f2e4b; font-size:1.1rem; }
+.da-ml{ font-size:.68rem; color:#8a97a4; }
+
+@media (min-width:992px){ .da-grid{ grid-template-columns:1fr 1fr; } .da-panel:nth-child(4){ grid-column:1 / -1; } }

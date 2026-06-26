@@ -1,0 +1,27 @@
+{
+ "dataset_id": "IFC-mini",
+ "synthetic": true,
+ "reduced": true,
+ "modality": "bim",
+ "note": "SYNTHETIC mini IFC (IFC4/STEP) stand-in \u2014 NOT real BIM content. Oracle profile grounded in these bytes.",
+ "oracle_profile": {
+  "ifc_schema": "IFC4",
+  "num_entities": 18,
+  "element_classes": {
+   "IfcWall": 3,
+   "IfcSlab": 1,
+   "IfcDoor": 1
+  },
+  "num_elements": 5,
+  "spatial_hierarchy": [
+   "IfcProject",
+   "IfcSite",
+   "IfcBuilding",
+   "IfcBuildingStorey",
+   "IfcSpace"
+  ],
+  "spatial_hierarchy_depth": 5,
+  "num_property_sets": 1,
+  "has_property_sets": true
+ }
+}

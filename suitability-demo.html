@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2024-2026 OpenConstruction Open Science Initiative · SPDX-License-Identifier: Apache-2.0 -->
+<!-- Standalone demo for OCSuitability (Phase-C component #2). Loads the REAL engine + REAL catalog,
+     builds the corpus, and renders suitability on datasets the engine itself classifies (fit / unfit /
+     non-commercial), plus a SET case where c5Reliability genuinely abstains. No fixtures, no hardcoded
+     results. Serve over http: `python3 -m http.server` then open http://localhost:8000/suitability-demo.html -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OCSuitability — demo (real engine output)</title>
+  <style>
+    body{font-family:Inter,system-ui,Arial,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#1e2a36;}
+    h1{font-size:1.25rem;} h2{font-size:.92rem;margin:1.3rem 0 .15rem;color:#0f2e4b;}
+    .why{font-size:.8rem;color:#667085;margin:.1rem 0 .35rem;}
+    .err{background:#fef3f2;border:1px solid #fecdca;color:#b42318;border-radius:10px;padding:.8rem 1rem;}
+    .note{font-size:.82rem;color:#475569;background:#f8fafc;border:1px solid #e7edf3;border-radius:10px;padding:.7rem .9rem;}
+    code{background:#f2f4f7;padding:.05rem .3rem;border-radius:4px;}
+  </style>
+</head>
+<body>
+  <h1>OCSuitability — Evaluate widget (live engine output)</h1>
+  <p class="note">Mọi checklist / verdict / license-gate / abstain bên dưới đọc lại từ engine
+    (<code>OCDataAgent.c3Fitness / c4CompareSelect / c5Reliability</code>) trên dataset thật. Không fixture, không số bịa.
+    Badge gọn do <strong>OCTrust</strong> render (không lặp).</p>
+  <div id="out"><p>Loading real engine + catalog…</p></div>
+
+  <script src="assets/js/data-agent.js"></script>
+  <script src="assets/js/trust.js"></script>
+  <script src="assets/js/suitability.js"></script>
+  <script>
+  (function () {
+    var out = document.getElementById('out');
+    function fail(m){ out.innerHTML = '<div class="err"><strong>Demo could not load.</strong><br>'+m+
+      '<br><br>Chạy qua http: <code>cd OpenConstruction &amp;&amp; python3 -m http.server</code> rồi mở <code>http://localhost:8000/suitability-demo.html</code>.</div>'; }
+    async function getJSON(u){ var r=await fetch(u,{cache:'no-cache'}); if(!r.ok) throw new Error(u+' → HTTP '+r.status); return r.json(); }
+    function section(title, why){ var h=document.createElement('div'); h.innerHTML='<h2>'+title+'</h2><div class="why">'+why+'</div>'; out.appendChild(h); return h; }
+
+    (async function(){
+      try{
+        if(!window.OCDataAgent) return fail('OCDataAgent missing (data-agent.js).');
+        if(!window.OCSuitability) return fail('OCSuitability missing (suitability.js).');
+        if(!window.OCTrust) return fail('OCTrust missing (trust.js).');
+        var A=window.OCDataAgent;
+        var tax=await getJSON('data/agent-taxonomy.json'); var ds=await getJSON('data/datasets.json');
+        A.setTaxonomy(tax); var corpus=A.buildCorpus(ds);
+        var need=A.parseNeed('object detection with bounding boxes for commercial use');
+        out.innerHTML='<p class="note">Parsed need: <code>'+JSON.stringify({task:need.task,modality:need.modality,annotation:need.annotation,license:need.license})+
+          '</code> · corpus <strong>'+corpus.datasets.length+'</strong> datasets.</p>';
+
+        var ranked=A.c1Discovery(corpus,need);
+
+        // FIT (single)
+        var fitRec=null; for(var i=0;i<ranked.length;i++){ if(A.c3Fitness(ranked[i].rec,need).verdict==='fit'){ fitRec=ranked[i].rec; break; } }
+        if(fitRec) window.OCSuitability.render(section('FIT (single)','Engine c3Fitness verdict = fit → checklist toàn ✓, license-gate ✓ nếu commercial-OK.'), fitRec, need, {corpus:corpus});
+
+        // UNFIT (single)
+        var unfitRec=null; for(var j=0;j<corpus.datasets.length;j++){ var f=A.c3Fitness(corpus.datasets[j],need); if(f.requiredCount>0&&f.verdict==='unfit'){ unfitRec=corpus.datasets[j]; break; } }
+        if(unfitRec) window.OCSuitability.render(section('UNFIT (single) → would not be selected','Engine verdict = unfit → liệt kê tiêu chí trượt, không bịa fit.'), unfitRec, need, {corpus:corpus});
+
+        // NON-COMMERCIAL gate (single)
+        var ncRec=null; for(var k=0;k<corpus.datasets.length;k++){ if(corpus.datasets[k].rights&&corpus.datasets[k].rights.commercial_ok===false){ ncRec=corpus.datasets[k]; break; } }
+        if(ncRec) window.OCSuitability.render(section('NON-COMMERCIAL → license-gate ✕','rights.commercial_ok=false + need yêu cầu commercial → gate ✕ (thật).'), ncRec, need, {corpus:corpus});
+
+        // SET → c5 abstains: shortlist = engine-discovered datasets that FAIL c3Fitness (real scores, real unfit) → none selected → abstain
+        var unfitShortlist=ranked.filter(function(d){ return A.c3Fitness(d.rec,need).verdict==='unfit'; }).slice(0,5);
+        if(!unfitShortlist.length){ // fallback: scan unfit recs (score 0 = not discovered, honest)
+          unfitShortlist=[]; for(var m=0;m<corpus.datasets.length&&unfitShortlist.length<4;m++){ var ff=A.c3Fitness(corpus.datasets[m],need); if(ff.requiredCount>0&&ff.verdict==='unfit') unfitShortlist.push({rec:corpus.datasets[m],score:0,matched:[]}); }
+        }
+        window.OCSuitability.renderSet(section('SET → c5 ABSTAIN','Shortlist = dataset engine discover nhưng FAIL c3Fitness → c4 chọn 0 → c5 abstain (message thật, không bịa).'), unfitShortlist, need, {corpus:corpus});
+      }catch(e){ fail(String(e&&e.message||e)); }
+    })();
+  })();
+  </script>
+</body>
+</html>

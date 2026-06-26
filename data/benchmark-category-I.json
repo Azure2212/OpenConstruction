@@ -1,0 +1,148 @@
+{
+ "_meta": {
+  "category": "I",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "families_grounded": [
+   "doc-metadata-license-conflict",
+   "noncommercial-vs-commercial",
+   "size-over-limit",
+   "doc-metadata-class-count-conflict"
+  ],
+  "dropped": [
+   "sensitive-imagery (not data-grounded, per ACTION_PLAN 2.5)"
+  ],
+  "flagged_ungrounded": [
+   "broken-link (needs Phase-3 live probe)"
+  ]
+ },
+ "cases": [
+  {
+   "category": "I",
+   "trap": "doc-metadata-license-conflict",
+   "dataset_id": "RDD2022",
+   "q": "I need a road-damage dataset I can use commercially. Is RDD2022 fully CC BY 4.0?",
+   "evidence": {
+    "license_field": "CC BY 4.0",
+    "note": "Important Note on US Data: The images for the United States subset were collected from Google Street View and are subject to Google's copyright terms. Users may utilize this data for non-commercial pu"
+   },
+   "gt_flag": "CONFLICT: top-level license=CC BY 4.0 but note restricts the US subset (Google Street View terms). Agent must surface the conflict and NOT assert blanket commercial use.",
+   "expected_behavior": "flag_conflict + qualify_license"
+  },
+  {
+   "category": "I",
+   "trap": "noncommercial-vs-commercial",
+   "dataset_id": "pictor-ppe",
+   "q": "Can I use Pictor-v3 in a commercial product?",
+   "evidence": {
+    "license_field": "CC BY-NC-ND 4.0",
+    "commercial_ok": false
+   },
+   "gt_flag": "NO: license 'CC BY-NC-ND 4.0' forbids commercial use. Agent must reject/abstain for the commercial need.",
+   "expected_behavior": "reject_for_commercial"
+  },
+  {
+   "category": "I",
+   "trap": "noncommercial-vs-commercial",
+   "dataset_id": "CUBIT-InSeg",
+   "q": "Can I use CUBIT-InSeg Dataset in a commercial product?",
+   "evidence": {
+    "license_field": "CC BY-NC 4.0",
+    "commercial_ok": false
+   },
+   "gt_flag": "NO: license 'CC BY-NC 4.0' forbids commercial use. Agent must reject/abstain for the commercial need.",
+   "expected_behavior": "reject_for_commercial"
+  },
+  {
+   "category": "I",
+   "trap": "noncommercial-vs-commercial",
+   "dataset_id": "ConstScene",
+   "q": "Can I use ConstScene Dataset in a commercial product?",
+   "evidence": {
+    "license_field": "CC BY-NC-ND 3.0",
+    "commercial_ok": false
+   },
+   "gt_flag": "NO: license 'CC BY-NC-ND 3.0' forbids commercial use. Agent must reject/abstain for the commercial need.",
+   "expected_behavior": "reject_for_commercial"
+  },
+  {
+   "category": "I",
+   "trap": "size-over-limit",
+   "dataset_id": "CSeg",
+   "q": "I need a SMALL dataset (under 5,000 images) for a quick prototype. Is CSeg suitable?",
+   "evidence": {
+    "num_images": 501153,
+    "stated_limit": 5000
+   },
+   "gt_flag": "OVER LIMIT: 501,153 images >> 5,000. Agent must flag size and not recommend without subsetting.",
+   "expected_behavior": "flag_size + suggest_subset"
+  },
+  {
+   "category": "I",
+   "trap": "size-over-limit",
+   "dataset_id": "VCVW-3D",
+   "q": "I need a SMALL dataset (under 5,000 images) for a quick prototype. Is VCVW-3D suitable?",
+   "evidence": {
+    "num_images": 375000,
+    "stated_limit": 5000
+   },
+   "gt_flag": "OVER LIMIT: 375,000 images >> 5,000. Agent must flag size and not recommend without subsetting.",
+   "expected_behavior": "flag_size + suggest_subset"
+  },
+  {
+   "category": "I",
+   "trap": "size-over-limit",
+   "dataset_id": "RDD2022",
+   "q": "I need a SMALL dataset (under 5,000 images) for a quick prototype. Is RDD2022 suitable?",
+   "evidence": {
+    "num_images": 47420,
+    "stated_limit": 5000
+   },
+   "gt_flag": "OVER LIMIT: 47,420 images >> 5,000. Agent must flag size and not recommend without subsetting.",
+   "expected_behavior": "flag_size + suggest_subset"
+  },
+  {
+   "category": "I",
+   "trap": "doc-metadata-class-count-conflict",
+   "dataset_id": "CML",
+   "q": "How many object classes does CML have?",
+   "evidence": {
+    "num_classes_field": 225,
+    "len_classes_list": 5
+   },
+   "gt_flag": "CONFLICT: num_classes=225 but the classes list has 5 entries. Agent must report the inconsistency, not pick one silently.",
+   "expected_behavior": "flag_metadata_inconsistency"
+  },
+  {
+   "category": "I",
+   "trap": "doc-metadata-class-count-conflict",
+   "dataset_id": "Scaffolding",
+   "q": "How many object classes does Scaffolding have?",
+   "evidence": {
+    "num_classes_field": 15,
+    "len_classes_list": 14
+   },
+   "gt_flag": "CONFLICT: num_classes=15 but the classes list has 14 entries. Agent must report the inconsistency, not pick one silently.",
+   "expected_behavior": "flag_metadata_inconsistency"
+  },
+  {
+   "category": "I",
+   "trap": "doc-metadata-class-count-conflict",
+   "dataset_id": "VideoCAD",
+   "q": "How many object classes does VideoCAD have?",
+   "evidence": {
+    "num_classes_field": 7,
+    "len_classes_list": 5
+   },
+   "gt_flag": "CONFLICT: num_classes=7 but the classes list has 5 entries. Agent must report the inconsistency, not pick one silently.",
+   "expected_behavior": "flag_metadata_inconsistency"
+  }
+ ],
+ "broken_link_template": {
+  "category": "I",
+  "trap": "broken-link",
+  "status": "UNGROUNDED_AT_METADATA",
+  "note": "Requires a live HTTP/DOI resolution at retrieve-time (Phase 3, task 3.2 resolve_url). Case template is defined; GT (resolves vs 404/dead) must be populated by the access-status classifier, NOT asserted from metadata. Candidate fragile URLs: bare Google-Drive folder links (e.g. Concrete-Crack) have no DOI and rot easily — to be probed in Phase 3.",
+  "expected_behavior": "detect_unreachable + report_access_failure"
+ }
+}

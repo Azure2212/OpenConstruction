@@ -1,0 +1,14 @@
+{
+ "_meta": {
+  "category": "H",
+  "owner": "OC_DATA_1",
+  "status": "deferred",
+  "date": "2026-06-20",
+  "title": "End-to-end (discover → evaluate → retrieve → understand → use → report)",
+  "anchor": ".doc Category-H (ACTION_PLAN 5.4)",
+  "why_deferred": "depends on Category-G + Phases 3–5 landing; DEFINED in the spec, implemented later",
+  "spec_metric": "full-pipeline success + per-stage scores composed (each stage scored by its own deterministic Category metric); NO LLM-judge",
+  "spec_outputs": "{stages:[{name, ok, score}], overall_ok: bool}"
+ },
+ "cases": []
+}

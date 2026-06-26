@@ -1,0 +1,382 @@
+{
+ "_meta": {
+  "category": "D",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "anchor": ".doc Category-D + email modality list (tabular, BIM, point cloud, image, video, drawing, sensor)",
+  "implemented_modalities": [
+   "point_cloud",
+   "image",
+   "tabular",
+   "bim"
+  ],
+  "defined_only_modalities": [
+   "video",
+   "drawing",
+   "sensor"
+  ],
+  "bim_note": "BIM/IFC = the .doc novelty axis (email line 14 BIM; C3/TF4) — PROMOTED to IMPLEMENTED with a synthetic IFC4/STEP fixture + oracle (element_classes, spatial-hierarchy depth, counts, property-set presence). profile_bim is the AGREED future tool name (coordinate w/ OC_SPECIALIST_1 parse_ifc/profile_bim, next round).",
+  "profile_shape": {
+   "point_cloud": [
+    "num_points",
+    "bbox{min,max}",
+    "centroid",
+    "num_classes",
+    "has_labels"
+   ],
+   "image": [
+    "num_images",
+    "width",
+    "height",
+    "num_annotations",
+    "num_categories",
+    "annotation_type",
+    "class_names"
+   ],
+   "tabular": [
+    "num_rows",
+    "num_columns",
+    "columns[{name,dtype}]",
+    "numeric_stats{col:{min,max,mean}}"
+   ],
+   "video": [
+    "num_frames",
+    "fps",
+    "duration_s",
+    "width",
+    "height"
+   ],
+   "bim": [
+    "ifc_schema",
+    "num_entities",
+    "element_classes",
+    "num_elements",
+    "spatial_hierarchy",
+    "spatial_hierarchy_depth",
+    "num_property_sets",
+    "has_property_sets"
+   ],
+   "drawing": [
+    "num_sheets",
+    "page_size",
+    "raster_or_vector",
+    "num_layers"
+   ],
+   "sensor": [
+    "num_channels",
+    "sample_rate_hz",
+    "duration_s",
+    "num_samples"
+   ]
+  },
+  "tool_per_modality": {
+   "point_cloud": [
+    "profile_pointcloud"
+   ],
+   "image": [
+    "profile_images",
+    "profile_annotations"
+   ],
+   "tabular": [
+    "profile_table"
+   ],
+   "video": [
+    "profile_video"
+   ],
+   "bim": [
+    "profile_bim"
+   ],
+   "drawing": [
+    "profile_drawing"
+   ],
+   "sensor": [
+    "profile_sensor"
+   ]
+  },
+  "scoring": "numeric-profile = fraction of GT fields within tolerance (counts exact, floats rel 1%); tool-selection = set-match; edge = exact. defined-only NOT scored.",
+  "flags": [
+   "oracle profiles ground the SYNTHETIC fixtures (deterministic), NOT real datasets",
+   "video/bim/drawing/sensor are DEFINED only (no fixtures) — covers the email's full modality list at spec level",
+   "profile_shape is the field-shape contract for OC_SPECIALIST_1's profile_* tools (TF4, not yet built)"
+  ]
+ },
+ "cases": [
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "point_cloud",
+   "path": "data/samples/PC-Urban",
+   "gt_profile": {
+    "num_points": 8,
+    "bbox": {
+     "min": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "centroid": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "num_classes": 4,
+    "has_labels": true
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "image",
+   "path": "data/samples/Construction-Site-Segmentation",
+   "gt_profile": {
+    "num_images": 2,
+    "width": 2,
+    "height": 2,
+    "num_annotations": 2,
+    "num_categories": 1,
+    "annotation_type": "bbox",
+    "class_names": [
+     "structure"
+    ]
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "tabular",
+   "path": "data/samples/wblca-benchmark-v2-data",
+   "gt_profile": {
+    "num_rows": 3,
+    "num_columns": 4,
+    "columns": [
+     {
+      "name": "building_id",
+      "dtype": "categorical"
+     },
+     {
+      "name": "gfa_m2",
+      "dtype": "numeric"
+     },
+     {
+      "name": "embodied_carbon_kgco2e",
+      "dtype": "numeric"
+     },
+     {
+      "name": "stage",
+      "dtype": "categorical"
+     }
+    ],
+    "numeric_stats": {
+     "gfa_m2": {
+      "min": 800.0,
+      "max": 3400.0,
+      "mean": 1800.0
+     },
+     "embodied_carbon_kgco2e": {
+      "min": 205000.0,
+      "max": 910000.0,
+      "mean": 485000.0
+     }
+    }
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "tabular",
+   "path": "data/samples/DTCTP",
+   "gt_profile": {
+    "num_rows": 2,
+    "num_columns": 3,
+    "columns": [
+     {
+      "name": "project_id",
+      "dtype": "categorical"
+     },
+     {
+      "name": "duration_days",
+      "dtype": "numeric"
+     },
+     {
+      "name": "cost_usd",
+      "dtype": "numeric"
+     }
+    ],
+    "numeric_stats": {
+     "duration_days": {
+      "min": 120.0,
+      "max": 210.0,
+      "mean": 165.0
+     },
+     "cost_usd": {
+      "min": 540000.0,
+      "max": 1230000.0,
+      "mean": 885000.0
+     }
+    }
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "modality": "bim",
+   "path": "data/samples/IFC-mini",
+   "gt_profile": {
+    "ifc_schema": "IFC4",
+    "num_entities": 18,
+    "element_classes": {
+     "IfcWall": 3,
+     "IfcSlab": 1,
+     "IfcDoor": 1
+    },
+    "num_elements": 5,
+    "spatial_hierarchy": [
+     "IfcProject",
+     "IfcSite",
+     "IfcBuilding",
+     "IfcBuildingStorey",
+     "IfcSpace"
+    ],
+    "spatial_hierarchy_depth": 5,
+    "num_property_sets": 1,
+    "has_property_sets": true
+   },
+   "tolerance": {
+    "rel": 0.01
+   }
+  },
+  {
+   "category": "D",
+   "subtype": "tool-selection",
+   "modality": "point_cloud",
+   "path": "data/samples/PC-Urban",
+   "gt_tools": [
+    "profile_pointcloud"
+   ]
+  },
+  {
+   "category": "D",
+   "subtype": "tool-selection",
+   "modality": "image",
+   "path": "data/samples/Construction-Site-Segmentation",
+   "gt_tools": [
+    "profile_images",
+    "profile_annotations"
+   ]
+  },
+  {
+   "category": "D",
+   "subtype": "tool-selection",
+   "modality": "tabular",
+   "path": "data/samples/wblca-benchmark-v2-data",
+   "gt_tools": [
+    "profile_table"
+   ]
+  },
+  {
+   "category": "D",
+   "subtype": "tool-selection",
+   "modality": "bim",
+   "path": "data/samples/IFC-mini",
+   "gt_tools": [
+    "profile_bim"
+   ]
+  },
+  {
+   "category": "D",
+   "subtype": "edge-case",
+   "edge": "corrupted",
+   "path": "data/samples/_edgecases/broken.png",
+   "gt_result": "corrupted"
+  },
+  {
+   "category": "D",
+   "subtype": "edge-case",
+   "edge": "empty",
+   "path": "data/samples/_edgecases/empty.csv",
+   "gt_result": "empty"
+  },
+  {
+   "category": "D",
+   "subtype": "edge-case",
+   "edge": "incomplete-metadata",
+   "path": "data/samples/PC-Urban",
+   "modality": "",
+   "gt_result": "point_cloud",
+   "note": "catalog modality omitted → profiler must recover the modality from the file (magic/ext)"
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "status": "defined-only",
+   "modality": "video",
+   "path": null,
+   "gt_profile": null,
+   "expected_profile_fields": [
+    "num_frames",
+    "fps",
+    "duration_s",
+    "width",
+    "height"
+   ],
+   "gt_tools": [
+    "profile_video"
+   ],
+   "note": "DEFINED only (no fixture) — implement when a fixture for this modality exists"
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "status": "defined-only",
+   "modality": "drawing",
+   "path": null,
+   "gt_profile": null,
+   "expected_profile_fields": [
+    "num_sheets",
+    "page_size",
+    "raster_or_vector",
+    "num_layers"
+   ],
+   "gt_tools": [
+    "profile_drawing"
+   ],
+   "note": "DEFINED only (no fixture) — implement when a fixture for this modality exists"
+  },
+  {
+   "category": "D",
+   "subtype": "numeric-profile",
+   "status": "defined-only",
+   "modality": "sensor",
+   "path": null,
+   "gt_profile": null,
+   "expected_profile_fields": [
+    "num_channels",
+    "sample_rate_hz",
+    "duration_s",
+    "num_samples"
+   ],
+   "gt_tools": [
+    "profile_sensor"
+   ],
+   "note": "DEFINED only (no fixture) — implement when a fixture for this modality exists"
+  }
+ ]
+}

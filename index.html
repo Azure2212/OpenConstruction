@@ -1286,6 +1286,7 @@
 			<li><a class="dropdown-item" href="oer.html">OERs</a></li>
           </ul>
         </li>
+        <li class="nav-item"><a class="nav-link plain" href="data-agent.html" data-route="data-agent">Data Agent</a></li>
         <li class="nav-item"><a class="nav-link plain" href="benchmarks.html" data-route="models">Benchmarks</a></li>
         <li class="nav-item"><a class="nav-link plain" href="skills.html" data-route="skills">Skills</a></li>
         <li class="nav-item dropdown">
@@ -2335,12 +2336,12 @@
      the hero search now offers only the in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent).
      Removing it disables the old live-search + #ocAssistant panel so it can't overlay the method results.
      assistant.js itself is unchanged and still used on other pages. -->
-<script src="assets/js/chatbox.js?v=10"></script>
+<script src="assets/js/chatbox.js?v=9"></script>
 
 <!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent) via window.OCMethods. -->
 <script src="assets/js/data-agent.js"></script>
 <script src="assets/js/rag-baseline.js"></script>
-<script src="assets/js/oc-methods.js?v=7"></script>
+<script src="assets/js/oc-methods.js?v=6"></script>
 <script>
 (function () {
   var $ = function (id){ return document.getElementById(id); };
@@ -2367,6 +2368,7 @@
         (r.evidence ? '<div class="hero-method-ev">' + [r.evidence.license ? ('License: ' + esc(r.evidence.license)) : '', r.evidence.scale ? esc(r.evidence.scale) : '', r.evidence.annotation ? ('ann: ' + esc(r.evidence.annotation)) : '', r.evidence.source ? esc(r.evidence.source) : ''].filter(Boolean).join(' · ') + '</div>' : '') +
         (r.criteria && r.criteria.length ? '<div class="hero-method-crit">' + r.criteria.map(function (c){ return (c.pass ? '✓' : '✗') + ' ' + esc(c.key); }).join('  ') + '</div>' : '') +
         (r.warnings && r.warnings.length ? '<div class="hero-method-warn">' + r.warnings.map(function (w){ return '⚠ ' + esc(w.type); }).join('  ') + '</div>' : '') +
+        (r.analyzeHref ? '<div class="hero-method-analyze"><a href="' + esc(r.analyzeHref) + '&q=' + encodeURIComponent(input.value || '') + '">Phân tích với Data Agent →</a></div>' : '') +
         '</div>' +
         (r.score != null ? '<span class="hero-method-score">' + (+r.score).toFixed(3) + '</span>' : '') + '</li>';
     });

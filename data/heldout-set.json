@@ -1,0 +1,443 @@
+{
+ "_meta": {
+  "name": "OC-AgentBench HELD-OUT (generalization, pre-registered)",
+  "owner": "OC_DATA_1",
+  "date": "2026-06-20",
+  "purpose": "Measure v2-vs-v1 generalization OUTSIDE the golden 144 (no tuning-on-test). Pre-registered: frozen before the v2 run.",
+  "selection_criteria": [
+   "stratified by family: discovery / fitness / license / must-abstain",
+   "held-out = canonical task NOT used as need.task in golden 144 AND query string not among golden q",
+   "GT derived deterministically from datasets.json potential_tasks via agent-taxonomy task_canon (exact+descendant) — identical rule to the golden set",
+   "license GT via license_rights.commercial_ok; must-abstain(OOD)=task not in the 96-task vocabulary; must-abstain(in-domain)=task present but 0 fit datasets at the queried modality",
+   "ONLY vocab-ratified tasks (proposed-new excluded); any case whose GT cannot be derived cleanly is DROPPED (no fabricated labels)"
+  ],
+  "non_overlap_verified": true,
+  "violations": [],
+  "families": {
+   "discovery": 10,
+   "fitness": 8,
+   "license": 4,
+   "must-abstain": 10
+  },
+  "n_cases": 32,
+  "n_dropped": 2,
+  "dropped": [
+   [
+    "license",
+    "Image inpainting",
+    "license unknown → GT uncertain"
+   ],
+   [
+    "license",
+    "Image-to-image translation",
+    "license unknown → GT uncertain"
+   ]
+  ]
+ },
+ "cases": [
+  {
+   "family": "discovery",
+   "q": "2d-to-bim reconstruction dataset",
+   "need": {
+    "task": "2D-to-BIM reconstruction",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "ResBIM"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "3d semantic segmentation dataset",
+   "need": {
+    "task": "3D semantic segmentation",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "3d_bridge_segmentation"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "6-dof pose estimation dataset",
+   "need": {
+    "task": "6-DoF pose estimation",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "wfcdataset"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "agentic blueprint reading dataset",
+   "need": {
+    "task": "Agentic blueprint reading",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "aec-bench"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "architecture design assistance dataset",
+   "need": {
+    "task": "Architecture design assistance",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "archseek"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "automatic compliance checking dataset",
+   "need": {
+    "task": "Automatic compliance checking",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "code-accord"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "bim automation dataset",
+   "need": {
+    "task": "BIM automation",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "LLM4BIM_Benchmark_Data"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "bim object classification dataset",
+   "need": {
+    "task": "BIM object classification",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "GNI-BIM-Dataset"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "bim querying dataset",
+   "need": {
+    "task": "BIM querying",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "ifc-bench"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "discovery",
+   "q": "building detection dataset",
+   "need": {
+    "task": "Building detection",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [
+    "xBD"
+   ],
+   "label_source": "datasets.json potential_tasks → task_canon (exact+descendant)"
+  },
+  {
+   "family": "fitness",
+   "q": "Is Building Energy Prediction with Small, Inconsistent Datasets fit for building energy modeling?",
+   "need": {
+    "task": "Building energy modeling"
+   },
+   "fitnessExpect": {
+    "datasetId": "Component_based_Machine_Learning_data",
+    "verdict": "fit"
+   },
+   "label_source": "dataset declares the task (exact+descendant)"
+  },
+  {
+   "family": "fitness",
+   "q": "Is VideoCAD: Learning Long-Horizon 3D CAD UI Interactions from Video fit for cad generation?",
+   "need": {
+    "task": "CAD generation"
+   },
+   "fitnessExpect": {
+    "datasetId": "VideoCAD",
+    "verdict": "fit"
+   },
+   "label_source": "dataset declares the task (exact+descendant)"
+  },
+  {
+   "family": "fitness",
+   "q": "Is BMKG: Bridge Maintenance Knowledge Graph fit for case-based retrieval?",
+   "need": {
+    "task": "Case-based retrieval"
+   },
+   "fitnessExpect": {
+    "datasetId": "BMKG",
+    "verdict": "fit"
+   },
+   "label_source": "dataset declares the task (exact+descendant)"
+  },
+  {
+   "family": "fitness",
+   "q": "Is Conditional Change Segmentation dataset (CSeg) fit for change segmentation?",
+   "need": {
+    "task": "Change segmentation"
+   },
+   "fitnessExpect": {
+    "datasetId": "CSeg",
+    "verdict": "fit"
+   },
+   "label_source": "dataset declares the task (exact+descendant)"
+  },
+  {
+   "family": "fitness",
+   "q": "Is 3DFacilities: Annotated 3D Reconstructions of Building Facilities fit for depth estimation?",
+   "need": {
+    "task": "Depth estimation"
+   },
+   "fitnessExpect": {
+    "datasetId": "3DFacilities",
+    "verdict": "unfit"
+   },
+   "label_source": "dataset's tasks are subtree-disjoint from the need"
+  },
+  {
+   "family": "fitness",
+   "q": "Is SemanticBridge: 3D semantic segmentation of bridge dataset fit for digital twin generation?",
+   "need": {
+    "task": "Digital twin generation"
+   },
+   "fitnessExpect": {
+    "datasetId": "3d_bridge_segmentation",
+    "verdict": "unfit"
+   },
+   "label_source": "dataset's tasks are subtree-disjoint from the need"
+  },
+  {
+   "family": "fitness",
+   "q": "Is ACID: Advanced Construction Image Dataset Suite fit for disaster recognition?",
+   "need": {
+    "task": "Disaster recognition"
+   },
+   "fitnessExpect": {
+    "datasetId": "ACID",
+    "verdict": "unfit"
+   },
+   "label_source": "dataset's tasks are subtree-disjoint from the need"
+  },
+  {
+   "family": "fitness",
+   "q": "Is ADPT: Agent-based Defect Pattern Tagger (ADPT) Dataset fit for embodied carbon estimation?",
+   "need": {
+    "task": "Embodied carbon estimation"
+   },
+   "fitnessExpect": {
+    "datasetId": "ADPT_Dataset",
+    "verdict": "unfit"
+   },
+   "label_source": "dataset's tasks are subtree-disjoint from the need"
+  },
+  {
+   "family": "license",
+   "q": "commercial-use floorplan segmentation dataset",
+   "need": {
+    "task": "Floorplan segmentation",
+    "license": "commercial"
+   },
+   "expect": [],
+   "licenseConstraint": "commercial_ok",
+   "label_source": "fit datasets filtered by license_rights.commercial_ok"
+  },
+  {
+   "family": "license",
+   "q": "commercial-use geospatial analysis dataset",
+   "need": {
+    "task": "Geospatial analysis",
+    "license": "commercial"
+   },
+   "expect": [],
+   "licenseConstraint": "commercial_ok",
+   "label_source": "fit datasets filtered by license_rights.commercial_ok"
+  },
+  {
+   "family": "license",
+   "q": "commercial-use knowledge graph reasoning dataset",
+   "need": {
+    "task": "Knowledge graph reasoning",
+    "license": "commercial"
+   },
+   "expect": [
+    "BMKG"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "label_source": "fit datasets filtered by license_rights.commercial_ok"
+  },
+  {
+   "family": "license",
+   "q": "commercial-use lod4 building model generation dataset",
+   "need": {
+    "task": "LOD4 building model generation",
+    "license": "commercial"
+   },
+   "expect": [
+    "LOD4-Building-Image-Modeling"
+   ],
+   "licenseConstraint": "commercial_ok",
+   "label_source": "fit datasets filtered by license_rights.commercial_ok"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "speech emotion recognition dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "sentiment analysis dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "DNA sequence classification dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "chess move prediction dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "music genre classification dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "out-of-domain",
+   "q": "electrocardiogram arrhythmia dataset",
+   "need": {
+    "task": "",
+    "modality": "",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task not in task-vocabulary.json (96 tasks) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "in-domain-none-fit",
+   "q": "aerial rgb 2d-to-bim reconstruction dataset",
+   "need": {
+    "task": "2D-to-BIM reconstruction",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task present but 0 datasets at modality 'aerial_rgb' (exact+descendant) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "in-domain-none-fit",
+   "q": "aerial rgb 3d semantic segmentation dataset",
+   "need": {
+    "task": "3D semantic segmentation",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task present but 0 datasets at modality 'aerial_rgb' (exact+descendant) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "in-domain-none-fit",
+   "q": "aerial rgb 6-dof pose estimation dataset",
+   "need": {
+    "task": "6-DoF pose estimation",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task present but 0 datasets at modality 'aerial_rgb' (exact+descendant) → must abstain"
+  },
+  {
+   "family": "must-abstain",
+   "subtype": "in-domain-none-fit",
+   "q": "aerial rgb agentic blueprint reading dataset",
+   "need": {
+    "task": "Agentic blueprint reading",
+    "modality": "aerial_rgb",
+    "license": "any"
+   },
+   "expect": [],
+   "abstain": true,
+   "label_source": "task present but 0 datasets at modality 'aerial_rgb' (exact+descendant) → must abstain"
+  }
+ ]
+}
