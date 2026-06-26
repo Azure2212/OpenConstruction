@@ -59,7 +59,13 @@
     '.ocbot-note{font-size:.68rem;color:#8a97a5;text-align:center;margin-top:.35rem;}.ocbot-note a{color:#0b66c3;}',
     '.ocbot-typing{display:inline-flex;gap:3px;}.ocbot-typing i{width:6px;height:6px;border-radius:50%;background:#9bb0c4;animation:ocbotb 1s infinite;}',
     '.ocbot-typing i:nth-child(2){animation-delay:.15s;}.ocbot-typing i:nth-child(3){animation-delay:.3s;}',
-    '@keyframes ocbotb{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}'
+    '@keyframes ocbotb{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}',
+    '.ocbot-mode-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem;}',
+    '.ocbot-mode{flex:1;border:1px solid #e7edf3;border-radius:999px;padding:.34rem .7rem;font-size:.8rem;background:#fff;color:#0f2e4b;outline:none;cursor:pointer;}',
+    '.ocbot-mode:focus{border-color:#86b7fe;}',
+    '.ocbot-status{color:#4f5d6c;font-size:.82rem;margin-left:.4rem;}',
+    '.ocbot-modetag{font-size:.64rem;font-weight:800;letter-spacing:.03em;color:#3a2606;background:#f2a238;border-radius:4px;padding:.05rem .32rem;}',
+    '.ocbot-foot-note{color:#8a97a5;font-size:.72rem;margin-top:.4rem;}'
   ].join('');
   document.head.appendChild(css);
 
@@ -110,6 +116,24 @@
     var input = panel.querySelector('#ocbotInput');
     var greeted = false;
 
+    // On pages where the in-browser methods are loaded (oc-methods.js, e.g. the home page), add a
+    // method selector to the chat (BM25 / RAG-dense / LLM-agent, default RAG-dense). Elsewhere the
+    // chatbox keeps its existing keyword-assistant behavior unchanged.
+    if (window.OCMethods) {
+      var foot = panel.querySelector('.ocbot-foot');
+      var modeRow = document.createElement('div');
+      modeRow.className = 'ocbot-mode-row';
+      modeRow.innerHTML = '<label class="visually-hidden" for="ocbotMode">Retrieval method</label>' +
+        '<select class="ocbot-mode" id="ocbotMode" aria-label="Retrieval method">' +
+          '<option value="bm25">BM25 (lexical)</option>' +
+          '<option value="dense" selected>RAG-dense (bge-small)</option>' +
+          '<option value="hybrid">Hybrid (BM25 + RAG-dense)</option>' +
+          '<option value="agent">LLM-agent (Qwen2.5)</option>' +
+        '</select>';
+      if (foot) foot.insertBefore(modeRow, foot.firstChild);
+      if (window.OCMethods.ensureCorpus) window.OCMethods.ensureCorpus().catch(function () {});
+    }
+
     function scroll() { log.scrollTop = log.scrollHeight; }
     function addUser(text) {
       var d = document.createElement('div'); d.className = 'ocbot-msg user'; d.textContent = text;
@@ -140,7 +164,9 @@
         '<div class="ocbot-ccite">' + cite + '</div></a>';
     }
 
-    async function answer(q) {
+    // Existing catalog assistant (keyword retrieval via window.OCAssistant) — kept as the fallback
+    // for pages where the in-browser methods (oc-methods.js) are not loaded.
+    async function answerAssistant(q) {
       var thinking = addBot('<span class="ocbot-typing"><i></i><i></i><i></i></span>');
       var eng = window.OCAssistant;
       if (!eng) { thinking.textContent = 'Assistant engine not loaded on this page.'; return; }
@@ -156,6 +182,45 @@
         (n === 1 ? 'match' : 'matches') + ' for “' + esc(q) + '”:' +
         '<div class="ocbot-cards">' + res.results.map(cardHtml).join('') + '</div>';
       scroll();
+    }
+
+    // In-browser retrieval methods (BM25 / RAG-dense / LLM-agent) via window.OCMethods, with a
+    // live loading indicator (typing dots + status/progress while a model downloads/runs).
+    function modeLabel(m) { return (window.OCMethods && window.OCMethods.LABELS && window.OCMethods.LABELS[m]) || m; }
+    function rowCard(r) {
+      var href = r.href ? fixHref({ href: r.href }) : '#';
+      var ev = r.evidence ? [r.evidence.license ? ('License: ' + r.evidence.license) : '', r.evidence.scale, r.evidence.source].filter(Boolean).join(' · ') : '';
+      var warn = (r.warnings && r.warnings.length) ? r.warnings.map(function (w) { return '⚠ ' + w.type; }).join('  ') : '';
+      return '<a class="ocbot-card" href="' + esc(href) + '">' +
+        '<span class="ocbot-ctype dataset">Dataset</span>' +
+        '<div class="ocbot-ctitle">' + esc(r.name) + '</div>' +
+        '<div class="ocbot-ccite">' + esc(r.id) + (r.meta ? (' · ' + esc(r.meta)) : '') + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div>' +
+        (ev ? '<div class="ocbot-ccite">' + esc(ev) + '</div>' : '') +
+        (warn ? '<div class="ocbot-ccite" style="color:#b45309">' + esc(warn) + '</div>' : '') +
+        '</a>';
+    }
+    async function answerMethod(q, mode) {
+      var thinking = addBot('<span class="ocbot-typing"><i></i><i></i><i></i></span>');
+      function setStatus(s) { thinking.innerHTML = '<span class="ocbot-typing"><i></i><i></i><i></i></span><span class="ocbot-status">' + esc(s) + '</span>'; scroll(); }
+      function onProg(p) { if (p && p.status === 'progress' && p.total) { var pct = Math.round(p.loaded / p.total * 100); setStatus('Downloading ' + (p.file || '') + ' — ' + pct + '%'); } }
+      try {
+        var out = await window.OCMethods.run(mode, q, { onProgress: onProg, onStatus: setStatus });
+        if (!out.rows.length) {
+          thinking.innerHTML = 'No catalog match for <strong>“' + esc(q) + '”</strong> via ' + esc(modeLabel(mode)) + '. I only answer from real entries.' + chips();
+          return;
+        }
+        var n = out.rows.length;
+        thinking.innerHTML = 'Here ' + (n === 1 ? 'is' : 'are') + ' <strong>' + n + '</strong> dataset ' + (n === 1 ? 'match' : 'matches') +
+          ' for “' + esc(q) + '” <span class="ocbot-modetag">' + esc(modeLabel(mode)) + '</span>:' +
+          '<div class="ocbot-cards">' + out.rows.map(rowCard).join('') + '</div>' +
+          (out.note ? '<div class="ocbot-foot-note">' + esc(out.note) + '</div>' : '');
+        scroll();
+      } catch (e) { thinking.innerHTML = esc((e && e.message) || String(e)); scroll(); }
+    }
+    function answer(q) {
+      var modeSel = document.getElementById('ocbotMode');
+      if (window.OCMethods && modeSel) return answerMethod(q, modeSel.value);
+      return answerAssistant(q);
     }
 
     function send(q) {

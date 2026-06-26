@@ -26,6 +26,29 @@ var QUERY = argVal('--query');
 var K = parseInt(argVal('--k') || '5', 10);
 var USE_FILTER = hasFlag('--filter');
 var CONFIG = argVal('--config') || path.join(ROOT, '.llm-config.json');
+var CACHE = argVal('--cache');
+
+// ---- LOAD-FROM-CACHE mode (no endpoint, no embedModel): score RAG-dense from a pre-embedded cache built once
+// on GPU (dense_cache.json). Scores BOTH naive + license-filter on the goldenset. "Tạo 1 lần dùng mãi."
+if (CACHE) {
+  var RAG = require(path.join(ROOT, 'assets/js/rag-baseline.js'));
+  api.setTaxonomy(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/agent-taxonomy.json'), 'utf8')));
+  var cCorpus = api.buildCorpus(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/datasets.json'), 'utf8')));
+  var cGs = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/data-agent-goldenset.json'), 'utf8'));
+  if (!fs.existsSync(CACHE)) die('cache not found: ' + CACHE);
+  var cache = JSON.parse(fs.readFileSync(CACHE, 'utf8'));
+  console.log('dense cache:', JSON.stringify(cache._meta));
+  function denseRow(name, filt) {
+    var fn = RAG.makeDenseRetrieverFromCache(cCorpus, cache, { licenseFilter: filt, k: K });
+    var r = api.benchmarkAgent(fn, cGs, cCorpus);
+    console.log('  ' + name.padEnd(16) + JSON.stringify({ P: r.precisionAtK, R: r.recallAtK, nDCG: r.ndcgAtK, fit: r.fitnessAccuracy, lic: r.licenseCorrectness, abs: r.abstentionCorrectness, halluc: r.hallucinationRate }));
+    return r;
+  }
+  console.log('\nRAG-DENSE (nomic) — Category-A (k=' + K + ', cache-scored, deterministic):');
+  denseRow('RAG-dense', false);
+  denseRow('RAG-dense+filter', true);
+  process.exit(0);
+}
 
 // ---- X-guard: load config + REFUSE to run without an embedding model (never embed with the chat model)
 var cfg;

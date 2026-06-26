@@ -141,9 +141,58 @@
     });
   }
 
+  // ---------------------------------------------------------------- HYBRID (BM25 + dense) retrieval
+  // Fuse the lexical (BM25) and dense (cached) rankings. method='rrf' (Reciprocal Rank Fusion, Cormack et al.
+  // 2009: score = Σ 1/(rrfK + rank), rrfK=60) or 'weighted' (min-max normalize each score list, then
+  // alpha*BM25 + (1-alpha)*dense). Abstains on zero BM25 lexical overlap (consistent with RAG-naive/BM25).
+  function _minmax(scoreById) {
+    var ks = Object.keys(scoreById); if (!ks.length) return {};
+    var vals = ks.map(function (k) { return scoreById[k]; }), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rng = (mx - mn) || 1, out = {};
+    ks.forEach(function (k) { out[k] = (scoreById[k] - mn) / rng; }); return out;
+  }
+  function makeHybridRetriever(corpus, cache, opts) {
+    opts = opts || {};
+    var method = opts.method || 'rrf', alpha = opts.alpha != null ? opts.alpha : 0.5, rrfK = opts.rrfK != null ? opts.rrfK : 60;
+    var index = buildBM25Index(corpus, opts);
+    var di = buildDenseIndex(cache.doc_ids || [], cache.doc_vecs || []);
+    var qmap = cache.queries || {};
+    var allIds = corpus.datasets.map(function (d) { return d.id; });
+    function run(input) {
+      var k = (input && input.k) || opts.k || 5, qt = queryText(input);
+      var bm = bm25Rank(index, qt), qv = qmap[qt], dn = qv ? denseRank(di, qv) : [];
+      var combined;
+      if (method === 'rrf') {
+        var bmR = {}, dnR = {}; bm.forEach(function (r, i) { bmR[r.id] = i; }); dn.forEach(function (r, i) { dnR[r.id] = i; });
+        combined = allIds.map(function (id) { var s = 0; if (id in bmR) s += 1 / (rrfK + bmR[id]); if (id in dnR) s += 1 / (rrfK + dnR[id]); return { id: id, score: +s.toFixed(8) }; });
+      } else {
+        var bmS = {}, dnS = {}; bm.forEach(function (r) { bmS[r.id] = r.score; }); dn.forEach(function (r) { dnS[r.id] = r.score; });
+        var bmN = _minmax(bmS), dnN = _minmax(dnS);
+        combined = allIds.map(function (id) { return { id: id, score: +(alpha * (bmN[id] || 0) + (1 - alpha) * (dnN[id] || 0)).toFixed(8) }; });
+      }
+      combined.sort(function (a, b) { return b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+      if (opts.licenseFilter) combined = applyLicenseFilter(combined, corpus, input);
+      if (input && input.fitness_target) {
+        var topk = combined.slice(0, k), tgt = norm(input.fitness_target);
+        return { selected_ids: [], ranking: [], fitness_verdict: { id: input.fitness_target, verdict: topk.some(function (r) { return norm(r.id) === tgt; }) ? 'fit' : 'unfit' }, abstained: false };
+      }
+      var abstain = !(bm.length && bm[0].score > 0), ids = combined.slice(0, k).map(function (r) { return r.id; });
+      return { selected_ids: abstain ? [] : ids, ranking: ids, abstained: abstain };
+    }
+    run.kind = 'hybrid-' + method; return run;
+  }
+
+  // Build a dense retriever from a PRE-EMBEDDED cache (created once on GPU; reused forever, no endpoint).
+  // cache = { _meta, doc_ids:[...], doc_vecs:[[...]], queries:{ "<queryText>": [...] } }. queryText keys must
+  // match queryText(input) (same docText/queryText functions were used to build the cache).
+  function makeDenseRetrieverFromCache(corpus, cache, opts) {
+    var di = buildDenseIndex(cache.doc_ids || [], cache.doc_vecs || []);
+    var q = cache.queries || {};
+    return makeDenseRetriever(corpus, di, function (qt) { return q[qt]; }, opts || {});
+  }
+
   var API = { tokenize: tokenize, docText: docText, queryText: queryText,
     buildBM25Index: buildBM25Index, bm25Score: bm25Score, bm25Rank: bm25Rank, makeLexicalRetriever: makeLexicalRetriever,
-    cosine: cosine, buildDenseIndex: buildDenseIndex, denseRank: denseRank, makeDenseRetriever: makeDenseRetriever, prepareDenseRetriever: prepareDenseRetriever };
+    cosine: cosine, buildDenseIndex: buildDenseIndex, denseRank: denseRank, makeDenseRetriever: makeDenseRetriever, prepareDenseRetriever: prepareDenseRetriever, makeDenseRetrieverFromCache: makeDenseRetrieverFromCache, makeHybridRetriever: makeHybridRetriever };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.OCRagBaseline = API;
 })();

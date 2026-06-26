@@ -11,7 +11,7 @@
   "expect_semantics": "cases[].expect lists canonical dataset IDs (NOT title substrings). Discovery PASSES if expected IDs appear in top-k. abstain=true => engine must return none-fit. fitnessExpect={datasetId,verdict} scores C3 against the owner's deterministic verdict.",
   "ground_truth_rule": "fit(d,t) <=> d declares t OR a descendant of t in task-vocabulary hierarchy. related-only = unfit. Identical to engine taskIdMatch after the `related` clause is dropped.",
   "families": {
-   "discovery": 60,
+   "discovery": 66,
    "fitness": 44,
    "license": 12,
    "abstain": 22

@@ -2097,3 +2097,38 @@ function setImgWithFallback(imgEl, basePath, placeholderPath) {
     }
   };
 }
+
+// ----------------------------------------------------------------------------
+// Phase-C bridge: inject "Analyze with Data Agent →" on a DATASET detail page.
+// Links to the chat-workspace (data-agent.html?id=<real id>). Datasets only (not models).
+// Self-contained, additive, reuses the real ?id — no fabrication.
+(function () {
+  'use strict';
+  if (typeof document === 'undefined') return;
+  if (/\/models\//.test(location.pathname)) return;                 // datasets only
+  var id = '';
+  try { id = decodeURIComponent(new URL(location.href).searchParams.get('id') || ''); } catch (e) {}
+  if (!id) return;
+  function inject() {
+    var root = document.getElementById('detailRoot');
+    if (!root || !root.children.length) return false;
+    if (root.querySelector('.oc-analyze-bar')) return true;
+    var bar = document.createElement('div');
+    bar.className = 'oc-analyze-bar';
+    bar.style.cssText = 'margin:0 0 1rem;';
+    bar.innerHTML = '<a href="data-agent.html?id=' + encodeURIComponent(id) + '" ' +
+      'style="display:inline-flex;align-items:center;gap:.4rem;border:1px solid #0f2e4b;background:#0f2e4b;color:#fff;' +
+      'border-radius:999px;padding:.4rem .9rem;font-size:.85rem;font-weight:700;text-decoration:none;">' +
+      '🤖 Phân tích với Data Agent →</a>';
+    root.insertBefore(bar, root.firstChild);
+    return true;
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    if (inject()) return;
+    var root = document.getElementById('detailRoot');
+    if (!root) return;
+    var obs = new MutationObserver(function () { if (inject()) obs.disconnect(); });
+    obs.observe(root, { childList: true, subtree: true });
+    setTimeout(function () { obs.disconnect(); }, 8000);
+  });
+})();

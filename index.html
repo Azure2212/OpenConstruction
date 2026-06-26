@@ -263,6 +263,28 @@
       overflow:hidden;
     }
     .hero-search-results[hidden]{ display:none !important; }
+    /* In-browser retrieval-method panel (BM25 / RAG-dense / LLM-agent) under the hero search */
+    .hero-method{ margin-top:.75rem; text-align:left; }
+    .hero-method[hidden]{ display:none !important; }
+    .hero-method-note{ font-size:.85rem; color:var(--oc-muted,#6b7280); margin:0 0 .4rem; }
+    .hero-method-progress{ margin:.4rem 0; }
+    .hero-method-progress-text{ font-size:.78rem; color:var(--oc-muted,#6b7280); margin-top:.25rem; }
+    .hero-method-status{ font-size:.82rem; color:var(--oc-muted,#6b7280); min-height:1em; }
+    .hero-method-status.is-err{ color:#b91c1c; }
+    .hero-method-status.is-ok{ color:#15803d; }
+    .hero-method-list{ list-style:none; margin:.5rem 0 0; padding:0; border:1px solid var(--oc-border); border-radius:14px; background:#fff; overflow:hidden; }
+    .hero-method-item{ display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; padding:.6rem .85rem; border-top:1px solid var(--oc-border); }
+    .hero-method-item:first-child{ border-top:none; }
+    .hero-method-item-title{ font-weight:600; font-size:.92rem; }
+    .hero-method-item-title a{ text-decoration:none; }
+    .hero-method-id{ font-weight:400; color:var(--oc-muted,#6b7280); font-size:.8rem; }
+    .hero-method-item-meta{ font-size:.8rem; color:var(--oc-muted,#6b7280); margin-top:.15rem; }
+    .hero-method-score{ font-variant-numeric:tabular-nums; font-size:.78rem; color:#374151; background:#f3f4f6; border-radius:999px; padding:.1rem .5rem; white-space:nowrap; }
+    .hero-method-foot{ font-size:.78rem; color:var(--oc-muted,#6b7280); margin-top:.4rem; }
+    .hero-method-empty{ font-size:.85rem; color:var(--oc-muted,#6b7280); padding:.5rem; }
+    .hero-method-ev{ font-size:.76rem; color:#475569; margin-top:.2rem; }
+    .hero-method-crit{ font-size:.74rem; color:#475569; margin-top:.15rem; font-variant-numeric:tabular-nums; }
+    .hero-method-warn{ font-size:.74rem; color:#b45309; margin-top:.15rem; }
     .search-results-head{
       display:flex;
       justify-content:space-between;
@@ -1397,13 +1419,12 @@
                 <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               </svg>
             </span>
-            <label class="visually-hidden" for="homeSearchScope">Filter search by resource type</label>
-            <select id="homeSearchScope" class="hero-search-scope" aria-label="Filter search by resource type">
-              <option value="all">All resources</option>
-              <option value="dataset">Datasets</option>
-              <option value="model">Models</option>
-              <option value="workflow">Workflows</option>
-              <option value="oer">OERs</option>
+            <label class="visually-hidden" for="heroSearchMode">Retrieval method</label>
+            <select id="heroSearchMode" class="hero-search-scope" aria-label="Choose retrieval method">
+              <option value="bm25">BM25 (lexical)</option>
+              <option value="dense" selected>RAG-dense (bge-small)</option>
+              <option value="hybrid">Hybrid (BM25 + RAG-dense)</option>
+              <option value="agent">LLM-agent (Qwen2.5)</option>
             </select>
             <input
               id="homeSearchInput"
@@ -1415,6 +1436,18 @@
           </div>
         </form>
         <div class="hero-search-results" id="homeSearchResults" hidden aria-live="polite"></div>
+        <!-- In-browser retrieval methods (BM25 / RAG-dense / LLM-agent); shown only when a method ≠ Ask assistant is chosen -->
+        <div class="hero-method" id="heroMethodPanel" hidden>
+          <p id="heroMethodNote" class="hero-method-note" aria-live="polite"></p>
+          <div id="heroMethodProgressWrap" class="hero-method-progress" hidden>
+            <div class="progress" role="progressbar" aria-label="Model download progress" style="height:6px;">
+              <div id="heroMethodProgressBar" class="progress-bar" style="width:0%"></div>
+            </div>
+            <div id="heroMethodProgressText" class="hero-method-progress-text"></div>
+          </div>
+          <div id="heroMethodStatus" class="hero-method-status" aria-live="polite"></div>
+          <div id="heroMethodResults" class="hero-method-results"></div>
+        </div>
       </div>
 
   </div>
@@ -2299,7 +2332,84 @@
   </div>
 </div>
 
-<script src="assets/js/assistant.js?v=5"></script>
-<script src="assets/js/chatbox.js?v=6"></script>
+<!-- assistant.js (the old hero "Ask assistant" engine) is intentionally NOT loaded on the home page:
+     the hero search now offers only the in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent).
+     Removing it disables the old live-search + #ocAssistant panel so it can't overlay the method results.
+     assistant.js itself is unchanged and still used on other pages. -->
+<script src="assets/js/chatbox.js?v=9"></script>
+
+<!-- Hero search: in-browser retrieval methods (BM25 / RAG-dense / Hybrid / LLM-agent) via window.OCMethods. -->
+<script src="assets/js/data-agent.js"></script>
+<script src="assets/js/rag-baseline.js"></script>
+<script src="assets/js/oc-methods.js?v=6"></script>
+<script>
+(function () {
+  var $ = function (id){ return document.getElementById(id); };
+  var form = $('homeSearchForm'), input = $('homeSearchInput'), modeSel = $('heroSearchMode');
+  if (!form || !input || !modeSel) return;
+  var panel = $('heroMethodPanel'), noteEl = $('heroMethodNote'), statusEl = $('heroMethodStatus'),
+      resEl = $('heroMethodResults'), progWrap = $('heroMethodProgressWrap'),
+      progBar = $('heroMethodProgressBar'), progText = $('heroMethodProgressText');
+
+  function esc(s){ var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+  function status(msg, kind){ statusEl.textContent = msg || ''; statusEl.className = 'hero-method-status' + (kind === 'err' ? ' is-err' : kind === 'ok' ? ' is-ok' : ''); }
+  function showProgress(on){ progWrap.hidden = !on; if (!on){ progBar.style.width = '0%'; progText.textContent = ''; } }
+  function onProgress(p){ if (!p) return; if (p.status === 'progress' && p.total){ showProgress(true); var pct = Math.round((p.loaded / p.total) * 100); progBar.style.width = pct + '%'; progText.textContent = 'Downloading ' + (p.file || '') + ' — ' + pct + '%'; } else if (p.status === 'done'){ progText.textContent = 'Loaded ' + (p.file || ''); } else if (p.status === 'ready'){ progBar.style.width = '100%'; progText.textContent = 'Model ready'; } }
+
+  function render(rows, note){
+    if (!rows || !rows.length){ resEl.innerHTML = '<div class="hero-method-empty">No matches.</div>'; return; }
+    var html = '<ol class="hero-method-list">';
+    rows.forEach(function (r){
+      var nm = esc(r.name);
+      html += '<li class="hero-method-item"><div class="hero-method-item-main">' +
+        '<div class="hero-method-item-title">' + (r.href ? ('<a href="' + esc(r.href) + '">' + nm + '</a>') : nm) +
+        ' <span class="hero-method-id">' + esc(r.id) + '</span></div>' +
+        '<div class="hero-method-item-meta">' + esc(r.meta) + (r.reason ? (' — ' + esc(r.reason)) : '') + '</div>' +
+        (r.evidence ? '<div class="hero-method-ev">' + [r.evidence.license ? ('License: ' + esc(r.evidence.license)) : '', r.evidence.scale ? esc(r.evidence.scale) : '', r.evidence.annotation ? ('ann: ' + esc(r.evidence.annotation)) : '', r.evidence.source ? esc(r.evidence.source) : ''].filter(Boolean).join(' · ') + '</div>' : '') +
+        (r.criteria && r.criteria.length ? '<div class="hero-method-crit">' + r.criteria.map(function (c){ return (c.pass ? '✓' : '✗') + ' ' + esc(c.key); }).join('  ') + '</div>' : '') +
+        (r.warnings && r.warnings.length ? '<div class="hero-method-warn">' + r.warnings.map(function (w){ return '⚠ ' + esc(w.type); }).join('  ') + '</div>' : '') +
+        (r.analyzeHref ? '<div class="hero-method-analyze"><a href="' + esc(r.analyzeHref) + '&q=' + encodeURIComponent(input.value || '') + '">Phân tích với Data Agent →</a></div>' : '') +
+        '</div>' +
+        (r.score != null ? '<span class="hero-method-score">' + (+r.score).toFixed(3) + '</span>' : '') + '</li>';
+    });
+    html += '</ol>';
+    if (note) html += '<div class="hero-method-foot">' + esc(note) + '</div>';
+    resEl.innerHTML = html;
+  }
+
+  var NOTES = {
+    bm25: 'BM25 lexical match over 136 datasets — native JS, fully offline. Type a query and press Enter.',
+    dense: 'Embeds your query with bge-small-en-v1.5 (ONNX, ~130 MB first load, cached) + cosine over 136 pre-computed vectors. Type a query and press Enter.',
+    hybrid: 'Fuses BM25 (lexical) + RAG-dense (bge-small ONNX) with a weighted α=0.7·BM25 + 0.3·dense blend (min-max normalized). Needs the embedding model (~130 MB first load, cached). Type a query and press Enter.',
+    agent: 'Re-ranks a shortlist with a hosted Qwen2.5-7B LLM (via the Vercel API). Available on the hosted deployment; on GitHub Pages use BM25 / RAG-dense / Hybrid instead. Type a query and press Enter.'
+  };
+  function isMethod(){ return modeSel.value !== 'assistant'; }
+  function syncMode(){
+    var m = modeSel.value;
+    document.querySelectorAll('.oc-ask-examples').forEach(function (el){ el.style.display = (m === 'assistant') ? '' : 'none'; });
+    var ap = document.getElementById('ocAssistant'); if (ap && m !== 'assistant') ap.hidden = true;
+    if (m === 'assistant'){ panel.hidden = true; resEl.innerHTML = ''; status(''); showProgress(false); noteEl.textContent = ''; }
+    else { panel.hidden = false; noteEl.textContent = NOTES[m] || ''; if (window.OCMethods) window.OCMethods.ensureCorpus().catch(function () {}); }
+  }
+  function runCurrent(){
+    var q = (input.value || '').trim(); if (!q){ status('Type a query above.', 'err'); return; }
+    if (!window.OCMethods){ status('Retrieval module not loaded.', 'err'); return; }
+    resEl.innerHTML = ''; status('Working…'); showProgress(false);
+    window.OCMethods.run(modeSel.value, q, { onProgress: onProgress, onStatus: function (s){ status(s); } }).then(function (out){
+      showProgress(false); render(out.rows, out.note);
+      status(out.rows && out.rows.length ? ('Done (' + out.rows.length + ').') : 'No results.', 'ok');
+    }).catch(function (e){ showProgress(false); status((e && e.message) || String(e), 'err'); });
+  }
+  modeSel.addEventListener('change', function (){ syncMode(); if (isMethod() && input.value.trim()) runCurrent(); });
+  // Capture phase (registered at parse-time, before assistant.js DOMContentLoaded): act only when method != assistant.
+  form.addEventListener('submit', function (e){ if (isMethod()){ e.preventDefault(); e.stopImmediatePropagation(); runCurrent(); } }, true);
+  input.addEventListener('input', function (e){ if (isMethod()){ e.stopImmediatePropagation(); } }, true);
+  syncMode();
+  // Deep link: index.html?q=... prefills + runs the current method (replaces the old assistant ?q handler).
+  try { var pq = new URLSearchParams(location.search).get('q'); if (pq && isMethod()) { input.value = pq; runCurrent(); } } catch (e) {}
+})();
+</script>
 </body>
+
+
 </html>

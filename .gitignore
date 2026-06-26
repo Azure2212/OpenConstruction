@@ -1,3 +1,4 @@
 # Local LLM endpoint config (contains baseUrl/model/apiKey) — never commit
 .llm-config.json
 node_modules/
+

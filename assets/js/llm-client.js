@@ -105,6 +105,41 @@
     return { chat: chat, embed: embed, cfg: cfg };
   }
 
+  // Browser client (uses global `fetch`, no Node `http`). Same {chat, embed} interface as createClient,
+  // reusing buildRequestBody/parseChatResponse so request/response shaping is IDENTICAL to the Node path.
+  // Used by the homepage "Try dataset search" demo widget for RAG-dense (/embeddings) + LLM-agent (/chat).
+  // No fabrication: any network/HTTP error rejects so the caller can show "endpoint needed" — never canned.
+  function createFetchClient(cfg) {
+    if (!cfg || !cfg.baseUrl || !cfg.model) throw new Error('llm-client: config needs {baseUrl, model}');
+    var base = cfg.baseUrl.replace(/\/+$/, '');
+    function headers() { var h = { 'Content-Type': 'application/json' }; if (cfg.apiKey) h['Authorization'] = 'Bearer ' + cfg.apiKey; return h; }
+    function withTimeout(p, ms, label) {
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var t = setTimeout(function () { if (ctrl) ctrl.abort(); }, ms || cfg.timeout_ms || 120000);
+      return { signal: ctrl && ctrl.signal, done: function () { clearTimeout(t); }, label: label };
+    }
+    function chat(messages, tools) {
+      var to = withTimeout(null, cfg.timeout_ms, 'chat');
+      return fetch(base + '/chat/completions', { method: 'POST', headers: headers(), body: JSON.stringify(buildRequestBody(cfg, messages, tools)), signal: to.signal })
+        .then(function (res) { return res.text().then(function (txt) {
+          to.done();
+          if (!res.ok) throw new Error('llm-client/chat HTTP ' + res.status + ': ' + txt.slice(0, 300));
+          return parseChatResponse(JSON.parse(txt));
+        }); }, function (e) { to.done(); throw e; });
+    }
+    function embed(input, modelOverride) {
+      var arrInput = Array.isArray(input) ? input : [input];
+      var to = withTimeout(null, cfg.timeout_ms, 'embed');
+      return fetch(base + '/embeddings', { method: 'POST', headers: headers(), body: JSON.stringify({ model: modelOverride || cfg.embedModel || cfg.model, input: arrInput }), signal: to.signal })
+        .then(function (res) { return res.text().then(function (txt) {
+          to.done();
+          if (!res.ok) throw new Error('llm-client/embed HTTP ' + res.status + ': ' + txt.slice(0, 300));
+          return (JSON.parse(txt).data || []).map(function (d) { return d.embedding; });
+        }); }, function (e) { to.done(); throw e; });
+    }
+    return { chat: chat, embed: embed, cfg: cfg };
+  }
+
   // Load a gitignored config file; throws a helpful message if absent (CI/stub never needs it).
   function loadConfig(path) {
     var fs = require('fs');
@@ -115,7 +150,7 @@
     return cfg;
   }
 
-  var API = { createClient: createClient, buildRequestBody: buildRequestBody, parseChatResponse: parseChatResponse, loadConfig: loadConfig, DEFAULTS: DEFAULTS };
+  var API = { createClient: createClient, createFetchClient: createFetchClient, buildRequestBody: buildRequestBody, parseChatResponse: parseChatResponse, loadConfig: loadConfig, DEFAULTS: DEFAULTS };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.OCLLMClient = API;
 })();

@@ -97,7 +97,25 @@
   </div>
 </header>
 
-<main class="container my-4">
+<!-- Phase-C chat-workspace: one flow discover → understand → evaluate → retrieve → use (real engine, no fabrication) -->
+<section class="container my-4" id="ocWorkspace">
+  <div id="wsStages" class="ws-stages"></div>
+  <div class="ws-grid">
+    <div class="ws-chat">
+      <div id="wsChatLog" class="ws-log"></div>
+      <div class="ws-foot">
+        <input id="wsChatInput" class="ws-input" placeholder="Ask for a dataset… (e.g. object detection, bounding boxes, commercial)">
+        <button id="wsChatSend" class="ws-send">Send</button>
+      </div>
+    </div>
+    <div id="wsCanvas" class="ws-canvas"></div>
+  </div>
+  <p class="text-muted small mt-2 mb-0">Every panel is real deterministic-engine output. Where the engine has no datum (e.g. BIM / point-cloud content profiling) the canvas says so — it never fabricates a number.</p>
+</section>
+
+<details class="container my-4">
+  <summary class="fw-semibold">Reference baseline (advanced) — C1→C5 trace + benchmark</summary>
+<main class="my-4">
   <div class="row g-3">
     <!-- Intake -->
     <aside class="col-lg-4">
@@ -156,6 +174,7 @@
     </section>
   </div>
 </main>
+</details>
 
 <footer class="py-4 mt-3 oc-site-footer">
   <div class="container oc-container small text-muted text-center">
@@ -173,6 +192,13 @@
 <script src="assets/js/app.js?v=1"></script>
 <script src="assets/js/data-agent.js?v=3"></script>
 <script src="assets/js/data-agent-ui.js?v=3"></script>
+<!-- Phase-C: retrieval + leaf components + workspace assembly (real engine, no fabrication) -->
+<script src="assets/js/rag-baseline.js?v=1"></script>
+<script src="assets/js/oc-methods.js?v=1"></script>
+<script src="assets/js/trust.js?v=1"></script>
+<script src="assets/js/suitability.js?v=1"></script>
+<script src="assets/js/starterkit.js?v=1"></script>
+<script src="assets/js/workspace.js?v=1"></script>
 <script>
   // populate the Task datalist from the site task vocabulary (app.js)
   (async function () {

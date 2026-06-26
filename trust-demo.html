@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2024-2026 OpenConstruction Open Science Initiative · SPDX-License-Identifier: Apache-2.0 -->
+<!-- Standalone demo harness for OCTrust (Phase-C component #1). NOT part of the site nav.
+     It loads the REAL engine (assets/js/data-agent.js) + the REAL catalog (data/datasets.json),
+     builds the corpus, and renders OCTrust on datasets the engine itself classifies (fit / unfit /
+     non-commercial / ungroundable-access). Every value shown is read back from the engine — no fixtures,
+     no hardcoded results. Serve over http (fetch needs it): `python3 -m http.server` then open
+     http://localhost:8000/trust-demo.html -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OCTrust — demo (real engine output)</title>
+  <style>
+    body{font-family:Inter,system-ui,Arial,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#1e2a36;}
+    h1{font-size:1.25rem;} h2{font-size:.95rem;margin:1.4rem 0 .2rem;color:#0f2e4b;}
+    .case{border:1px solid #e7edf3;border-radius:12px;padding:.8rem 1rem;margin:.6rem 0;background:#fcfdff;}
+    .case .who{font-weight:700;color:#0f2e4b;}
+    .case .why{font-size:.8rem;color:#667085;margin:.1rem 0 .3rem;}
+    .err{background:#fef3f2;border:1px solid #fecdca;color:#b42318;border-radius:10px;padding:.8rem 1rem;}
+    .note{font-size:.82rem;color:#475569;background:#f8fafc;border:1px solid #e7edf3;border-radius:10px;padding:.7rem .9rem;}
+    code{background:#f2f4f7;padding:.05rem .3rem;border-radius:4px;}
+  </style>
+</head>
+<body>
+  <h1>OCTrust — evidence-drawer (live engine output)</h1>
+  <p class="note">Mọi badge/evidence bên dưới là giá trị <strong>đọc lại từ engine tất định</strong>
+    (<code>OCDataAgent.c3Fitness / classifyAccess / licenseRights / citation</code>) trên dataset thật trong
+    <code>data/datasets.json</code>. Không fixture, không số bịa. Dataset trong mỗi "case" được engine tự phân loại
+    (fit / unfit / non-commercial / access-ungroundable) — không hardcode id.</p>
+  <div id="out"><p>Loading real engine + catalog…</p></div>
+
+  <!-- REAL engine + REAL component -->
+  <script src="assets/js/data-agent.js"></script>
+  <script src="assets/js/trust.js"></script>
+  <script>
+  (function () {
+    var out = document.getElementById('out');
+    function fail(msg) { out.innerHTML = '<div class="err"><strong>Demo could not load.</strong><br>' + msg +
+      '<br><br>Chạy qua http (fetch cần server): <code>cd OpenConstruction &amp;&amp; python3 -m http.server</code> rồi mở ' +
+      '<code>http://localhost:8000/trust-demo.html</code>.</div>'; }
+
+    async function getJSON(url) { var r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) throw new Error(url + ' → HTTP ' + r.status); return r.json(); }
+
+    function caseCard(title, why, rec, need, corpus) {
+      var box = document.createElement('div'); box.className = 'case';
+      box.innerHTML = '<div class="who">' + title + (rec ? ' — ' + (rec.name || rec.id) : '') + '</div><div class="why">' + why + '</div>';
+      if (rec) window.OCTrust.render(box, { record: rec, need: need, corpus: corpus });
+      out.appendChild(box);
+    }
+
+    (async function () {
+      try {
+        if (!window.OCDataAgent) return fail('window.OCDataAgent missing (assets/js/data-agent.js did not load).');
+        if (!window.OCTrust) return fail('window.OCTrust missing (assets/js/trust.js did not load).');
+        var A = window.OCDataAgent;
+
+        var tax = await getJSON('data/agent-taxonomy.json');
+        var datasets = await getJSON('data/datasets.json');
+        A.setTaxonomy(tax);
+        var corpus = A.buildCorpus(datasets);
+
+        // A real, fully-specified need (commercial use REQUIRED so the license-gate is exercised).
+        var need = A.parseNeed('object detection with bounding boxes for commercial use');
+        out.innerHTML = '<p class="note">Parsed need (engine <code>parseNeed</code>): ' +
+          '<code>' + JSON.stringify({ task: need.task, modality: need.modality, annotation: need.annotation, license: need.license }) +
+          '</code> · corpus: <strong>' + corpus.datasets.length + '</strong> datasets.</p>';
+
+        var ranked = A.c1Discovery(corpus, need);
+
+        // Case 1 — a dataset the engine rules FIT for this need (top discovery hit that passes c3Fitness).
+        var fitRec = null;
+        for (var i = 0; i < ranked.length; i++) { if (A.c3Fitness(ranked[i].rec, need).verdict === 'fit') { fitRec = ranked[i].rec; break; } }
+        caseCard('FIT', 'Engine <code>c3Fitness.verdict === "fit"</code> — passes every required criterion → answered (T2), license-gate ✓ if commercial-OK (T1).', fitRec, need, corpus);
+
+        // Case 2 — a dataset the engine rules UNFIT (required constraints exist but not all pass) → would abstain.
+        var unfitRec = null;
+        for (var j = 0; j < corpus.datasets.length; j++) { var f = A.c3Fitness(corpus.datasets[j], need); if (f.requiredCount > 0 && f.verdict === 'unfit') { unfitRec = corpus.datasets[j]; break; } }
+        caseCard('UNFIT → would abstain', 'Engine <code>c3Fitness.verdict === "unfit"</code> → no fabrication: T2 abstention badge + failing criteria in the drawer.', unfitRec, need, corpus);
+
+        // Case 3 — a NON-COMMERCIAL dataset under the commercial-required need → license-gate ✕ (T1).
+        var ncRec = null;
+        for (var k = 0; k < corpus.datasets.length; k++) { if (corpus.datasets[k].rights && corpus.datasets[k].rights.commercial_ok === false) { ncRec = corpus.datasets[k]; break; } }
+        caseCard('NON-COMMERCIAL → license-gate ✕', 'Engine <code>rights.commercial_ok === false</code> + need requires commercial → T1 gate ✕ (real, not asserted).', ncRec, need, corpus);
+
+        // Case 4 — a dataset whose access the engine cannot ground (honest "unknown" provenance, T4).
+        var unkRec = null;
+        for (var m = 0; m < corpus.datasets.length; m++) { if (A.classifyAccess(corpus.datasets[m]) === 'unknown' || A.classifyAccess(corpus.datasets[m]) === 'gated') { unkRec = corpus.datasets[m]; break; } }
+        caseCard('ACCESS not groundable', 'Engine <code>classifyAccess</code> → gated/unknown → T4 provenance shows the honest state, not a fake "open".', unkRec, need, corpus);
+
+        // Case 5 — honesty of the hallucination check WITHOUT a corpus: must say "not checked", never "yes".
+        caseCard('No-corpus → catalog "not checked"', 'Same FIT record but corpus omitted → T3 hallucination badge must read <em>not checked</em> (never a fake ✓).', fitRec, need, /* corpus */ null);
+
+        if (!fitRec && !unfitRec) out.insertAdjacentHTML('beforeend', '<p class="note">Note: this need produced no FIT/UNFIT split on the current catalog — try editing the <code>parseNeed</code> string in the page source.</p>');
+      } catch (e) { fail(String(e && e.message || e)); }
+    })();
+  })();
+  </script>
+</body>
+</html>
